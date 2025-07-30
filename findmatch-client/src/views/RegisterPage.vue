@@ -15,6 +15,11 @@
         </div>
 
         <div class="mb-3">
+          <label for="username" class="form-label">Nome utente:</label>
+          <input type="text" id="username" v-model="username" class="form-control" required />
+        </div>
+        
+        <div class="mb-3">
           <label for="email" class="form-label">Email:</label>
           <input type="email" id="email" v-model="email" class="form-control" required />
         </div>
@@ -45,16 +50,17 @@ const router = useRouter()
 
 const nome = ref('')
 const cognome = ref('')
+const username = ref('')
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 
 const handleRegister = async () => {
   try {
-    const response = await registerUser(nome.value + ' ' + cognome.value, email.value, password.value)
-    router.push('/') // dopo registrazione → torna al login
+    await registerUser(nome.value, cognome.value, username.value, email.value, password.value)
+    router.push('/')
   } catch (err) {
-    errorMessage.value = 'Registrazione fallita. Email già usata o errore server.'
+    errorMessage.value = err.response?.data?.message || 'Errore durante la registrazione.'
   }
 }
 </script>

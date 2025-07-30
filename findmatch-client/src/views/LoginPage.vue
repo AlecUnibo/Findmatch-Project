@@ -44,7 +44,7 @@ const handleLogin = async () => {
   try {
     const response = await loginUser(email.value, password.value)
     localStorage.setItem('token', response.token)
-    localStorage.setItem('userName', response.user.name)
+    localStorage.setItem('userName', response.user.username)
     localStorage.setItem('userId', response.user.id)
 
     // Reindirizza alla pagina home

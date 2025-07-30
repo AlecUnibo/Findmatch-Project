@@ -12,6 +12,10 @@ import Navbar from './components/Navbar.vue'
 
 const route = useRoute()
 
-// La Navbar non si mostra solo sulla pagina "/"
-const showNavbar = computed(() => route.path !== '/')
+// Mostra Navbar solo se non sei in login/registrazione e l'utente è autenticato
+const showNavbar = computed(() => {
+  const authRoutes = ['/', '/register']
+  const isAuthenticated = localStorage.getItem('userId') !== null
+  return !authRoutes.includes(route.path) && isAuthenticated
+})
 </script>

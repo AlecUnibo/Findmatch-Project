@@ -13,8 +13,19 @@
       </div>
 
       <div class="col-md-3">
-        <input type="text" v-model="sportFiltro" class="form-control" placeholder="Cerca sport" />
+        <select v-model="sportFiltro" class="form-select">
+          <option value="">Seleziona uno sport</option>
+          <option>Calcio a 11</option>
+          <option>Calcio a 5</option>
+          <option>Basket</option>
+          <option>Beach Volley</option>
+          <option>Pallavolo</option>
+          <option>Racchettoni</option>
+          <option>Tennis</option>
+          <option>Paddle</option>
+        </select>
       </div>
+
 
       <div class="col-md-2">
         <input type="date" v-model="dataFiltro" class="form-control" />
@@ -36,7 +47,7 @@
         <div v-for="partita in partite" :key="partita.id" class="card mb-3">
           <div class="card-body d-flex justify-content-between align-items-center">
             <div>
-              <h5 class="card-title mb-1">{{ partita.sport }}</h5>
+              <h5 class="card-title mb-1"> {{ getSportIcon(partita.sport) }} {{ partita.sport }} </h5>
               <p class="card-text mb-0">
                 <strong>Data:</strong> {{ formatData(partita.date_time) }} –
                 <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
@@ -63,7 +74,7 @@
             <p><strong>Ora:</strong> {{ formatOra(partitaSelezionata.date_time) }}</p>
             <p><strong>Luogo:</strong> {{ partitaSelezionata.location }}</p>
             <p><strong>Posti massimi:</strong> {{ partitaSelezionata.max_players }}</p>
-            <p><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_id }}</p>
+            <p><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_name }}</p>
             <p><strong>Descrizione:</strong> {{ partitaSelezionata.description || 'Nessuna descrizione disponibile.' }}</p>
           </div>
         </div>
@@ -76,6 +87,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getPartite } from '../services/partiteService'
+import * as bootstrap from 'bootstrap'
 
 const nomeUtente = ref('')
 
@@ -85,11 +97,6 @@ const orarioFiltro = ref('')
 const dataFiltro = ref('')
 const partite = ref([])
 const partitaSelezionata = ref(null)
-
-const formattaData = (isoDate) => {
-  return new Date(isoDate).toLocaleDateString()
-}
-
 
 const cercaPartite = async () => {
   const termine = [sportFiltro.value, luogoFiltro.value].filter(Boolean).join(' ')
@@ -106,7 +113,6 @@ const apriDettagli = (partita) => {
   const modal = new bootstrap.Modal(document.getElementById('modalDettagli'))
   modal.show()
 }
-
 
 function formatData(datetime) {
   const date = new Date(datetime)
@@ -125,11 +131,29 @@ function formatOra(datetime) {
   })
 }
 
+function getSportIcon(sport) {
+  switch (sport.toLowerCase()) {
+    case 'calcio a 5':
+    case 'calcio a 11':
+      return '⚽'
+    case 'basket':
+      return '🏀'
+    case 'beach volley':
+    case 'pallavolo':
+      return '🏐'
+    case 'racchettoni':
+      return '🏓'
+    case 'tennis':
+      return '🎾'
+    case 'paddle':
+      return '🥎'
+    default:
+      return '🎯' // fallback
+  }
+}
 
 onMounted(async () => {
   nomeUtente.value = localStorage.getItem('userName') || 'Utente'
-  const oggi = new Date().toISOString().split('T')[0]
-  dataFiltro.value = oggi
   await cercaPartite()
 })
 </script>
