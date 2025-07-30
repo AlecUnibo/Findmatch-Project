@@ -5,20 +5,31 @@ const pool = require('../db')
 //funzione GET per le partite inserite
 router.get('/', async (req, res) => {
   try {
-    const { termine, data, ora } = req.query
+    const { sport, luogo, data, ora } = req.query
 
     let query = `
-      SELECT e.*, u.username AS organizer_name
+      SELECT 
+        e.*, 
+        u.username AS organizer_name,
+        COUNT(p.user_id) AS partecipanti
       FROM events e
       JOIN users u ON e.organizer_id = u.id
+      LEFT JOIN participants p ON e.id = p.event_id
       WHERE 1=1
+
     `
     let values = []
     let counter = 1
 
-    if (termine) {
-      query += ` AND (LOWER(e.sport) LIKE $${counter} OR LOWER(e.location) LIKE $${counter})`
-      values.push(`%${termine.toLowerCase()}%`)
+    if (sport) {
+      query += ` AND LOWER(e.sport) LIKE $${counter}`
+      values.push('%${sport.toLowerCase()}%')
+      counter++
+    }
+
+    if (luogo) {
+      query += ` AND LOWER(e.location) LIKE $${counter}`
+      values.push('%${luogo.toLowerCase()}%')
       counter++
     }
 
@@ -34,6 +45,7 @@ router.get('/', async (req, res) => {
       counter++
     }
 
+    query += ` GROUP BY e.id, u.username`
     const result = await pool.query(query, values)
     res.json(result.rows)
   } catch (error) {
@@ -62,4 +74,29 @@ router.post('/', async (req, res) => {
   }
 })
 
-module.exports = router
+// Aggiorna partita esistente
+router.put('/:id', async (req, res) => {
+  const { id } = req.params
+  const { sport, location, date_time, max_players, description } = req.body
+
+  try {
+    const result = await pool.query(
+      `UPDATE events 
+       SET sport = $1, location = $2, date_time = $3, max_players = $4, description = $5 
+       WHERE id = $6
+       RETURNING *`,
+      [sport, location, date_time, max_players, description, id]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Partita non trovata' })
+    }
+
+    res.json(result.rows[0])
+  } catch (err) {
+    console.error('Errore durante aggiornamento partita:', err)
+    res.status(500).json({ error: 'Errore durante aggiornamento partita' })
+  }
+})
+
+module.exports = router

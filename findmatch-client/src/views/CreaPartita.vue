@@ -18,12 +18,10 @@
         </select>
       </div>
 
-
       <div class="mb-3">
         <label class="form-label">Luogo</label>
         <input id="autocomplete" type="text" class="form-control" placeholder="Inserisci luogo" required />
       </div>
-
 
       <div class="mb-3">
         <label class="form-label">Data e ora</label>
@@ -32,12 +30,12 @@
 
       <div class="mb-3">
         <label class="form-label">Numero massimo di giocatori</label>
-        <input type="number" v-model="form.max_players" class="form-control" required min="2" />
+        <input type="number" v-model="form.max_players" class="form-control" required min="1" />
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Descrizione (opzionale)</label>
-        <textarea v-model="form.description" class="form-control" rows="3"></textarea>
+        <label class="form-label">Info & Luogo</label>
+        <textarea v-model="form.description" class="form-control" rows="3" required></textarea>
       </div>
 
       <div class="text-end">
@@ -104,8 +102,7 @@ onMounted(() => {
     })
   } else {
     console.warn('Google Maps API non è ancora pronta.')
-  }
+  }
 })
 
 </script>
-

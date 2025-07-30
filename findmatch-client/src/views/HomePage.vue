@@ -9,7 +9,7 @@
     <!-- Ricerca avanzata -->
     <div class="row justify-content-center mb-4 g-2">
       <div class="col-md-3">
-        <input type="text" v-model="luogoFiltro" class="form-control" placeholder="Cerca luogo" />
+        <input id="autocomplete-luogo" type="text" class="form-control" placeholder="Cerca luogo" />
       </div>
 
       <div class="col-md-3">
@@ -35,9 +35,11 @@
         <input type="time" v-model="orarioFiltro" class="form-control" />
       </div>
 
-      <div class="col-auto">
+      <div class="col-auto d-flex gap-2">
         <button class="btn btn-success" @click="cercaPartite">Cerca</button>
+        <button class="btn btn-outline-danger" @click="pulisciFiltri">Pulisci</button>
       </div>
+
     </div>
 
     <!-- Partite trovate -->
@@ -54,7 +56,21 @@
                 <strong>Luogo:</strong> {{ partita.location }}
               </p>
             </div>
-            <button class="btn btn-sm btn-outline-secondary" @click="apriDettagli(partita)">Dettagli</button>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-info" @click="apriDettagli(partita)">Dettagli</button>
+              <!-- Se sei il creatore -->
+              <button class="btn btn-sm btn-secondary" v-if="String(partita.organizer_id) === userId" disabled>
+                Creatore
+              </button>
+              <!-- Se sei già iscritto -->
+              <button class="btn btn-sm btn-danger" v-else-if="partecipazioniUtente.includes(partita.id)" @click="abbandona(partita.id)">
+                Abbandona
+              </button>
+              <!-- Se puoi unirti -->
+              <button class="btn btn-sm btn-outline-success" v-else @click="unisciti(partita.id, partita.organizer_id)">
+                Unisciti
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -73,7 +89,7 @@
             <p><strong>Data:</strong> {{ formatData(partitaSelezionata.date_time) }}</p>
             <p><strong>Ora:</strong> {{ formatOra(partitaSelezionata.date_time) }}</p>
             <p><strong>Luogo:</strong> {{ partitaSelezionata.location }}</p>
-            <p><strong>Posti massimi:</strong> {{ partitaSelezionata.max_players }}</p>
+            <p><strong>Posti rimanenti:</strong> {{ partitaSelezionata.max_players - partitaSelezionata.partecipanti}} / {{ partitaSelezionata.max_players }}</p>
             <p><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_name }}</p>
             <p><strong>Descrizione:</strong> {{ partitaSelezionata.description || 'Nessuna descrizione disponibile.' }}</p>
           </div>
@@ -88,6 +104,7 @@
 import { ref, onMounted } from 'vue'
 import { getPartite } from '../services/partiteService'
 import * as bootstrap from 'bootstrap'
+import axios from 'axios'
 
 const nomeUtente = ref('')
 
@@ -96,15 +113,84 @@ const sportFiltro = ref('')
 const orarioFiltro = ref('')
 const dataFiltro = ref('')
 const partite = ref([])
+const partecipazioniUtente = ref([])
 const partitaSelezionata = ref(null)
+const userId = localStorage.getItem('userId')
 
 const cercaPartite = async () => {
-  const termine = [sportFiltro.value, luogoFiltro.value].filter(Boolean).join(' ')
   try {
-    const data = await getPartite(termine, dataFiltro.value, orarioFiltro.value)
+    const data = await getPartite({
+      sport: sportFiltro.value,
+      luogo: luogoFiltro.value,
+      data: dataFiltro.value,
+      ora: orarioFiltro.value
+    })
     partite.value = data
   } catch (err) {
     console.error('Errore nel caricamento delle partite:', err)
+  }
+}
+
+const pulisciFiltri = async () => {
+  sportFiltro.value = ''
+  luogoFiltro.value = ''
+  dataFiltro.value = ''
+  orarioFiltro.value = ''
+  await cercaPartite()
+}
+
+const unisciti = async (eventId, organizerId) => {
+  if (!userId) {
+    alert('Devi essere loggato per unirti a una partita.')
+    return
+  }
+
+  if (String(userId) === String(organizerId)) {
+    alert('❌ Non puoi unirti alla partita, sei il creatore.')
+    return
+  }
+
+  try {
+    await axios.post('http://localhost:3000/api/partecipazioni', {
+      user_id: userId,
+      event_id: eventId
+    })
+    partecipazioniUtente.value.push(eventId) // aggiorna localmente
+    alert('✅ Ti sei unito con successo alla partita!')
+    await cercaPartite()
+  } catch (err) {
+    if (err.response && err.response.status === 409) {
+      alert('⚠ Sei già iscritto a questa partita.')
+    } else {
+      alert('❌ Errore durante la registrazione. Riprova più tardi.')
+      console.error('Errore partecipazione:', err)
+    }
+  }
+}
+
+const caricaPartecipazioniUtente = async () => {
+  try {
+    const { data } = await axios.get('http://localhost:3000/api/partecipazioni/mie/${userId}')
+    partecipazioniUtente.value = data
+  } catch (err) {
+    console.error('Errore caricamento partecipazioni:', err)
+  }
+}
+
+const abbandona = async (eventId) => {
+  try {
+    await axios.delete('http://localhost:3000/api/partecipazioni', {
+      data: {
+        user_id: userId,
+        event_id: eventId
+      }
+    })
+    partecipazioniUtente.value = partecipazioniUtente.value.filter(id => id !== eventId)
+    alert('🚫 Hai abbandonato la partita.')
+    await cercaPartite()
+  } catch (err) {
+    console.error('Errore durante l\'abbandono:', err)
+    alert('❌ Errore durante l\'abbandono. Riprova più tardi.')
   }
 }
 
@@ -148,13 +234,31 @@ function getSportIcon(sport) {
     case 'paddle':
       return '🥎'
     default:
-      return '🎯' // fallback
+      return '🎯'
   }
 }
 
 onMounted(async () => {
   nomeUtente.value = localStorage.getItem('userName') || 'Utente'
-  await cercaPartite()
+  await Promise.all([
+    cercaPartite(),
+    caricaPartecipazioniUtente()
+  ])
+
+  const input = document.getElementById('autocomplete-luogo')
+
+if (window.google && google.maps && google.maps.places) {
+  const autocomplete = new google.maps.places.Autocomplete(input, {
+    types: ['geocode'],
+    componentRestrictions: { country: 'it' }
+  })
+
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace()
+    luogoFiltro.value = place.formatted_address || input.value
+  })
+} else {
+  console.warn('Google Maps API non è ancora pronta.')
+}
 })
 </script>
-
