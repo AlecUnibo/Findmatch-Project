@@ -108,7 +108,6 @@ router.delete('/', async (req, res) => {
   }
 })
 
-<<<<<<< HEAD
 router.delete('/:id', async (req, res) => {
   const { id } = req.params
 
@@ -131,8 +130,6 @@ router.delete('/:id', async (req, res) => {
 
 
 module.exports = router
-=======
 
 
 module.exports = router
->>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
