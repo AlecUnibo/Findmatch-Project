@@ -1,5 +1,5 @@
 <template>
   <div>
-    <h1>Chat</h1>
+    <h1>Notifiche</h1>
   </div>
 </template>

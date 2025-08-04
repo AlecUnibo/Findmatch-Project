@@ -2,7 +2,7 @@
   <div class="container mt-5">
     <h2 class="mb-4 text-center">📝 Crea una nuova partita</h2>
 
-    <form @submit.prevent="creaPartita" class="card p-4 shadow">
+    <form @submit.prevent="creaPartita" class="card p-4 shadow mb-5">
       <div class="mb-3">
         <label class="form-label">Sport</label>
         <select v-model="form.sport" class="form-select" required>
@@ -18,26 +18,24 @@
         </select>
       </div>
 
-
       <div class="mb-3">
         <label class="form-label">Luogo</label>
         <input id="autocomplete" type="text" class="form-control" placeholder="Inserisci luogo" required />
       </div>
 
-
       <div class="mb-3">
         <label class="form-label">Data e ora</label>
-        <input type="datetime-local" v-model="form.date_time" class="form-control" required />
+        <input type="datetime-local" v-model="form.date_time" :min="minDateTime" class="form-control" required />
       </div>
 
       <div class="mb-3">
         <label class="form-label">Numero massimo di giocatori</label>
-        <input type="number" v-model="form.max_players" class="form-control" required min="2" />
+        <input type="number" v-model="form.max_players" class="form-control" required min="1" />
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Descrizione (opzionale)</label>
-        <textarea v-model="form.description" class="form-control" rows="3"></textarea>
+        <label class="form-label">Info & Luogo</label>
+        <textarea v-model="form.description" class="form-control" rows="3" required></textarea>
       </div>
 
       <div class="text-end">
@@ -52,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 
 const form = ref({
@@ -64,6 +62,8 @@ const form = ref({
 })
 
 const messaggio = ref('')
+const now = new Date()
+const pad = (n) => n.toString().padStart(2, '0')
 
 const creaPartita = async () => {
   try {
@@ -88,6 +88,15 @@ const creaPartita = async () => {
     alert('Errore durante la creazione della partita.')
   }
 }
+
+const minDateTime = computed(() => {
+  const year = now.getFullYear()
+  const month = pad(now.getMonth() + 1)
+  const day = pad(now.getDate())
+  const hours = pad(now.getHours())
+  const minutes = pad(now.getMinutes())
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+})
 
 onMounted(() => {
   const input = document.getElementById('autocomplete')

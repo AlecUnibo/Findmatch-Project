@@ -8,7 +8,7 @@ import CreaPartita from '../views/CreaPartita.vue'
 import Classifica from '../views/Classifica.vue'
 import Profilo from '../views/Profilo.vue'
 import Impostazioni from '../views/Impostazioni.vue'
-import Chat from '../views/Chat.vue'
+import Chat from '../views/Notifiche.vue'
 
 const routes = [
   { path: '/', component: LoginPage },
