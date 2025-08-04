@@ -23,13 +23,21 @@ router.get('/', async (req, res) => {
 
     if (sport) {
       query += ` AND LOWER(e.sport) LIKE $${counter}`
+<<<<<<< HEAD
       values.push(`%${sport.toLowerCase()}%`)
+=======
+      values.push('%${sport.toLowerCase()}%')
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
       counter++
     }
 
     if (luogo) {
       query += ` AND LOWER(e.location) LIKE $${counter}`
+<<<<<<< HEAD
       values.push(`%${luogo.toLowerCase()}%`)
+=======
+      values.push('%${luogo.toLowerCase()}%')
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
       counter++
     }
 
@@ -99,4 +107,8 @@ router.put('/:id', async (req, res) => {
   }
 })
 
+<<<<<<< HEAD
 module.exports = router
+=======
+module.exports = router
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a

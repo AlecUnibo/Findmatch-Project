@@ -80,7 +80,11 @@ const userId = localStorage.getItem('userId')
 
 onMounted(async () => {
   try {
+<<<<<<< HEAD
     const { data } = await axios.get(`http://localhost:3000/api/users/${userId}`)
+=======
+    const { data } = await axios.get('http://localhost:3000/api/users/${userId}')
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
     user.value.username = data.username
     user.value.bio = data.bio || 'Appassionato di sport e partite amatoriali!'
     user.value.followers = data.followers || 0
@@ -110,4 +114,8 @@ img.rounded-circle {
   object-fit: cover;
   border: 2px solid #ddd;
 }
+<<<<<<< HEAD
 </style>
+=======
+</style>
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a

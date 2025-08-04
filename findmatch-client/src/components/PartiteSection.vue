@@ -1,7 +1,11 @@
 <template>
   <div>
     <div v-if="partite.length">
+<<<<<<< HEAD
       <div v-for="partita in partite" :key="partita.id" class="card mb-3 text-white" :class="getCardClass(partita.sport)">
+=======
+      <div v-for="partita in partite" :key="partita.id" class="card mb-3">
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
         <div class="card-body d-flex justify-content-between align-items-center">
           <div>
             <h5 class="card-title mb-1">
@@ -14,6 +18,7 @@
             </p>
           </div>
           <div>
+<<<<<<< HEAD
             <button 
               class="btn btn-outline-primary btn-sm me-2" 
               @click="mostraDettagli(partita)">
@@ -37,6 +42,15 @@
               @click="abbandona(partita.id)">
               Abbandona
             </button>
+=======
+            <button class="btn btn-outline-secondary btn-sm me-2" @click="mostraDettagli(partita)">Dettagli</button>
+            <button 
+              v-if="isPartitaCreataDaUtente(partita)" 
+              class="btn btn-outline-primary btn-sm"
+              @click="mostraModifica(partita)">
+              Modifica
+            </button>
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
           </div>
         </div>
       </div>
@@ -82,6 +96,7 @@
               </div>
               <div class="mb-3">
                 <label class="form-label">Data e Ora</label>
+<<<<<<< HEAD
                 <input
                   type="datetime-local"
                   :value="formatDateTimeLocal(partitaDaModificare.date_time)"
@@ -90,6 +105,9 @@
                   class="form-control"
                   required
                 />
+=======
+                <input type="datetime-local" :value="formatDateTimeLocal(partitaDaModificare.date_time)" @input="partitaDaModificare.date_time = $event.target.value" class="form-control" required />
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
               </div>
               <div class="mb-3">
                 <label class="form-label">Posti Massimi</label>
@@ -114,6 +132,7 @@
 import { ref } from 'vue'
 import * as bootstrap from 'bootstrap'
 import axios from 'axios'
+<<<<<<< HEAD
 import { computed } from 'vue'
 
 const props = defineProps({
@@ -125,6 +144,11 @@ const minDateTime = computed(() => {
   const d = new Date()
   d.setSeconds(0, 0)
   return d.toISOString().slice(0, 16)
+=======
+
+const props = defineProps({
+  partite: Array
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
 })
 
 const partitaSelezionata = ref(null)
@@ -145,7 +169,11 @@ function mostraModifica(partita) {
 
 async function salvaModifiche() {
   try {
+<<<<<<< HEAD
     await axios.put(`http://localhost:3000/api/partite/${partitaDaModificare.value.id}`, partitaDaModificare.value)
+=======
+    await axios.put('http://localhost:3000/api/partite/${partitaDaModificare.value.id}', partitaDaModificare.value)
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
     alert('✅ Partita modificata con successo!')
     location.reload()
   } catch (err) {
@@ -154,6 +182,7 @@ async function salvaModifiche() {
   }
 }
 
+<<<<<<< HEAD
 async function eliminaPartita(partitaId) {
   if (!confirm('Sei sicuro di voler eliminare questa partita?')) return
 
@@ -183,6 +212,8 @@ async function abbandona(eventId) {
   }
 }
 
+=======
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
 function isPartitaCreataDaUtente(partita) {
   return partita.organizer_id == userId
 }
@@ -228,6 +259,7 @@ function getSportIcon(sport) {
       return '🥎'
     default:
       return '🎯'
+<<<<<<< HEAD
   }
 }
 
@@ -317,3 +349,8 @@ function getCardClass(sport) {
 }
 
 </style>
+=======
+  }
+}
+</script>
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a

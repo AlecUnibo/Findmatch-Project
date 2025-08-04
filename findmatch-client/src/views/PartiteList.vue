@@ -24,9 +24,13 @@
     <PartiteSection
       v-else-if="currentTab === 'iscritto'"
       :partite="iscrittoList"
+<<<<<<< HEAD
       sezione="iscritto"
     />
 
+=======
+    />
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
     <PartiteSection
       v-else-if="currentTab === 'storico'"
       :partite="storicoList"
@@ -51,8 +55,13 @@ watch(currentTab, (newValue) => {
 })
 const tabs = [
   { label: '📌 Create da te', value: 'create' },
+<<<<<<< HEAD
   { label: '🗓️ A cui sei iscritto', value: 'iscritto' },
   { label: '📖 Storico partecipazioni', value: 'storico' }
+=======
+  { label: '🗓 A cui sei iscritto', value: 'iscritto' },
+  { label: '📚 Storico partecipazioni', value: 'storico' }
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
 ]
 
 const loadData = async () => {
@@ -60,9 +69,15 @@ const loadData = async () => {
 
   try {
     const [createRes, iscrittoRes, storicoRes] = await Promise.all([
+<<<<<<< HEAD
       axios.get(`http://localhost:3000/api/partecipazioni/create/${userId}`),
       axios.get(`http://localhost:3000/api/partecipazioni/iscritto/${userId}`),
       axios.get(`http://localhost:3000/api/partecipazioni/storico/${userId}`)
+=======
+      axios.get('http://localhost:3000/api/partecipazioni/create/${userId}'),
+      axios.get('http://localhost:3000/api/partecipazioni/iscritto/${userId}'),
+      axios.get('http://localhost:3000/api/partecipazioni/storico/${userId}')
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
     ])
     createList.value = createRes.data
     iscrittoList.value = iscrittoRes.data
@@ -73,6 +88,7 @@ const loadData = async () => {
 }
 
 onMounted(loadData)
+<<<<<<< HEAD
 </script>
 
 <style scoped>
@@ -85,3 +101,6 @@ onMounted(loadData)
   font-weight: bold;             /* opzionale: enfasi visiva */
 }
 </style>
+=======
+</script>
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a

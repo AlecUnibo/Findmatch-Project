@@ -57,7 +57,11 @@
               </p>
             </div>
             <div class="d-flex gap-2">
+<<<<<<< HEAD
               <button class="btn btn-sm btn-outline-primary" @click="apriDettagli(partita)">Dettagli</button>
+=======
+              <button class="btn btn-sm btn-outline-info" @click="apriDettagli(partita)">Dettagli</button>
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
               <!-- Se sei il creatore -->
               <button class="btn btn-sm btn-secondary" v-if="String(partita.organizer_id) === userId" disabled>
                 Creatore
@@ -136,6 +140,7 @@ const pulisciFiltri = async () => {
   luogoFiltro.value = ''
   dataFiltro.value = ''
   orarioFiltro.value = ''
+<<<<<<< HEAD
 
   document.getElementById('autocomplete-luogo').value = ''
 
@@ -143,6 +148,11 @@ const pulisciFiltri = async () => {
 }
 
 
+=======
+  await cercaPartite()
+}
+
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
 const unisciti = async (eventId, organizerId) => {
   if (!userId) {
     alert('Devi essere loggato per unirti a una partita.')
@@ -164,7 +174,11 @@ const unisciti = async (eventId, organizerId) => {
     await cercaPartite()
   } catch (err) {
     if (err.response && err.response.status === 409) {
+<<<<<<< HEAD
       alert('⚠️ Sei già iscritto a questa partita.')
+=======
+      alert('⚠ Sei già iscritto a questa partita.')
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
     } else {
       alert('❌ Errore durante la registrazione. Riprova più tardi.')
       console.error('Errore partecipazione:', err)
@@ -174,7 +188,11 @@ const unisciti = async (eventId, organizerId) => {
 
 const caricaPartecipazioniUtente = async () => {
   try {
+<<<<<<< HEAD
     const { data } = await axios.get(`http://localhost:3000/api/partecipazioni/mie/${userId}`)
+=======
+    const { data } = await axios.get('http://localhost:3000/api/partecipazioni/mie/${userId}')
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
     partecipazioniUtente.value = data
   } catch (err) {
     console.error('Errore caricamento partecipazioni:', err)
@@ -183,7 +201,11 @@ const caricaPartecipazioniUtente = async () => {
 
 const abbandona = async (eventId) => {
   try {
+<<<<<<< HEAD
     await axios.delete(`http://localhost:3000/api/partecipazioni`, {
+=======
+    await axios.delete('http://localhost:3000/api/partecipazioni', {
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
       data: {
         user_id: userId,
         event_id: eventId
@@ -239,6 +261,7 @@ function getSportIcon(sport) {
       return '🥎'
     default:
       return '🎯'
+<<<<<<< HEAD
   }
 }
 
@@ -261,6 +284,8 @@ function getCardClass(sport) {
       return 'card-sport-beach'
     default:
       return ''
+=======
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a
   }
 }
 
@@ -270,6 +295,7 @@ onMounted(async () => {
     cercaPartite(),
     caricaPartecipazioniUtente()
   ])
+<<<<<<< HEAD
 
   const input = document.getElementById('autocomplete-luogo')
 
@@ -351,3 +377,23 @@ if (window.google && google.maps && google.maps.places) {
 }
 
 </style>
+=======
+
+  const input = document.getElementById('autocomplete-luogo')
+
+if (window.google && google.maps && google.maps.places) {
+  const autocomplete = new google.maps.places.Autocomplete(input, {
+    types: ['geocode'],
+    componentRestrictions: { country: 'it' }
+  })
+
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace()
+    luogoFiltro.value = place.formatted_address || input.value
+  })
+} else {
+  console.warn('Google Maps API non è ancora pronta.')
+}
+})
+</script>
+>>>>>>> 76bc2d8111405c6188e46a3b1255d18aae33395a

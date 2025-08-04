@@ -113,8 +113,7 @@ onMounted(() => {
     })
   } else {
     console.warn('Google Maps API non è ancora pronta.')
-  }
+  }
 })
 
 </script>
-
