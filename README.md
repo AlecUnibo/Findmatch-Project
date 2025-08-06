@@ -1,4 +1,18 @@
-# Come creare e aggiornare DataBase
+# 1. Preparazione Ambiente
+
+1. Installare Node.js -> https://nodejs.org/en
+
+2. Installare PostgreSQL -> https://www.postgresql.org/
+
+Come tool relativi a PostgreSQL, quello che ci servirá sará pgAdmin, cosí possiamo tenere traccia delle modifiche al database.
+Quindi procedere all'installazione guidata (come porta lasciare la 5432) e come tool installare solo pgAdmin. La password per semplificare il tutto e rendere tutto uguale sará "Prova".
+
+3. Installare i pacchetti npm, all'interno della cartella findmatch_client
+```bash
+npm install
+```
+
+# 2. Creazione e aggiornamento DataBase
 
 ## 1. Creazione del database in PostgreSQL (usando pgAdmin)
 1. Apri pgAdmin
@@ -11,21 +25,14 @@
 5. Clicca su Save
 
 ## 2. Inizializzazione del database
+Vai nella cartella del progetto relativa al backend -> findmatch_client, e lancia i seguenti comandi:
 
 ```bash
-psql -U postgres -d findmatch_db -f migrations/001_init_schema.sql
-psql -U postgres -d findmatch_db -f migrations/002_seed_data.sql  
+"C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/001_init_schema.sql
+"C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/002_seed_data.sql
 ```
 
 > Inserisci la password dell’utente postgres quando richiesto.
-
-Se stai usando pgAdmin, puoi eseguire i file .sql così:
-
-1. Tasto destro su findmatch_db → Query Tool
-
-2. Apri 001_init_schema.sql → clic su "Esegui"
-
-3. Ripeti per 002_seed_data.sql
 
 ## 3. Se si fanno modifiche al DB
 
@@ -51,32 +58,18 @@ CREATE TABLE eventi (
   creatore_id INTEGER REFERENCES users(id)
 );
 ```
-3. Fai il commit del file su Git:
-
-
-```bash
-git add migrations/003_add_tabella_eventi.sql
-git commit -m "Aggiunta tabella eventi"
-git push
-```
-4. Gli altri potranno applicare le modifiche con:
+3. Si potranno applicare le modifiche con:
 
 ```bash
-psql -U postgres -d findmatch_db -f migrations/003_add_tabella_eventi
+"C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/003_add_tabella_eventi
 ```
 
-## RIEPILOGO COMANDI
-
-Creazione DB (una volta sola):
+# 3. Avviare la web app:
+1. Posizionarsi nella cartella findmatch_client e lanciare il seguente comando:
 ```bash
-createdb -U postgres findmatch_db
+npm run dev
 ```
-Applicazione struttura iniziale:
+2. Posizionarsi nella cartella findmatch_server e lanciare il seguente comando:
 ```bash
-psql -U postgres -d findmatch_db -f migrations/001_init_schema.sql
-psql -U postgres -d findmatch_db -f migrations/002_seed_data.sql
-```
-Esecuzione di nuove migrazioni:
-```bash
-psql -U postgres -d findmatch_db -f migrations/NNN_nome_migrazione.sql
+node index.js
 ```

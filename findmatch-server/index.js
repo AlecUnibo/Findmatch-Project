@@ -9,7 +9,7 @@ const usersRoutes = require('./routes/users')
 
 const app = express()
 
-app.use(cors()) // ✅ Deve essere PRIMA di TUTTE le rotte
+app.use(cors())
 app.use(express.json())
 
 // Rotte API
