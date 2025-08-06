@@ -5,11 +5,15 @@ require('dotenv').config()
 const authRoutes = require('./routes/auth')
 const partecipazioniRoutes = require('./routes/partecipazioni')
 const partiteRoutes = require('./routes/partite')
+const usersRoutes = require('./routes/users')
+
 const app = express()
 
-app.use(cors())
+app.use(cors()) // ✅ Deve essere PRIMA di TUTTE le rotte
 app.use(express.json())
 
+// Rotte API
+app.use('/api/users', usersRoutes)
 app.use('/api/partecipazioni', partecipazioniRoutes)
 app.use('/api', authRoutes)
 app.use('/api/partite', partiteRoutes)

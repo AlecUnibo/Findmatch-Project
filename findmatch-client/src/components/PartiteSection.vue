@@ -18,7 +18,7 @@
           <div>
 
             <button 
-              class="btn btn-outline-primary btn-sm me-2" 
+              class="btn btn-primary btn-sm me-2" 
               @click="mostraDettagli(partita)">
               Dettagli
             </button>
@@ -30,13 +30,13 @@
             </button>
             <button
               v-if="isPartitaCreataDaUtente(partita)" 
-              class="btn btn-outline-danger btn-sm me-2"
+              class="btn btn-danger btn-sm me-2"
               @click="eliminaPartita(partita.id)">
               Elimina
             </button>
             <button
               v-if="props.sezione === 'iscritto'"
-              class="btn btn-outline-danger btn-sm me-2"
+              class="btn btn-danger btn-sm me-2"
               @click="abbandona(partita.id)">
               Abbandona
             </button>

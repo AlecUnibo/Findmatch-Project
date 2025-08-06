@@ -36,7 +36,7 @@
       </div>
 
       <div class="col-auto d-flex gap-2">
-        <button class="btn btn-success" @click="cercaPartite">Cerca</button>
+        <button class="btn btn-outline-success" @click="cercaPartite">Cerca</button>
         <button class="btn btn-outline-danger" @click="pulisciFiltri">Pulisci</button>
       </div>
 
@@ -58,7 +58,7 @@
             </div>
             <div class="d-flex gap-2">
 
-              <button class="btn btn-sm btn-outline-primary" @click="apriDettagli(partita)">Dettagli</button>
+              <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
 
               <!-- Se sei il creatore -->
               <button class="btn btn-sm btn-secondary" v-if="String(partita.organizer_id) === userId" disabled>
@@ -69,7 +69,7 @@
                 Abbandona
               </button>
               <!-- Se puoi unirti -->
-              <button class="btn btn-sm btn-outline-success" v-else @click="unisciti(partita.id, partita.organizer_id)">
+              <button class="btn btn-sm btn-success" v-else @click="unisciti(partita.id, partita.organizer_id)">
                 Unisciti
               </button>
             </div>
