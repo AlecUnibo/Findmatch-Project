@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-container d-flex flex-column min-vh-100">
     <Navbar v-if="showNavbar" />
     <router-view />
     <Footer v-if="showFooter" />

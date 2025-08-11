@@ -1,15 +1,21 @@
 <template>
   <div class="d-flex justify-content-center align-items-center vh-100 bg-light">
-    <div class="card shadow p-4" style="width: 400px;">
-      <h3 class="mb-4 text-center">Accedi a Findmatch</h3>
+    <div class="card shadow p-4 text-center" style="width: 400px;">
+      
+      <!-- LOGO -->
+      <div class="d-flex justify-content-center mb-3">
+        <img src="/images/logo_login.png" alt="Logo Findmatch" class="login-logo" />
+      </div>
+
+      <h3 class="mb-4">Accedi</h3>
 
       <form @submit.prevent="handleLogin">
-        <div class="mb-3">
+        <div class="mb-3 text-start">
           <label for="email" class="form-label">Email:</label>
           <input type="email" id="email" v-model="email" class="form-control" required />
         </div>
 
-        <div class="mb-3">
+        <div class="mb-3 text-start">
           <label for="password" class="form-label">Password:</label>
           <input type="password" id="password" v-model="password" class="form-control" required />
         </div>
@@ -29,6 +35,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref } from 'vue'
@@ -54,3 +61,11 @@ const handleLogin = async () => {
   }
 }
 </script>
+
+<style scooped>
+.login-logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+</style>

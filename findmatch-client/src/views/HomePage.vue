@@ -69,7 +69,7 @@
                 Abbandona
               </button>
               <!-- Se puoi unirti -->
-              <button class="btn btn-sm btn-success" v-else @click="unisciti(partita.id, partita.organizer_id)">
+              <button class="btn btn-sm btn-success" v-else @click="unisciti(partita.id, partita.organizer_id, partita.sport)">
                 Unisciti
               </button>
             </div>
@@ -99,6 +99,7 @@
       </div>
     </div>
   </div>
+  <div class="emoji-rain-container" ref="emojiContainer"></div>
 </template>
 
 
@@ -118,6 +119,19 @@ const partite = ref([])
 const partecipazioniUtente = ref([])
 const partitaSelezionata = ref(null)
 const userId = localStorage.getItem('userId')
+const emojiContainer = ref(null)
+
+const sportEmojis = {
+  'calcio a 5': '⚽',
+  'calcio a 11': '⚽',
+  'basket': '🏀',
+  'beach volley': '🏐',
+  'pallavolo': '🏐',
+  'racchettoni': '🏓',
+  'tennis': '🎾',
+  'paddle': '🥎'
+}
+
 
 const cercaPartite = async () => {
   try {
@@ -127,11 +141,18 @@ const cercaPartite = async () => {
       data: dataFiltro.value,
       ora: orarioFiltro.value
     })
-    partite.value = data
+
+    // Ordina per data e ora crescenti
+    partite.value = data.sort((a, b) => {
+      const dateA = new Date(a.date_time)
+      const dateB = new Date(b.date_time)
+      return dateA - dateB
+    })
   } catch (err) {
     console.error('Errore nel caricamento delle partite:', err)
   }
 }
+
 
 const pulisciFiltri = async () => {
   sportFiltro.value = ''
@@ -145,7 +166,7 @@ const pulisciFiltri = async () => {
   await cercaPartite()
 }
 
-const unisciti = async (eventId, organizerId) => {
+const unisciti = async (eventId, organizerId, sport) => {
   if (!userId) {
     alert('Devi essere loggato per unirti a una partita.')
     return
@@ -161,20 +182,41 @@ const unisciti = async (eventId, organizerId) => {
       user_id: userId,
       event_id: eventId
     })
-    partecipazioniUtente.value.push(eventId) // aggiorna localmente
-    alert('✅ Ti sei unito con successo alla partita!')
+    partecipazioniUtente.value.push(eventId)
     await cercaPartite()
+
+    // Effetto Pioggia emoji
+    lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉')
+
+    alert('Ti sei unito con successo alla partita!')
   } catch (err) {
-    if (err.response && err.response.status === 409) {
-
-      alert('⚠️ Sei già iscritto a questa partita.')
-
+    if (err.response?.status === 409) {
+      alert('Sei già iscritto a questa partita.')
     } else {
-      alert('❌ Errore durante la registrazione. Riprova più tardi.')
       console.error('Errore partecipazione:', err)
+      alert('❌ Errore durante la registrazione.')
     }
   }
 }
+
+function lanciaPioggia(emoji) {
+  const container = emojiContainer.value
+  if (!container) return
+
+  for (let i = 0; i < 30; i++) {
+    const el = document.createElement('span')
+    el.textContent = emoji
+    el.className = 'emoji-fall'
+    el.style.left = Math.random() * 100 + 'vw'
+    el.style.animationDuration = 2 + Math.random() * 2 + 's'
+    container.appendChild(el)
+
+    setTimeout(() => {
+      container.removeChild(el)
+    }, 4000)
+  }
+}
+
 
 const caricaPartecipazioniUtente = async () => {
   try {
@@ -299,7 +341,7 @@ if (window.google && google.maps && google.maps.places) {
 })
 </script>
 
-<style scoped>
+<style>
 .card[class*='card-sport-'] {
   position: relative;
   overflow: hidden;
@@ -359,6 +401,34 @@ if (window.google && google.maps && google.maps.places) {
   background-image:
     url('/public/images/beach-mask.png');
 }
+
+.emoji-rain-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.emoji-fall {
+  position: absolute;
+  top: -2rem;
+  font-size: 2rem;
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+
 
 </style>
 
