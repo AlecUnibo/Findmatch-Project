@@ -24,8 +24,8 @@ npm install
 - Owner: postgres (o altro utente valido)
 5. Clicca su Save
 
-## 2. Inizializzazione del database
-Vai nella cartella del progetto relativa al backend -> findmatch_client, e lancia i seguenti comandi:
+## 2. Inizializzazione/Aggiornamento del database
+Vai nella cartella del progetto relativa al backend -> findmatch_server, e lancia i seguenti comandi:
 
 ```bash
 "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/001_init_schema.sql

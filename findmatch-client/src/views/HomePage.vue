@@ -41,34 +41,57 @@
       </div>
 
     </div>
+    <!-- Tabs -->
+    <ul class="nav nav-pills justify-content-center mb-3">
+      <li class="nav-item">
+        <button class="nav-link" :class="{ active: tab==='disponibili' }" @click="tab='disponibili'">
+          Disponibili
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" :class="{ active: tab==='mie' }" @click="tab='mie'">
+          Create da te
+        </button>
+      </li>
+    </ul>
 
     <!-- Partite trovate -->
-    <div class="mb-5">
+    <div class="mb-5" v-if="tab==='disponibili'">
       <h4 class="mb-3">📅 Partite disponibili</h4>
-      <div v-if="partite.length">
-        <div v-for="partita in partite" :key="partita.id" class="card mb-3 text-white" :class="getCardClass(partita.sport)">
+      <div v-if="partiteDisponibili.length">
+        <div v-for="partita in partiteDisponibili" :key="partita.id" class="card mb-3 text-white" :class="getCardClass(partita.sport)">
           <div class="card-body d-flex justify-content-between align-items-center">
             <div>
-              <h5 class="card-title mb-1"> {{ getSportIcon(partita.sport) }} {{ partita.sport }} </h5>
+              <h5 class="card-title mb-1">{{ getSportIcon(partita.sport) }} {{ partita.sport }}</h5>
               <p class="card-text mb-0">
+                <!-- Stato posti -->
+                <div class="d-flex align-items-center gap-2 mt-2">
+                  <span class="badge bg-light text-dark">
+                    {{ postiLiberi(partita) }} posti liberi
+                  </span>
+                </div>
+                <div class="progress mt-2" style="height: 6px;">
+                  <div class="progress-bar"
+                      role="progressbar"
+                      :class="progressBarClass(partita)"
+                      :style="{ width: progressPercent(partita) + '%' }"
+                      :aria-valuenow="partita.partecipanti"
+                      :aria-valuemin="0"
+                      :aria-valuemax="partita.max_players">
+                  </div>
+                </div>
                 <strong>Data:</strong> {{ formatData(partita.date_time) }} –
                 <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
                 <strong>Luogo:</strong> {{ partita.location }}
               </p>
             </div>
             <div class="d-flex gap-2">
-
               <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
-
-              <!-- Se sei il creatore -->
-              <button class="btn btn-sm btn-secondary" v-if="String(partita.organizer_id) === userId" disabled>
-                Creatore
-              </button>
-              <!-- Se sei già iscritto -->
-              <button class="btn btn-sm btn-danger" v-else-if="partecipazioniUtente.includes(partita.id)" @click="abbandona(partita.id)">
+              <!-- già iscritto -->
+              <button class="btn btn-sm btn-danger" v-if="partecipazioniUtente.includes(partita.id)" @click="abbandona(partita.id)">
                 Abbandona
               </button>
-              <!-- Se puoi unirti -->
+              <!-- puoi unirti -->
               <button class="btn btn-sm btn-success" v-else @click="unisciti(partita.id, partita.organizer_id, partita.sport)">
                 Unisciti
               </button>
@@ -78,6 +101,52 @@
       </div>
       <div v-else class="text-muted">Nessuna partita trovata.</div>
     </div>
+
+    <div class="mb-5" v-else>
+      <h4 class="mb-3">🛠️ Create da te</h4>
+      <div v-if="partiteCreate.length">
+        <div v-for="partita in partiteCreate" :key="partita.id" class="card mb-3 text-white" :class="getCardClass(partita.sport)">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="card-title mb-1">
+                {{ getSportIcon(partita.sport) }} {{ partita.sport }}
+                <span class="badge bg-warning text-dark ms-2">Tua</span>
+              </h5>
+              <p class="card-text mb-0">
+
+                <!-- Stato posti -->
+                <div class="d-flex align-items-center gap-2 mt-2">
+                  <span class="badge bg-light text-dark">
+                    {{ postiLiberi(partita) }} posti liberi
+                  </span>
+                </div>
+                <div class="progress mt-2" style="height: 6px;">
+                  <div class="progress-bar"
+                      role="progressbar"
+                      :class="progressBarClass(partita)"
+                      :style="{ width: progressPercent(partita) + '%' }"
+                      :aria-valuenow="partita.partecipanti"
+                      :aria-valuemin="0"
+                      :aria-valuemax="partita.max_players">
+                  </div>
+                </div>
+
+                <strong>Data:</strong> {{ formatData(partita.date_time) }} –
+                <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
+                <strong>Luogo:</strong> {{ partita.location }}
+              </p>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
+              <!-- opzionale: pulsante gestisci/elimina se già previsto nel backend -->
+              <!-- <button class="btn btn-sm btn-outline-danger" @click="eliminaPartita(partita.id)">Elimina</button> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else class="text-muted">Non hai ancora creato partite.</div>
+    </div>
+
 
     <!-- MODALE DETTAGLI -->
     <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
@@ -104,7 +173,7 @@
 
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getPartite } from '../services/partiteService'
 import * as bootstrap from 'bootstrap'
 import axios from 'axios'
@@ -120,6 +189,7 @@ const partecipazioniUtente = ref([])
 const partitaSelezionata = ref(null)
 const userId = localStorage.getItem('userId')
 const emojiContainer = ref(null)
+const tab = ref('disponibili')
 
 const sportEmojis = {
   'calcio a 5': '⚽',
@@ -132,6 +202,29 @@ const sportEmojis = {
   'paddle': '🥎'
 }
 
+const postiLiberi = (p) => Math.max(0, (p.max_players ?? 0) - (p.partecipanti ?? 0))
+const progressPercent = (p) => {
+  const max = p.max_players ?? 0, cur = p.partecipanti ?? 0
+  if (!max) return 0
+  return Math.min(100, Math.round((cur / max) * 100))
+}
+const progressBarClass = (p) => {
+  const left = postiLiberi(p)
+  if (left === 0) return 'bg-danger'     // piena
+  if (left <= 2) return 'bg-warning'     // quasi piena
+  return 'bg-success'                    // buona disponibilità
+}
+
+
+const partiteCreate = computed(() =>
+  partite.value.filter(p => String(p.organizer_id) === String(userId))
+)
+
+const partiteDisponibili = computed(() =>
+  partite.value.filter(p =>
+    String(p.organizer_id) !== String(userId)
+  )
+)
 
 const cercaPartite = async () => {
   try {
@@ -401,6 +494,7 @@ if (window.google && google.maps && google.maps.places) {
   background-image:
     url('/public/images/beach-mask.png');
 }
+
 
 .emoji-rain-container {
   position: fixed;

@@ -4,7 +4,7 @@
       <div class="d-flex align-items-center">
         <div class="me-4">
           <img
-            src="./images/immagine_profilo.jpg"
+            src="/images/immagine_profilo.jpg"
             class="rounded-circle"
             alt="Foto profilo"
             width="100"
