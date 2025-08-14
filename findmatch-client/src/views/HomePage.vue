@@ -65,6 +65,10 @@
               <h5 class="card-title mb-1">{{ getSportIcon(partita.sport) }} {{ partita.sport }}</h5>
               <p class="card-text mb-0">
                 <!-- Stato posti -->
+                <strong>Data:</strong> {{ formatData(partita.date_time) }} –
+                <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
+                <strong>Luogo:</strong> {{ partita.location }}
+
                 <div class="d-flex align-items-center gap-2 mt-2">
                   <span class="badge bg-light text-dark">
                     {{ postiLiberi(partita) }} posti liberi
@@ -80,9 +84,6 @@
                       :aria-valuemax="partita.max_players">
                   </div>
                 </div>
-                <strong>Data:</strong> {{ formatData(partita.date_time) }} –
-                <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
-                <strong>Luogo:</strong> {{ partita.location }}
               </p>
             </div>
             <div class="d-flex gap-2">
@@ -167,10 +168,24 @@
         </div>
       </div>
     </div>
+
+    <!-- TOAST -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+  <div
+    ref="toastEl"
+    class="toast align-items-center border-0 fade"  
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+  >
+    <div :class="['toast-body', 'rounded-3', 'shadow-lg', toastVariantClass]">
+      <strong class="me-2">{{ toastIcon }}</strong> {{ toastMessage }}
+    </div>
+  </div>
+</div>
   </div>
   <div class="emoji-rain-container" ref="emojiContainer"></div>
 </template>
-
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
@@ -215,14 +230,14 @@ const progressBarClass = (p) => {
   return 'bg-success'                    // buona disponibilità
 }
 
-
 const partiteCreate = computed(() =>
   partite.value.filter(p => String(p.organizer_id) === String(userId))
 )
 
 const partiteDisponibili = computed(() =>
   partite.value.filter(p =>
-    String(p.organizer_id) !== String(userId)
+    String(p.organizer_id) !== String(userId) &&
+    postiLiberi(p) > 0
   )
 )
 
@@ -246,7 +261,6 @@ const cercaPartite = async () => {
   }
 }
 
-
 const pulisciFiltri = async () => {
   sportFiltro.value = ''
   luogoFiltro.value = ''
@@ -261,12 +275,7 @@ const pulisciFiltri = async () => {
 
 const unisciti = async (eventId, organizerId, sport) => {
   if (!userId) {
-    alert('Devi essere loggato per unirti a una partita.')
-    return
-  }
-
-  if (String(userId) === String(organizerId)) {
-    alert('❌ Non puoi unirti alla partita, sei il creatore.')
+    showToast('Devi essere loggato per unirti a una partita.', 'warning', 6000)
     return
   }
 
@@ -280,16 +289,49 @@ const unisciti = async (eventId, organizerId, sport) => {
 
     // Effetto Pioggia emoji
     lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉')
-
-    alert('Ti sei unito con successo alla partita!')
+    showToast('Ti sei unito con successo!', 'success', 5000)
   } catch (err) {
     if (err.response?.status === 409) {
-      alert('Sei già iscritto a questa partita.')
-    } else {
-      console.error('Errore partecipazione:', err)
-      alert('❌ Errore durante la registrazione.')
+      showToast('Errore durante la registrazione.', 'danger')
     }
   }
+}
+
+// --- TOAST state ---
+const toastEl = ref(null)
+const toastMessage = ref('')
+const toastVariant = ref('success') 
+
+// Icone
+const toastIcon = computed(() => {
+  switch (toastVariant.value) {
+    case 'success': return '✅'
+    case 'danger':  return '🛑'
+    case 'warning': return '⚠️'
+    default:        return 'ℹ️'
+  }
+})
+
+// Classi di colore (sfondo pieno + testo leggibile)
+const toastVariantClass = computed(() => {
+  switch (toastVariant.value) {
+    case 'success': return 'bg-success text-white'
+    case 'danger':  return 'bg-danger text-white'
+    case 'warning': return 'bg-warning text-dark'
+    default:        return 'bg-info text-white'
+  }
+})
+
+// Durata più lunga + animazione
+function showToast(message, variant = 'success', delayMs = 5000) {
+  toastMessage.value = message
+  toastVariant.value  = variant
+  const t = new bootstrap.Toast(toastEl.value, {
+    autohide: true,
+    animation: true,
+    delay: delayMs   // ⬅️ 5s
+  })
+  t.show()
 }
 
 function lanciaPioggia(emoji) {
@@ -309,7 +351,6 @@ function lanciaPioggia(emoji) {
     }, 4000)
   }
 }
-
 
 const caricaPartecipazioniUtente = async () => {
   try {
@@ -333,11 +374,11 @@ const abbandona = async (eventId) => {
       }
     })
     partecipazioniUtente.value = partecipazioniUtente.value.filter(id => id !== eventId)
-    alert('🚫 Hai abbandonato la partita.')
+    showToast('Hai abbandonato la partita.', 'danger', 5000)
     await cercaPartite()
   } catch (err) {
     console.error('Errore durante l\'abbandono:', err)
-    alert('❌ Errore durante l\'abbandono. Riprova più tardi.')
+    showToast('Errore durante l\'abbandono. Riprova più tardi.', 'danger')
   }
 }
 
@@ -457,44 +498,27 @@ if (window.google && google.maps && google.maps.places) {
   z-index: 1;
 }
 
-/* Sfondo sfumato per tennis/paddle */
-.card-sport-tennis::before {
-  background-image:
-    url('/public/images/tennis-mask.png');
+/* Sfondo sfumato per card */
+.card-sport-tennis::before { background-image: url('/public/images/tennis-mask.png'); }
+.card-sport-paddle::before { background-image: url('/public/images/paddle-mask.png'); }
+.card-sport-racchettoni::before { background-image: url('/public/images/racchettoni-mask.png'); }
+.card-sport-calcio::before { background-image: url('/public/images/calcio-mask.png'); }
+.card-sport-basket::before { background-image: url('/public/images/basket-mask.png'); }
+.card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
+.card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
+
+/* Toast */
+.toast-container .toast {
+  --bs-toast-max-width: 520px;  
+}
+.toast .toast-body {
+  font-size: 1.05rem;            
+  padding: 0.95rem 1.15rem;     
 }
 
-.card-sport-paddle::before {
-  background-image:
-    url('/public/images/paddle-mask.png');
+.toast.fade {
+  transition: opacity .6s ease;  
 }
-
-.card-sport-racchettoni::before {
-  background-image:
-    url('/public/images/racchettoni-mask.png');
-}
-/* Sfondo sfumato per calcio */
-.card-sport-calcio::before {
-  background-image:
-    url('/public/images/calcio-mask.png');
-}
-
-/* Sfondo sfumato per basket */
-.card-sport-basket::before {
-  background-image:
-    url('/public/images/basket-mask.png');
-}
-
-/* Sfondo sfumato per pallavolo */
-.card-sport-volley::before {
-  background-image:
-    url('/public/images/pallavolo-mask.png');
-}
-
-.card-sport-beach::before {
-  background-image:
-    url('/public/images/beach-mask.png');
-}
-
 
 .emoji-rain-container {
   position: fixed;
@@ -522,7 +546,6 @@ if (window.google && google.maps && google.maps.places) {
     opacity: 0;
   }
 }
-
 
 </style>
 

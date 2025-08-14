@@ -86,6 +86,6 @@ onMounted(loadData)
 
 .nav-tabs .nav-link.active {
   color: #0d6efd !important;
-  font-weight: bold;             /* opzionale: enfasi visiva */
+  font-weight: bold; 
 }
 </style>
