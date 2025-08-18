@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="component-partite">
     <div v-if="lista.length">
       <div
         v-for="partita in lista"
@@ -392,41 +392,3 @@ function getCardClass(sport) {
   }
 }
 </script>
-
-<style scoped>
-.card[class*='card-sport-'] {
-  position: relative;
-  overflow: hidden;
-  background-color: transparent;
-}
-.card[class*='card-sport-']::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-blend-mode: normal;
-  z-index: 0;
-}
-.card .card-body { position: relative; z-index: 1; }
-
-/* Progress & badge su sfondo immagine */
-.progress { background-color: rgba(255,255,255,.25); }
-.progress-bar { transition: width .25s ease; }
-.badge.bg-light.text-dark { backdrop-filter: blur(2px); }
-
-/* Sfondo per sport */
-.card-sport-tennis::before { background-image: url('/public/images/tennis-mask.png'); }
-.card-sport-paddle::before { background-image: url('/public/images/paddle-mask.png'); }
-.card-sport-racchettoni::before { background-image: url('/public/images/racchettoni-mask.png'); }
-.card-sport-calcio::before { background-image: url('/public/images/calcio-mask.png'); }
-.card-sport-basket::before { background-image: url('/public/images/basket-mask.png'); }
-.card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
-.card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
-
-/* Toast */
-.toast-container .toast { --bs-toast-max-width: 520px; }
-.toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
-.toast.fade { transition: opacity .6s ease; }
-</style>

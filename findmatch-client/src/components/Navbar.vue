@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark px-3 sticky-top custom-navbar">
+  <nav class="component-navbar navbar navbar-expand-lg navbar-dark px-3 sticky-top custom-navbar">
     <router-link class="navbar-brand" to="/home">
       <img src="/images/logo.png" alt="Home" class="navbar-logo" />
     </router-link>
@@ -285,70 +285,3 @@ onBeforeUnmount(() => {
 })
 
 </script>
-
-<style scoped>
-.custom-navbar {
-  background-color: rgba(68, 128, 187, 0.8); 
-  backdrop-filter: blur(6px);             
-  -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease;
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.361);
-  z-index: 1050;
-}
-
-.user-card {
-  background-color: #fff;
-  color: #000;
-  border-radius: 10px;
-}
-
-.user-card h4 {
-  color: #000 !important;
-}
-
-.stat-box {
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  color: #222;
-}
-
-.user-modal-card {
-  max-width: 600px;
-  min-width: 360px;
-  width: 100%;
-  background-color: rgba(68, 127, 187, 0.955);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: white;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.353);
-}
-
-.user-modal-card .btn-close {
-  filter: invert(1);
-}
-
-.user-modal-card h4,
-.user-modal-card h5,
-.user-modal-card h6 {
-  color: #fff;
-}
-
-.user-modal-card .text-muted {
-  color: #ddd !important;
-}
-
-.navbar-logo {
-  height: 55px;
-  width: auto;
-  object-fit: contain;
-}
-
-</style>

@@ -1,0 +1,117 @@
+/*
+   Styles estratti da Footer.vue
+*/
+
+.component-footer img {
+  transition: transform 0.2s ease;
+}
+
+.component-footer img:hover {
+  transform: scale(1.2);
+}
+
+/* ---------- Navbar.vue (scoped -> global namespaced) ---------- */
+
+.component-navbar.custom-navbar {
+  background-color: rgba(68, 128, 187, 0.8);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.component-navbar .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.361);
+  z-index: 1050;
+}
+
+.component-navbar .user-card {
+  background-color: #fff;
+  color: #000;
+  border-radius: 10px;
+}
+
+.component-navbar .user-card h4 {
+  color: #000 !important;
+}
+
+.component-navbar .stat-box {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  color: #222;
+}
+
+.component-navbar .user-modal-card {
+  max-width: 600px;
+  min-width: 360px;
+  width: 100%;
+  background-color: rgba(68, 127, 187, 0.955);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.353);
+}
+
+.component-navbar .user-modal-card .btn-close {
+  filter: invert(1);
+}
+
+.component-navbar .user-modal-card h4,
+.component-navbar .user-modal-card h5,
+.component-navbar .user-modal-card h6 {
+  color: #fff;
+}
+
+.component-navbar .user-modal-card .text-muted {
+  color: #ddd !important;
+}
+
+.component-navbar .navbar-logo {
+  height: 55px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ---------- PartiteList.vue (scoped -> global namespaced) ---------- */
+
+.component-partite .card[class*='card-sport-'] {
+  position: relative;
+  overflow: hidden;
+  background-color: transparent;
+}
+.component-partite .card[class*='card-sport-']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-blend-mode: normal;
+  z-index: 0;
+}
+.component-partite .card .card-body { position: relative; z-index: 1; }
+
+/* Progress & badge su sfondo immagine */
+.component-partite .progress { background-color: rgba(255,255,255,.25); }
+.component-partite .progress-bar { transition: width .25s ease; }
+.component-partite .badge.bg-light.text-dark { backdrop-filter: blur(2px); }
+
+/* Sfondo per sport */
+/* Mantieni i percorsi immagini come li hai usati; se erano /public/images/*, lasciali */
+.component-partite .card-sport-tennis::before { background-image: url('/public/images/tennis-mask.png'); }
+.component-partite .card-sport-paddle::before { background-image: url('/public/images/paddle-mask.png'); }
+.component-partite .card-sport-racchettoni::before { background-image: url('/public/images/racchettoni-mask.png'); }
+.component-partite .card-sport-calcio::before { background-image: url('/public/images/calcio-mask.png'); }
+.component-partite .card-sport-basket::before { background-image: url('/public/images/basket-mask.png'); }
+.component-partite .card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
+.component-partite .card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
+
+/* Toast */
+.component-partite .toast-container .toast { --bs-toast-max-width: 520px; }
+.component-partite .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
+.component-partite .toast.fade { transition: opacity .6s ease; }
+

@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-light text-dark py-4 border-top mt-auto">
+  <footer class="component-footer bg-light text-dark py-4 border-top mt-auto">
     <div class="container">
       <div class="row">
 
@@ -47,12 +47,3 @@
     </div>
   </footer>
 </template>
-
-<style scoped>
-footer img {
-  transition: transform 0.2s ease;
-}
-footer img:hover {
-  transform: scale(1.2);
-}
-</style>
