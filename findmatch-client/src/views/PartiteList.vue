@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-5">
+  <div class="component-partite container mt-5">
     <h2 class="text-center mb-4">📋 Le tue partite</h2>
 
     <!-- Nav Tab -->
@@ -49,12 +49,11 @@ const currentTab = ref(localStorage.getItem('partiteTab') || 'create')
 watch(currentTab, (newValue) => {
   localStorage.setItem('partiteTab', newValue)
 })
+
 const tabs = [
   { label: '📌 Create da te', value: 'create' },
-
   { label: '🗓️ A cui sei iscritto', value: 'iscritto' },
   { label: '📖 Storico partecipazioni', value: 'storico' }
-
 ]
 
 const loadData = async () => {
@@ -62,7 +61,6 @@ const loadData = async () => {
 
   try {
     const [createRes, iscrittoRes, storicoRes] = await Promise.all([
-
       axios.get(`http://localhost:3000/api/partecipazioni/create/${userId}`),
       axios.get(`http://localhost:3000/api/partecipazioni/iscritto/${userId}`),
       axios.get(`http://localhost:3000/api/partecipazioni/storico/${userId}`)
@@ -76,16 +74,4 @@ const loadData = async () => {
 }
 
 onMounted(loadData)
-
 </script>
-
-<style scoped>
-.nav-tabs .nav-link {
-  color: black;
-}
-
-.nav-tabs .nav-link.active {
-  color: #0d6efd !important;
-  font-weight: bold; 
-}
-</style>

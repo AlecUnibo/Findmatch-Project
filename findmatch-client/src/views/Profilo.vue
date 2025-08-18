@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-5 mb-5">
+  <div class="component-profilo container mt-5 mb-5">
     <div class="card p-4 shadow-sm">
       <div class="d-flex align-items-center">
         <div class="me-4">
@@ -38,7 +38,7 @@
 
       <div class="mb-4">
         <h5>📝 Biografia</h5>
-        <p v-if="user.bio && user.bio.trim().length" class="mb-0" style="white-space: pre-wrap;">
+        <p v-if="user.bio && user.bio.trim().length" class="mb-0 bio-text">
           {{ user.bio }}
         </p>
         <p v-else class="text-muted mb-0">
@@ -113,7 +113,7 @@
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
-import PartiteSection from '@/components/PartiteSection.vue' // percorso da adattare
+import PartiteSection from '@/components/PartiteSection.vue'
 
 const userId = localStorage.getItem('userId')
 
@@ -125,11 +125,10 @@ const user = ref({
 
 const followersCount = ref(0)
 const matchesPlayed = ref(0)
-const playedMatches = ref([]) // partite giocate (storico)
+const playedMatches = ref([])
 
 const modalBio = ref('')
 
-// stato tab
 const currentTab = ref(localStorage.getItem('profiloTab') || 'storico')
 const tabs = [
   { label: '📖 Storico partecipazioni', value: 'storico' },
@@ -145,7 +144,6 @@ onMounted(async () => {
     followersCount.value = data.followers_count ?? 0
     matchesPlayed.value = data.matches_played ?? 0
 
-    // carica lo storico partite dell'utente loggato
     const storicoRes = await axios.get(`http://localhost:3000/api/partecipazioni/storico/${userId}`)
     playedMatches.value = storicoRes.data
   } catch (err) {
@@ -171,19 +169,3 @@ async function salvaModifiche() {
   }
 }
 </script>
-
-<style scoped>
-img.rounded-circle {
-  object-fit: cover;
-  border: 2px solid #ddd;
-}
-
-.nav-tabs .nav-link {
-  color: black;
-}
-
-.nav-tabs .nav-link.active {
-  color: #0d6efd !important;
-  font-weight: bold;
-}
-</style>

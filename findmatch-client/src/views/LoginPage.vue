@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+  <div class="component-login d-flex justify-content-center align-items-center vh-100 bg-light">
     <div class="card shadow p-4 text-center" style="width: 400px;">
       
       <!-- LOGO -->
@@ -36,7 +36,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref } from 'vue'
 import { loginUser } from '../services/authService'
@@ -61,11 +60,3 @@ const handleLogin = async () => {
   }
 }
 </script>
-
-<style scooped>
-.login-logo {
-  width: 150px;
-  height: auto;
-  margin-bottom: 1rem;
-}
-</style>

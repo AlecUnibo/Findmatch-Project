@@ -139,3 +139,38 @@
   font-weight: 600;
 }
 
+/* ---------- Login component ---------- */
+.component-login .login-logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+/* ---------- Partite component ---------- */
+.component-partite .nav-tabs .nav-link {
+  color: black;
+}
+
+.component-partite .nav-tabs .nav-link.active {
+  color: #0d6efd !important;
+  font-weight: bold;
+}
+
+/* ---------- Profilo component ---------- */
+.component-profilo img.rounded-circle {
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.component-profilo .bio-text {
+  white-space: pre-wrap;
+}
+
+.component-profilo .nav-tabs .nav-link {
+  color: black;
+}
+
+.component-profilo .nav-tabs .nav-link.active {
+  color: #0d6efd !important;
+  font-weight: bold;
+}
