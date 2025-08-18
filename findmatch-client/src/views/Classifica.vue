@@ -1,5 +1,5 @@
 <template>
-  <div class="leaderboard">
+  <div class="leaderboard component-leaderboard">
     <h2>Classifica - Questo mese</h2>
     <ul>
       <li v-for="(player, index) in players" :key="player.username" :class="rankClass(index)">
@@ -38,55 +38,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.leaderboard {
-  max-width: 400px;
-  margin: auto;
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-.leaderboard h2 {
-  text-align: center;
-  margin-bottom: 15px;
-}
-.leaderboard ul {
-  list-style: none;
-  padding: 0;
-}
-.leaderboard li {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
-.rank {
-  font-weight: bold;
-  width: 30px;
-}
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin: 0 10px;
-}
-.info {
-  flex-grow: 1;
-}
-.username {
-  font-weight: bold;
-  display: block;
-}
-.points {
-  color: #888;
-  font-size: 14px;
-}
-.medal {
-  font-size: 20px;
-}
-.first { background: #fff7d1; }
-.second { background: #e5e5e5; }
-.third { background: #f9e0c7; }
-</style>

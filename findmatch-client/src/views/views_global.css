@@ -1,0 +1,141 @@
+/* ---------- Classifica.vue ---------- */
+
+.component-leaderboard {
+  max-width: 400px;
+  margin: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.component-leaderboard h2 {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.component-leaderboard ul {
+  list-style: none;
+  padding: 0;
+}
+
+.component-leaderboard li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.component-leaderboard .rank {
+  font-weight: bold;
+  width: 30px;
+}
+
+.component-leaderboard .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 0 10px;
+}
+
+.component-leaderboard .info {
+  flex-grow: 1;
+}
+
+.component-leaderboard .username {
+  font-weight: bold;
+  display: block;
+}
+
+.component-leaderboard .points {
+  color: #888;
+  font-size: 14px;
+}
+
+.component-leaderboard .medal {
+  font-size: 20px;
+}
+
+.component-leaderboard .first { background: #fff7d1; }
+.component-leaderboard .second { background: #e5e5e5; }
+.component-leaderboard .third { background: #f9e0c7; }
+
+/* ---------- HomePage.vue ---------- */
+
+.component-home .card[class*='card-sport-'] {
+  position: relative;
+  overflow: hidden;
+  background-color: transparent;
+}
+
+.component-home .card[class*='card-sport-']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-blend-mode: normal;
+  z-index: 0;
+}
+
+.component-home .card .card-body {
+  position: relative;
+  z-index: 1;
+}
+
+/* Sfondo sfumato per card */
+.component-home .card-sport-tennis::before { background-image: url('/public/images/tennis-mask.png'); }
+.component-home .card-sport-paddle::before { background-image: url('/public/images/paddle-mask.png'); }
+.component-home .card-sport-racchettoni::before { background-image: url('/public/images/racchettoni-mask.png'); }
+.component-home .card-sport-calcio::before { background-image: url('/public/images/calcio-mask.png'); }
+.component-home .card-sport-basket::before { background-image: url('/public/images/basket-mask.png'); }
+.component-home .card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
+.component-home .card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
+
+/* Toast */
+.component-home .toast-container .toast {
+  --bs-toast-max-width: 520px;
+}
+.component-home .toast .toast-body {
+  font-size: 1.05rem;
+  padding: 0.95rem 1.15rem;
+}
+.component-home .toast.fade {
+  transition: opacity .6s ease;
+}
+
+/* Emoji rain */
+.component-home .emoji-rain-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.component-home .emoji-fall {
+  position: absolute;
+  top: -2rem;
+  font-size: 2rem;
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+
+/* ---------- Settings/Impostazioni---------- */
+
+.component-settings .card h5 {
+  font-weight: 600;
+}
+

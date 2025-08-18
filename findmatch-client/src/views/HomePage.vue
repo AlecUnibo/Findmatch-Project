@@ -1,190 +1,193 @@
 <template>
-  <div class="container mt-5">
-    <!-- Benvenuto -->
-    <div class="text-center mb-4">
-      <h2>Benvenuto, {{ nomeUtente }}! 👋</h2>
-      <p class="text-muted">Trova o unisciti alla tua prossima partita sportiva!</p>
-    </div>
-
-    <!-- Ricerca avanzata -->
-    <div class="row justify-content-center mb-4 g-2">
-      <div class="col-md-3">
-        <input id="autocomplete-luogo" type="text" class="form-control" placeholder="Cerca luogo" />
+  <div class="component-home">
+    <div class="container mt-5">
+      <!-- Benvenuto -->
+      <div class="text-center mb-4">
+        <h2>Benvenuto, {{ nomeUtente }}! 👋</h2>
+        <p class="text-muted">Trova o unisciti alla tua prossima partita sportiva!</p>
       </div>
 
-      <div class="col-md-3">
-        <select v-model="sportFiltro" class="form-select">
-          <option value="">Seleziona uno sport</option>
-          <option>Calcio a 11</option>
-          <option>Calcio a 5</option>
-          <option>Basket</option>
-          <option>Beach Volley</option>
-          <option>Pallavolo</option>
-          <option>Racchettoni</option>
-          <option>Tennis</option>
-          <option>Paddle</option>
-        </select>
+      <!-- Ricerca avanzata -->
+      <div class="row justify-content-center mb-4 g-2">
+        <div class="col-md-3">
+          <input id="autocomplete-luogo" type="text" class="form-control" placeholder="Cerca luogo" />
+        </div>
+
+        <div class="col-md-3">
+          <select v-model="sportFiltro" class="form-select">
+            <option value="">Seleziona uno sport</option>
+            <option>Calcio a 11</option>
+            <option>Calcio a 5</option>
+            <option>Basket</option>
+            <option>Beach Volley</option>
+            <option>Pallavolo</option>
+            <option>Racchettoni</option>
+            <option>Tennis</option>
+            <option>Paddle</option>
+          </select>
+        </div>
+
+
+        <div class="col-md-2">
+          <input type="date" v-model="dataFiltro" class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+          <input type="time" v-model="orarioFiltro" class="form-control" />
+        </div>
+
+        <div class="col-auto d-flex gap-2">
+          <button class="btn btn-outline-success" @click="cercaPartite">Cerca</button>
+          <button class="btn btn-outline-danger" @click="pulisciFiltri">Pulisci</button>
+        </div>
+
       </div>
+      <!-- Tabs -->
+      <ul class="nav nav-pills justify-content-center mb-3">
+        <li class="nav-item">
+          <button class="nav-link" :class="{ active: tab==='disponibili' }" @click="tab='disponibili'">
+            Disponibili
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" :class="{ active: tab==='mie' }" @click="tab='mie'">
+            Create da te
+          </button>
+        </li>
+      </ul>
 
+      <!-- Partite trovate -->
+      <div class="mb-5" v-if="tab==='disponibili'">
+        <h4 class="mb-3">📅 Partite disponibili</h4>
+        <div v-if="partiteDisponibili.length">
+          <div v-for="partita in partiteDisponibili" :key="partita.id" class="card mb-3 text-white" :class="getCardClass(partita.sport)">
+            <div class="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title mb-1">{{ getSportIcon(partita.sport) }} {{ partita.sport }}</h5>
+                <p class="card-text mb-0">
+                  <!-- Stato posti -->
+                  <strong>Data:</strong> {{ formatData(partita.date_time) }} –
+                  <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
+                  <strong>Luogo:</strong> {{ partita.location }}
 
-      <div class="col-md-2">
-        <input type="date" v-model="dataFiltro" class="form-control" />
-      </div>
-
-      <div class="col-md-2">
-        <input type="time" v-model="orarioFiltro" class="form-control" />
-      </div>
-
-      <div class="col-auto d-flex gap-2">
-        <button class="btn btn-outline-success" @click="cercaPartite">Cerca</button>
-        <button class="btn btn-outline-danger" @click="pulisciFiltri">Pulisci</button>
-      </div>
-
-    </div>
-    <!-- Tabs -->
-    <ul class="nav nav-pills justify-content-center mb-3">
-      <li class="nav-item">
-        <button class="nav-link" :class="{ active: tab==='disponibili' }" @click="tab='disponibili'">
-          Disponibili
-        </button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link" :class="{ active: tab==='mie' }" @click="tab='mie'">
-          Create da te
-        </button>
-      </li>
-    </ul>
-
-    <!-- Partite trovate -->
-    <div class="mb-5" v-if="tab==='disponibili'">
-      <h4 class="mb-3">📅 Partite disponibili</h4>
-      <div v-if="partiteDisponibili.length">
-        <div v-for="partita in partiteDisponibili" :key="partita.id" class="card mb-3 text-white" :class="getCardClass(partita.sport)">
-          <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="card-title mb-1">{{ getSportIcon(partita.sport) }} {{ partita.sport }}</h5>
-              <p class="card-text mb-0">
-                <!-- Stato posti -->
-                <strong>Data:</strong> {{ formatData(partita.date_time) }} –
-                <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
-                <strong>Luogo:</strong> {{ partita.location }}
-
-                <div class="d-flex align-items-center gap-2 mt-2">
-                  <span class="badge bg-light text-dark">
-                    {{ postiLiberi(partita) }} posti liberi
-                  </span>
-                </div>
-                <div class="progress mt-2" style="height: 6px;">
-                  <div class="progress-bar"
-                      role="progressbar"
-                      :class="progressBarClass(partita)"
-                      :style="{ width: progressPercent(partita) + '%' }"
-                      :aria-valuenow="partita.partecipanti"
-                      :aria-valuemin="0"
-                      :aria-valuemax="partita.max_players">
+                  <div class="d-flex align-items-center gap-2 mt-2">
+                    <span class="badge bg-light text-dark">
+                      {{ postiLiberi(partita) }} posti liberi
+                    </span>
                   </div>
-                </div>
-              </p>
-            </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
-              <!-- già iscritto -->
-              <button class="btn btn-sm btn-danger" v-if="partecipazioniUtente.includes(partita.id)" @click="abbandona(partita.id)">
-                Abbandona
-              </button>
-              <!-- puoi unirti -->
-              <button class="btn btn-sm btn-success" v-else @click="unisciti(partita.id, partita.organizer_id, partita.sport)">
-                Unisciti
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-else class="text-muted">Nessuna partita trovata.</div>
-    </div>
-
-    <div class="mb-5" v-else>
-      <h4 class="mb-3">🛠️ Create da te</h4>
-      <div v-if="partiteCreate.length">
-        <div v-for="partita in partiteCreate" :key="partita.id" class="card mb-3 text-white" :class="getCardClass(partita.sport)">
-          <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-              <h5 class="card-title mb-1">
-                {{ getSportIcon(partita.sport) }} {{ partita.sport }}
-                <span class="badge bg-warning text-dark ms-2">Tua</span>
-              </h5>
-              <p class="card-text mb-0">
-
-                <!-- Stato posti -->
-                <div class="d-flex align-items-center gap-2 mt-2">
-                  <span class="badge bg-light text-dark">
-                    {{ postiLiberi(partita) }} posti liberi
-                  </span>
-                </div>
-                <div class="progress mt-2" style="height: 6px;">
-                  <div class="progress-bar"
-                      role="progressbar"
-                      :class="progressBarClass(partita)"
-                      :style="{ width: progressPercent(partita) + '%' }"
-                      :aria-valuenow="partita.partecipanti"
-                      :aria-valuemin="0"
-                      :aria-valuemax="partita.max_players">
+                  <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar"
+                        role="progressbar"
+                        :class="progressBarClass(partita)"
+                        :style="{ width: progressPercent(partita) + '%' }"
+                        :aria-valuenow="partita.partecipanti"
+                        :aria-valuemin="0"
+                        :aria-valuemax="partita.max_players">
+                    </div>
                   </div>
-                </div>
-
-                <strong>Data:</strong> {{ formatData(partita.date_time) }} –
-                <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
-                <strong>Luogo:</strong> {{ partita.location }}
-              </p>
+                </p>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
+                <!-- già iscritto -->
+                <button class="btn btn-sm btn-danger" v-if="partecipazioniUtente.includes(partita.id)" @click="abbandona(partita.id)">
+                  Abbandona
+                </button>
+                <!-- puoi unirti -->
+                <button class="btn btn-sm btn-success" v-else @click="unisciti(partita.id, partita.organizer_id, partita.sport)">
+                  Unisciti
+                </button>
+              </div>
             </div>
-            <div class="d-flex gap-2">
-              <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
-              <!-- opzionale: pulsante gestisci/elimina se già previsto nel backend -->
-              <!-- <button class="btn btn-sm btn-outline-danger" @click="eliminaPartita(partita.id)">Elimina</button> -->
+          </div>
+        </div>
+        <div v-else class="text-muted">Nessuna partita trovata.</div>
+      </div>
+
+      <div class="mb-5" v-else>
+        <h4 class="mb-3">🛠️ Create da te</h4>
+        <div v-if="partiteCreate.length">
+          <div v-for="partita in partiteCreate" :key="partita.id" class="card mb-3 text-white" :class="getCardClass(partita.sport)">
+            <div class="card-body d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title mb-1">
+                  {{ getSportIcon(partita.sport) }} {{ partita.sport }}
+                  <span class="badge bg-warning text-dark ms-2">Tua</span>
+                </h5>
+                <p class="card-text mb-0">
+
+                  <!-- Stato posti -->
+                  <div class="d-flex align-items-center gap-2 mt-2">
+                    <span class="badge bg-light text-dark">
+                      {{ postiLiberi(partita) }} posti liberi
+                    </span>
+                  </div>
+                  <div class="progress mt-2" style="height: 6px;">
+                    <div class="progress-bar"
+                        role="progressbar"
+                        :class="progressBarClass(partita)"
+                        :style="{ width: progressPercent(partita) + '%' }"
+                        :aria-valuenow="partita.partecipanti"
+                        :aria-valuemin="0"
+                        :aria-valuemax="partita.max_players">
+                    </div>
+                  </div>
+
+                  <strong>Data:</strong> {{ formatData(partita.date_time) }} –
+                  <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
+                  <strong>Luogo:</strong> {{ partita.location }}
+                </p>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
+                <!-- opzionale: pulsante gestisci/elimina se già previsto nel backend -->
+                <!-- <button class="btn btn-sm btn-outline-danger" @click="eliminaPartita(partita.id)">Elimina</button> -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-muted">Non hai ancora creato partite.</div>
+      </div>
+
+
+      <!-- MODALE DETTAGLI -->
+      <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalDettagliLabel">{{ partitaSelezionata?.sport || 'Dettagli Partita' }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body" v-if="partitaSelezionata">
+              <p><strong>Data:</strong> {{ formatData(partitaSelezionata.date_time) }}</p>
+              <p><strong>Ora:</strong> {{ formatOra(partitaSelezionata.date_time) }}</p>
+              <p><strong>Luogo:</strong> {{ partitaSelezionata.location }}</p>
+              <p><strong>Posti rimanenti:</strong> {{ partitaSelezionata.max_players - partitaSelezionata.partecipanti}} / {{ partitaSelezionata.max_players }}</p>
+              <p><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_name }}</p>
+              <p><strong>Descrizione:</strong> {{ partitaSelezionata.description || 'Nessuna descrizione disponibile.' }}</p>
             </div>
           </div>
         </div>
       </div>
-      <div v-else class="text-muted">Non hai ancora creato partite.</div>
-    </div>
 
-
-    <!-- MODALE DETTAGLI -->
-    <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalDettagliLabel">{{ partitaSelezionata?.sport || 'Dettagli Partita' }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-          </div>
-          <div class="modal-body" v-if="partitaSelezionata">
-            <p><strong>Data:</strong> {{ formatData(partitaSelezionata.date_time) }}</p>
-            <p><strong>Ora:</strong> {{ formatOra(partitaSelezionata.date_time) }}</p>
-            <p><strong>Luogo:</strong> {{ partitaSelezionata.location }}</p>
-            <p><strong>Posti rimanenti:</strong> {{ partitaSelezionata.max_players - partitaSelezionata.partecipanti}} / {{ partitaSelezionata.max_players }}</p>
-            <p><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_name }}</p>
-            <p><strong>Descrizione:</strong> {{ partitaSelezionata.description || 'Nessuna descrizione disponibile.' }}</p>
-          </div>
+      <!-- TOAST -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+      <div
+        ref="toastEl"
+        class="toast align-items-center border-0 fade"  
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <div :class="['toast-body', 'rounded-3', 'shadow-lg', toastVariantClass]">
+          <strong class="me-2">{{ toastIcon }}</strong> {{ toastMessage }}
         </div>
       </div>
     </div>
-
-    <!-- TOAST -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
-  <div
-    ref="toastEl"
-    class="toast align-items-center border-0 fade"  
-    role="status"
-    aria-live="polite"
-    aria-atomic="true"
-  >
-    <div :class="['toast-body', 'rounded-3', 'shadow-lg', toastVariantClass]">
-      <strong class="me-2">{{ toastIcon }}</strong> {{ toastMessage }}
     </div>
+
+    <div class="emoji-rain-container" ref="emojiContainer"></div>
   </div>
-</div>
-  </div>
-  <div class="emoji-rain-container" ref="emojiContainer"></div>
 </template>
 
 <script setup>
@@ -474,78 +477,3 @@ if (window.google && google.maps && google.maps.places) {
 }
 })
 </script>
-
-<style>
-.card[class*='card-sport-'] {
-  position: relative;
-  overflow: hidden;
-  background-color: transparent;
-}
-
-.card[class*='card-sport-']::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-blend-mode: normal;
-  z-index: 0;
-}
-
-.card .card-body {
-  position: relative;
-  z-index: 1;
-}
-
-/* Sfondo sfumato per card */
-.card-sport-tennis::before { background-image: url('/public/images/tennis-mask.png'); }
-.card-sport-paddle::before { background-image: url('/public/images/paddle-mask.png'); }
-.card-sport-racchettoni::before { background-image: url('/public/images/racchettoni-mask.png'); }
-.card-sport-calcio::before { background-image: url('/public/images/calcio-mask.png'); }
-.card-sport-basket::before { background-image: url('/public/images/basket-mask.png'); }
-.card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
-.card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
-
-/* Toast */
-.toast-container .toast {
-  --bs-toast-max-width: 520px;  
-}
-.toast .toast-body {
-  font-size: 1.05rem;            
-  padding: 0.95rem 1.15rem;     
-}
-
-.toast.fade {
-  transition: opacity .6s ease;  
-}
-
-.emoji-rain-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 9999;
-}
-
-.emoji-fall {
-  position: absolute;
-  top: -2rem;
-  font-size: 2rem;
-  animation-name: fall;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-}
-
-@keyframes fall {
-  to {
-    transform: translateY(110vh);
-    opacity: 0;
-  }
-}
-
-</style>
-

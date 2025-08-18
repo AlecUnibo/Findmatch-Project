@@ -4,6 +4,7 @@ import router from './router'
 import 'bootstrap/dist/css/bootstrap.min.css'      // questo per stile
 import 'bootstrap/dist/js/bootstrap.bundle.min.js' // questo per interazioni (es: dropdown)
 import './components/components_global.css'
+import './views/views_global.css'
 import 'bootstrap/dist/js/bootstrap.bundle'
 
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-5">
+  <div class="component-settings container mt-5">
     <div class="card shadow p-4">
       <h2 class="mb-4">Impostazioni account</h2>
 
@@ -122,11 +122,4 @@ onMounted(async () => {
     console.error('Errore nel recupero email:', err)
   }
 })
-
 </script>
-
-<style scoped>
-.card h5 {
-  font-weight: 600;
-}
-</style>
