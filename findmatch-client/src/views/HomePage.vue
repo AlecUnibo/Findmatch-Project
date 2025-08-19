@@ -37,7 +37,7 @@
         </div>
 
         <div class="col-auto d-flex gap-2">
-          <button class="btn btn-outline-success" @click="cercaPartite">Cerca</button>
+          <button class="btn btn-outline-success d-flex align-items-center gap-2" @click="cercaPartite"><img src="/images/search-button.svg" alt="Cerca" width="16" height="16" />Cerca</button>
           <button class="btn btn-outline-danger" @click="pulisciFiltri">Pulisci</button>
         </div>
 

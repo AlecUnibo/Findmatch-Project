@@ -7,8 +7,7 @@
 
       <li class="nav-item"><router-link class="nav-link" to="/partite">Partite</router-link></li>
       <li class="nav-item"><router-link class="nav-link" to="/crea"><img src="/images/plus.svg" alt="Segui" width="18" height="18"/> Crea</router-link></li>
-      <li class="nav-item"><router-link class="nav-link" to="/classifica">Classifica</router-link></li>
-
+      <li class="nav-item"><router-link class="nav-link" to="/classifica"><img src="/images/trophy.svg" alt="Classifica" width="18" height="18" style="margin-bottom: 3px; margin-right: 2px;" />Classifica</router-link></li>      
       <!-- Cerca utenti -->
       <li class="nav-item position-relative" ref="searchBox">
         <a class="nav-link" href="#" @click.prevent="toggleSearch">
