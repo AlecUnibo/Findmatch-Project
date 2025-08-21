@@ -139,14 +139,14 @@
   font-weight: 600;
 }
 
-/* ---------- Login component ---------- */
+/* ---------- LoginPage.vue ---------- */
 .component-login .login-logo {
   width: 150px;
   height: auto;
   margin-bottom: 1rem;
 }
 
-/* ---------- Partite component ---------- */
+/* ---------- PartiteList.vue ---------- */
 .component-partite .nav-tabs .nav-link {
   color: black;
 }
@@ -156,7 +156,7 @@
   font-weight: bold;
 }
 
-/* ---------- Profilo component ---------- */
+/* ---------- Profilo.vue ---------- */
 .component-profilo img.rounded-circle {
   object-fit: cover;
   border: 2px solid #ddd;
@@ -173,4 +173,14 @@
 .component-profilo .nav-tabs .nav-link.active {
   color: #0d6efd !important;
   font-weight: bold;
+}
+
+/* ---------- CreaPartita.vue ---------- */
+.component-crea-partita .role-label {
+  min-width: 160px;
+}
+
+.component-crea-partita .role-count {
+  min-width: 48px;
+  text-align: center;
 }

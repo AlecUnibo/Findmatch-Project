@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-5">
+  <div class="component-crea-partita container mt-5">
     <h2 class="mb-4 text-center">📝 Crea una nuova partita</h2>
 
     <form @submit.prevent="creaPartita" class="card p-4 shadow mb-5">
@@ -38,6 +38,10 @@
       <div v-else class="mb-3">
         <label class="form-label">Scegli i ruoli che mancano</label>
 
+        <div class="mb-2">
+          <small class="text-muted">Posti ruoli rimanenti: <strong>{{ remainingSlots }}</strong> / 10</small>
+        </div>
+
         <div class="list-group">
           <div
             v-for="role in roleList"
@@ -45,7 +49,7 @@
             class="list-group-item d-flex align-items-center justify-content-between"
           >
             <div class="d-flex align-items-center gap-3">
-              <div style="min-width: 160px;">
+              <div class="role-label">
                 <strong>{{ role.label }}</strong>
               </div>
               <small class="text-muted">Puoi inserire 0 o più.</small>
@@ -64,7 +68,7 @@
               </button>
 
               <!-- valore (readonly) -->
-              <div class="border rounded px-3 py-1 text-center" style="min-width: 48px;">
+              <div class="role-count border rounded px-3 py-1 text-center">
                 {{ roles[role.key] }}
               </div>
 
