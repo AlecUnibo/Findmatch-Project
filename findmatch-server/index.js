@@ -6,6 +6,7 @@ const authRoutes = require('./routes/auth')
 const partecipazioniRoutes = require('./routes/partecipazioni')
 const partiteRoutes = require('./routes/partite')
 const usersRoutes = require('./routes/users')
+const notificheRoutes = require('./routes/notifiche')
 
 const app = express()
 
@@ -17,6 +18,7 @@ app.use('/api/users', usersRoutes)
 app.use('/api/partecipazioni', partecipazioniRoutes)
 app.use('/api', authRoutes)
 app.use('/api/partite', partiteRoutes)
+app.use('/api/notifiche', notificheRoutes)
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {

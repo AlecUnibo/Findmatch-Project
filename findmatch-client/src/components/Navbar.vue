@@ -7,8 +7,8 @@
 
       <li class="nav-item"><router-link class="nav-link" to="/partite">Partite</router-link></li>
       <li class="nav-item"><router-link class="nav-link" to="/crea"><img src="/images/plus.svg" alt="Segui" width="18" height="18"/> Crea</router-link></li>
-      <li class="nav-item"><router-link class="nav-link" to="/classifica"><img src="/images/trophy.svg" alt="Classifica" width="18" height="18" style="margin-bottom: 3px; margin-right: 2px;" />Classifica</router-link></li>      
-      <!-- Cerca utenti -->
+      <li class="nav-item"><router-link class="nav-link" to="/classifica"><img src="/images/trophy.svg" alt="Classifica" width="18" height="18" style="margin-bottom: 3px; margin-right: 2px;" />Classifica</router-link></li>
+            <!-- Cerca utenti -->
       <li class="nav-item position-relative" ref="searchBox">
         <a class="nav-link" href="#" @click.prevent="toggleSearch">
           <img src="/images/search.svg" alt="Cerca" width="24" height="24" style="filter: invert(1)" />
@@ -37,9 +37,17 @@
         </div>
       </li>
 
-      <li class="nav-item"><router-link class="nav-link" to="/chat"><img src ="/images/bell.svg" alt="Profilo" width="24" height="24" style= "filter: invert(1)"></router-link></li>
-      <!-- menu dropdown con icona profilo -->
-      <li class="nav-item dropdown">
+      <li class="nav-item position-relative">
+        <router-link class="nav-link" to="/notifiche">
+          <img src="/images/bell.svg" alt="Profilo" width="24" height="24" style="filter: invert(1)">
+          <span v-if="unreadNotifications > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ unreadNotifications }}
+            <span class="visually-hidden">notifiche non lette</span>
+          </span>
+        </router-link>
+      </li>
+            <!-- menu dropdown con icona profilo -->
+<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
           <img src="/images/person.svg" alt="Profilo" width="24" height="24" style= "filter: invert(1)"  />
         </a>
@@ -50,7 +58,7 @@
         </ul>
       </li>
     </ul>
-    <!-- MODALE PROFILO UTENTE -->
+        <!-- MODALE PROFILO UTENTE -->
     <div
       v-if="showModal"
       class="modal-backdrop d-flex align-items-center justify-content-center"
@@ -144,8 +152,6 @@ import { useRouter } from 'vue-router'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
 
-
-
 const router = useRouter()
 
 const searchQuery = ref('')
@@ -156,7 +162,18 @@ const selectedUser = ref(null)
 const showModal = ref(false)
 const loadingUser = ref(false)
 const currentUserId = localStorage.getItem('userId')
+const unreadNotifications = ref(0)
+let notificationInterval = null
 
+const fetchUnreadCount = async () => {
+  if (!currentUserId) return;
+  try {
+    const { data } = await axios.get(`http://localhost:3000/api/notifiche/unread-count/${currentUserId}`);
+    unreadNotifications.value = data.count;
+  } catch (err) {
+    console.error('Errore nel recupero del conteggio notifiche:', err);
+  }
+};
 
 const handleClickOutside = (event) => {
   if (searchBox.value && !searchBox.value.contains(event.target)) {
@@ -215,13 +232,13 @@ const seguiUtente = async (targetUserId) => {
   if (!currentUserId) return alert('Devi essere loggato');
   if (String(targetUserId) === String(currentUserId)) return; // no self-follow
 
-  // se già segue, ignora (o implementa toggle)
+    // se già segue, ignora (o implementa toggle)
   if (selectedUser.value?.is_following) return;
 
   // Optimistic UI
-  const prev = { 
-    followers_count: selectedUser.value.followers_count, 
-    is_following: selectedUser.value.is_following 
+  const prev = {
+    followers_count: selectedUser.value.followers_count,
+    is_following: selectedUser.value.is_following
   };
   selectedUser.value.followers_count = (selectedUser.value.followers_count ?? 0) + 1;
   selectedUser.value.is_following = true;
@@ -231,7 +248,7 @@ const seguiUtente = async (targetUserId) => {
       `http://localhost:3000/api/users/${targetUserId}/follow`,
       { followerId: currentUserId }
     );
-    // allinea al dato server (in caso di concorrenza)
+        // allinea al dato server (in caso di concorrenza)
     selectedUser.value.followers_count = data.followers_count ?? selectedUser.value.followers_count;
   } catch (err) {
     console.error('Errore follow:', err);
@@ -247,9 +264,9 @@ const smettiDiSeguire = async (targetUserId) => {
   if (!currentUserId) return;
   if (!selectedUser.value?.is_following) return;
 
-  const prev = { 
-    followers_count: selectedUser.value.followers_count, 
-    is_following: selectedUser.value.is_following 
+  const prev = {
+    followers_count: selectedUser.value.followers_count,
+    is_following: selectedUser.value.is_following
   };
   selectedUser.value.followers_count = Math.max(0, (selectedUser.value.followers_count ?? 0) - 1);
   selectedUser.value.is_following = false;
@@ -276,11 +293,14 @@ const logout = () => {
 }
 
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
+  document.addEventListener('click', handleClickOutside);
+  fetchUnreadCount();
+  notificationInterval = setInterval(fetchUnreadCount, 15000); // Poll ogni 15 secondi
+});
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
+  document.removeEventListener('click', handleClickOutside);
+  clearInterval(notificationInterval);
+});
 
 </script>

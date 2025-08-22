@@ -8,8 +8,8 @@ router.get('/', async (req, res) => {
     const { sport, luogo, data, ora } = req.query
 
     let query = `
-      SELECT 
-        e.*, 
+      SELECT
+        e.*,
         u.username AS organizer_name,
         COUNT(p.user_id) AS partecipanti
       FROM events e
@@ -57,22 +57,34 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-  try {
-    const { sport, location, date_time, max_players, description, organizer_id } = req.body
+  const { sport, location, date_time, max_players, description, organizer_id } = req.body;
 
+  try {
+    await pool.query('BEGIN');
+
+    // Crea l'evento
     const query = `
       INSERT INTO events (sport, location, date_time, max_players, description, organizer_id, created_at)
       VALUES ($1, $2, $3, $4, $5, $6, NOW())
       RETURNING *
-    `
+    `;
+    const values = [sport, location, date_time, max_players, description, organizer_id];
+    const result = await pool.query(query, values);
+    const newEvent = result.rows[0];
 
-    const values = [sport, location, date_time, max_players, description, organizer_id]
-    const result = await pool.query(query, values)
+    // Aggiungi automaticamente l'organizzatore come primo partecipante
+    await pool.query(
+      'INSERT INTO participants (user_id, event_id) VALUES ($1, $2)',
+      [organizer_id, newEvent.id]
+    );
 
-    res.status(201).json(result.rows[0])
+    await pool.query('COMMIT');
+
+    res.status(201).json(newEvent);
   } catch (err) {
-    console.error('Errore nella creazione della partita:', err)
-    res.status(500).json({ error: 'Errore nella creazione della partita' })
+    await pool.query('ROLLBACK');
+    console.error('Errore nella creazione della partita:', err);
+    res.status(500).json({ error: 'Errore nella creazione della partita' });
   }
 })
 
@@ -83,8 +95,8 @@ router.put('/:id', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE events 
-       SET sport = $1, location = $2, date_time = $3, max_players = $4, description = $5 
+      `UPDATE events
+       SET sport = $1, location = $2, date_time = $3, max_players = $4, description = $5
        WHERE id = $6
        RETURNING *`,
       [sport, location, date_time, max_players, description, id]
@@ -100,4 +112,26 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: 'Errore durante aggiornamento partita' })
   }
 })
-module.exports = router
+
+// Elimina una partita
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM events WHERE id = $1 RETURNING *',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Partita non trovata o già eliminata' });
+    }
+
+    res.json({ message: 'Partita eliminata con successo' });
+  } catch (err) {
+    console.error('Errore durante eliminazione partita:', err);
+    res.status(500).json({ error: 'Errore durante eliminazione partita' });
+  }
+});
+
+module.exports = router;

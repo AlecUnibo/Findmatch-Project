@@ -279,7 +279,7 @@ async function salvaModifiche() {
 async function eliminaPartita(partitaId) {
   if (!confirm('Sei sicuro di voler eliminare questa partita?')) return
   try {
-    await axios.delete(`http://localhost:3000/api/partecipazioni/${partitaId}`)
+    await axios.delete(`http://localhost:3000/api/partite/${partitaId}`)
     lista.value = lista.value.filter(p => p.id !== partitaId)
     emit('partita-eliminata', partitaId)
     showToast('Partita eliminata con successo!', 'danger', 5000)

@@ -1,5 +1,165 @@
 <template>
-  <div>
-    <h1>Notifiche</h1>
+  <div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">🔔 Le tue notifiche</h2>
+      <button v-if="hasUnread" @click="markAllAsRead" class="btn btn-sm btn-outline-primary">
+        Segna tutte come lette
+      </button>
+    </div>
+
+    <div v-if="loading" class="text-center text-muted mt-5">
+      <div class="spinner-border spinner-border-sm" role="status"></div>
+      <p class="mt-2">Caricamento...</p>
+    </div>
+
+    <div v-else-if="notifiche.length === 0" class="text-center text-muted mt-5">
+      <p>Non ci sono nuove notifiche.</p>
+    </div>
+
+    <div v-else class="list-group">
+      <div
+        v-for="notifica in notifiche"
+        :key="notifica.id"
+        class="list-group-item d-flex align-items-center"
+        :class="{ 'notification-read': notifica.is_read }"
+      >
+        <div class="me-3 fs-4">
+          {{ getIcona(notifica.type) }}
+        </div>
+        <div class="flex-grow-1">
+          <p class="mb-0" v-html="formattaMessaggio(notifica)"></p>
+          <small>{{ formattaData(notifica.created_at) }}</small>
+        </div>
+        <div class="ms-3 d-flex align-items-center gap-2 notification-actions">
+          <button
+            v-if="!notifica.is_read"
+            @click.stop="markOneAsRead(notifica)"
+            class="btn btn-sm btn-outline-success rounded-circle"
+            title="Segna come letto"
+            style="width: 32px; height: 32px;"
+          >
+            ✓
+          </button>
+          <button
+            @click.stop="deleteNotification(notifica.id)"
+            class="btn btn-sm btn-outline-danger rounded-circle"
+            title="Elimina notifica"
+            style="width: 32px; height: 32px;"
+          >
+            &times;
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+import axios from 'axios';
+
+const notifiche = ref([]);
+const loading = ref(true);
+const userId = localStorage.getItem('userId');
+
+const hasUnread = computed(() => notifiche.value.some(n => !n.is_read));
+
+const fetchNotifiche = async () => {
+  if (!userId) {
+    loading.value = false;
+    return;
+  }
+  try {
+    const { data } = await axios.get(`http://localhost:3000/api/notifiche/${userId}`);
+    notifiche.value = data;
+  } catch (err) {
+    console.error('Errore nel caricamento delle notifiche:', err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const markAllAsRead = async () => {
+  if (!userId) return;
+  try {
+    await axios.post(`http://localhost:3000/api/notifiche/mark-all-as-read/${userId}`);
+    notifiche.value.forEach(n => n.is_read = true);
+  } catch (err) {
+    console.error('Errore nel segnare le notifiche come lette:', err);
+  }
+};
+
+const markOneAsRead = async (notifica) => {
+  if (!userId || notifica.is_read) return;
+  try {
+    await axios.put(`http://localhost:3000/api/notifiche/${notifica.id}/read`, { userId });
+    notifica.is_read = true;
+  } catch (err) {
+    console.error('Errore nel segnare la notifica come letta:', err);
+  }
+};
+
+const deleteNotification = async (notificationId) => {
+  if (!userId) return;
+  if (!confirm('Sei sicuro di voler eliminare questa notifica?')) return;
+  try {
+    await axios.delete(`http://localhost:3000/api/notifiche/${notificationId}`, { data: { userId } });
+    notifiche.value = notifiche.value.filter(n => n.id !== notificationId);
+  } catch (err) {
+    console.error('Errore nell\'eliminazione della notifica:', err);
+  }
+};
+
+onMounted(fetchNotifiche);
+
+const getIcona = (tipo) => {
+  switch (tipo) {
+    case 'nuovo_follower': return '👤';
+    case 'partita_unito': return '✅';
+    case 'partita_aggiornata': return '🔄';
+    case 'partita_abbandonata': return '❌';
+    default: return '🔔';
+  }
+};
+
+const formattaMessaggio = (notifica) => {
+  if (notifica.actor_username) {
+    return notifica.message.replace(notifica.actor_username, `<strong>${notifica.actor_username}</strong>`);
+  }
+  return notifica.message;
+};
+
+const formattaData = (data) => {
+  const now = new Date();
+  const diff = Math.round((now - new Date(data)) / 1000); // secondi
+
+  if (diff < 60) return `${diff} secondi fa`;
+  if (diff < 3600) return `${Math.floor(diff / 60)} minuti fa`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} ore fa`;
+  return new Date(data).toLocaleDateString('it-IT');
+};
+</script>
+
+<style scoped>
+/* Stile base per TUTTE le notifiche: sfondo bianco, testo nero. Solido e leggibile. */
+.list-group-item {
+  background-color: #ffffff;
+  color: #212529; /* Testo nero standard */
+}
+
+/* Stile per le notifiche GIA' LETTE: aggiunge uno sfondo e un bordo a sinistra. */
+.notification-read {
+  background-color: #f0f2f5; /* Grigio chiaro, più netto del precedente */
+  border-left: 4px solid #ced4da; /* Bordo grigio per marcare la differenza */
+}
+
+/* Stili per far apparire i pulsanti solo al passaggio del mouse */
+.notification-actions {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.list-group-item:hover .notification-actions {
+  opacity: 1;
+}
+</style>

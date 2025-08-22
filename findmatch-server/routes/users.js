@@ -146,8 +146,8 @@ router.put('/:id', async (req, res) => {
 
 // Segui un utente
 router.post('/:id/follow', async (req, res) => {
-  const { id } = req.params;               // user da seguire
-  const { followerId } = req.body;         // chi sta seguendo (dal client)
+  const { id } = req.params;       // user da seguire
+  const { followerId } = req.body;  // chi sta seguendo (dal client)
 
   if (!followerId) return res.status(400).json({ error: 'followerId obbligatorio' });
   if (parseInt(id) === parseInt(followerId)) {
@@ -155,19 +155,43 @@ router.post('/:id/follow', async (req, res) => {
   }
 
   try {
-    await pool.query(
+    // Inizia una transazione per assicurare che entrambe le operazioni abbiano successo
+    await pool.query('BEGIN');
+
+    const followResult = await pool.query(
       `INSERT INTO followers (user_id, follower_id)
        VALUES ($1, $2)
-       ON CONFLICT (user_id, follower_id) DO NOTHING`,
+       ON CONFLICT (user_id, follower_id) DO NOTHING
+       RETURNING user_id`, // Restituisce user_id se l'inserimento ha avuto successo
       [id, followerId]
     );
-    // ritorniamo il nuovo totale follower
+
+    // Solo se il follow è stato effettivamente inserito (non era un duplicato)
+    if (followResult.rowCount > 0) {
+      // Recupera il nome dell'utente che ha iniziato a seguire (actor)
+      const actorRes = await pool.query('SELECT username FROM users WHERE id = $1', [followerId]);
+      const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
+
+      // Crea la notifica per l'utente che è stato seguito
+      await pool.query(
+        `INSERT INTO notifications (user_id, actor_id, type, message)
+         VALUES ($1, $2, 'nuovo_follower', $3)`,
+        [id, followerId, `${actorUsername} ha iniziato a seguirti.`]
+      );
+    }
+
+    // Commit della transazione
+    await pool.query('COMMIT');
+
+    // Risposta al client
     const countRes = await pool.query(
       `SELECT COUNT(*)::int AS followers_count FROM followers WHERE user_id = $1`,
       [id]
     );
     res.json({ followed: true, followers_count: countRes.rows[0].followers_count });
+
   } catch (err) {
+    await pool.query('ROLLBACK'); // Annulla tutto in caso di errore
     console.error('Errore follow:', err);
     res.status(500).json({ error: 'Errore follow' });
   }
