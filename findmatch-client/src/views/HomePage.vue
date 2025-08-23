@@ -1,13 +1,13 @@
 <template>
   <div class="component-home">
     <div class="container mt-5">
-      <!-- Benvenuto -->
+            <!-- Benvenuto -->
       <div class="text-center mb-4">
         <h2>Benvenuto, {{ nomeUtente }}! 👋</h2>
         <p class="text-muted">Trova o unisciti alla tua prossima partita sportiva!</p>
       </div>
 
-      <!-- Ricerca avanzata -->
+            <!-- Ricerca avanzata -->
       <div class="row justify-content-center mb-4 g-2">
         <div class="col-md-3">
           <input id="autocomplete-luogo" type="text" class="form-control" placeholder="Cerca luogo" />
@@ -42,7 +42,7 @@
         </div>
 
       </div>
-      <!-- Tabs -->
+            <!-- Tabs -->
       <ul class="nav nav-pills justify-content-center mb-3">
         <li class="nav-item">
           <button class="nav-link" :class="{ active: tab==='disponibili' }" @click="tab='disponibili'">
@@ -56,7 +56,7 @@
         </li>
       </ul>
 
-      <!-- Partite trovate -->
+            <!-- Partite trovate -->
       <div class="mb-5" v-if="tab==='disponibili'">
         <h4 class="mb-3">📅 Partite disponibili</h4>
         <div v-if="partiteDisponibili.length">
@@ -65,7 +65,7 @@
               <div>
                 <h5 class="card-title mb-1">{{ getSportIcon(partita.sport) }} {{ partita.sport }}</h5>
                 <p class="card-text mb-0">
-                  <!-- Stato posti -->
+                                    <!-- Stato posti -->
                   <strong>Data:</strong> {{ formatData(partita.date_time) }} –
                   <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
                   <strong>Luogo:</strong> {{ partita.location }}
@@ -89,11 +89,11 @@
               </div>
               <div class="d-flex gap-2">
                 <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
-                <!-- già iscritto -->
+                                <!-- già iscritto -->
                 <button class="btn btn-sm btn-danger" v-if="partecipazioniUtente.includes(partita.id)" @click="abbandona(partita.id)">
                   Abbandona
                 </button>
-                <!-- puoi unirti -->
+                                <!-- puoi unirti -->
                 <button class="btn btn-sm btn-success" v-else @click="unisciti(partita.id, partita.organizer_id, partita.sport)">
                   Unisciti
                 </button>
@@ -116,7 +116,7 @@
                 </h5>
                 <p class="card-text mb-0">
 
-                  <!-- Stato posti -->
+                                    <!-- Stato posti -->
                   <div class="d-flex align-items-center gap-2 mt-2">
                     <span class="badge bg-light text-dark">
                       {{ postiLiberi(partita) }} posti liberi
@@ -140,7 +140,7 @@
               </div>
               <div class="d-flex gap-2">
                 <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
-                <!-- opzionale: pulsante gestisci/elimina se già previsto nel backend -->
+                 <!-- opzionale: pulsante gestisci/elimina se già previsto nel backend -->
                 <!-- <button class="btn btn-sm btn-outline-danger" @click="eliminaPartita(partita.id)">Elimina</button> -->
               </div>
             </div>
@@ -150,7 +150,7 @@
       </div>
 
 
-      <!-- MODALE DETTAGLI -->
+            <!-- MODALE DETTAGLI -->
       <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
           <div class="modal-content">
@@ -165,13 +165,26 @@
               <p><strong>Posti rimanenti:</strong> {{ partitaSelezionata.max_players - partitaSelezionata.partecipanti}} / {{ partitaSelezionata.max_players }}</p>
               <p><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_name }}</p>
               <p><strong>Descrizione:</strong> {{ partitaSelezionata.description || 'Nessuna descrizione disponibile.' }}</p>
+
+              <hr>
+              <h6>Invita un utente</h6>
+              <div class="input-group">
+                <input type="text" v-model="searchUserQuery" @input="searchUsersForInvite" class="form-control" placeholder="Cerca utente da invitare...">
+                <button class="btn btn-outline-secondary" type="button" @click="sendInvite" :disabled="!selectedUserToInvite">Invita</button>
+              </div>
+              <ul v-if="userSearchResults.length" class="list-group mt-2">
+                <li v-for="user in userSearchResults" :key="user.id" @click="selectUserToInvite(user)" class="list-group-item list-group-item-action" style="cursor: pointer;">
+                  {{ user.username }}
+                </li>
+              </ul>
+
             </div>
           </div>
         </div>
       </div>
 
-      <!-- TOAST -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+            <!-- TOAST -->
+      <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
       <div
         ref="toastEl"
         class="toast align-items-center border-0 fade"  
@@ -191,58 +204,56 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { getPartite } from '../services/partiteService'
-import * as bootstrap from 'bootstrap'
-import axios from 'axios'
+import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { getPartite, getPartitaById } from '../services/partiteService';
+import * as bootstrap from 'bootstrap';
+import axios from 'axios';
 
-const nomeUtente = ref('')
-
-const luogoFiltro = ref('')
-const sportFiltro = ref('')
-const orarioFiltro = ref('')
-const dataFiltro = ref('')
-const partite = ref([])
-const partecipazioniUtente = ref([])
-const partitaSelezionata = ref(null)
-const userId = localStorage.getItem('userId')
-const emojiContainer = ref(null)
-const tab = ref('disponibili')
+const route = useRoute(); // Per accedere ai parametri dell'URL
+const nomeUtente = ref('');
+const luogoFiltro = ref('');
+const sportFiltro = ref('');
+const orarioFiltro = ref('');
+const dataFiltro = ref('');
+const partite = ref([]);
+const partecipazioniUtente = ref([]);
+const partitaSelezionata = ref(null);
+const userId = localStorage.getItem('userId');
+const emojiContainer = ref(null);
+const tab = ref('disponibili');
+const searchUserQuery = ref('');
+const userSearchResults = ref([]);
+const selectedUserToInvite = ref(null);
 
 const sportEmojis = {
-  'calcio a 5': '⚽',
-  'calcio a 11': '⚽',
-  'basket': '🏀',
-  'beach volley': '🏐',
-  'pallavolo': '🏐',
-  'racchettoni': '🏓',
-  'tennis': '🎾',
-  'paddle': '🥎'
-}
+  'calcio a 5': '⚽', 'calcio a 11': '⚽', 'basket': '🏀',
+  'beach volley': '🏐', 'pallavolo': '🏐', 'racchettoni': '🏓',
+  'tennis': '🎾', 'paddle': '🥎'
+};
 
-const postiLiberi = (p) => Math.max(0, (p.max_players ?? 0) - (p.partecipanti ?? 0))
+const postiLiberi = (p) => Math.max(0, (p.max_players ?? 0) - (p.partecipanti ?? 0));
 const progressPercent = (p) => {
-  const max = p.max_players ?? 0, cur = p.partecipanti ?? 0
-  if (!max) return 0
-  return Math.min(100, Math.round((cur / max) * 100))
-}
+  const max = p.max_players ?? 0, cur = p.partecipanti ?? 0;
+  if (!max) return 0;
+  return Math.min(100, Math.round((cur / max) * 100));
+};
 const progressBarClass = (p) => {
   const left = postiLiberi(p)
   if (left === 0) return 'bg-danger'     // piena
   if (left <= 2) return 'bg-warning'     // quasi piena
   return 'bg-success'                    // buona disponibilità
-}
+};
 
 const partiteCreate = computed(() =>
   partite.value.filter(p => String(p.organizer_id) === String(userId))
-)
-
+);
 const partiteDisponibili = computed(() =>
   partite.value.filter(p =>
     String(p.organizer_id) !== String(userId) &&
     postiLiberi(p) > 0
   )
-)
+);
 
 const cercaPartite = async () => {
   try {
@@ -251,145 +262,140 @@ const cercaPartite = async () => {
       luogo: luogoFiltro.value,
       data: dataFiltro.value,
       ora: orarioFiltro.value
-    })
-
-    // Ordina per data e ora crescenti
-    partite.value = data.sort((a, b) => {
-      const dateA = new Date(a.date_time)
-      const dateB = new Date(b.date_time)
-      return dateA - dateB
-    })
+    });
+        // Ordina per data e ora crescenti
+    partite.value = data.sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
   } catch (err) {
-    console.error('Errore nel caricamento delle partite:', err)
+    console.error('Errore nel caricamento delle partite:', err);
   }
-}
+};
 
 const pulisciFiltri = async () => {
-  sportFiltro.value = ''
-  luogoFiltro.value = ''
-  dataFiltro.value = ''
-  orarioFiltro.value = ''
-
-
-  document.getElementById('autocomplete-luogo').value = ''
-
-  await cercaPartite()
-}
+  sportFiltro.value = '';
+  luogoFiltro.value = '';
+  dataFiltro.value = '';
+  orarioFiltro.value = '';
+  document.getElementById('autocomplete-luogo').value = '';
+  await cercaPartite();
+};
 
 const unisciti = async (eventId, organizerId, sport) => {
   if (!userId) {
-    showToast('Devi essere loggato per unirti a una partita.', 'warning', 6000)
-    return
+    showToast('Devi essere loggato per unirti a una partita.', 'warning', 6000);
+    return;
   }
-
   try {
     await axios.post('http://localhost:3000/api/partecipazioni', {
       user_id: userId,
       event_id: eventId
-    })
-    partecipazioniUtente.value.push(eventId)
-    await cercaPartite()
-
-    // Effetto Pioggia emoji
-    lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉')
-    showToast('Ti sei unito con successo!', 'success', 5000)
+    });
+    partecipazioniUtente.value.push(eventId);
+    await cercaPartite();
+        // Effetto Pioggia emoji
+    lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉');
+    showToast('Ti sei unito con successo!', 'success', 5000);
   } catch (err) {
-    if (err.response?.status === 409) {
-      showToast('Errore durante la registrazione.', 'danger')
-    }
+    showToast(err.response?.status === 409 ? 'Sei già iscritto a questa partita.' : 'Errore durante la registrazione.', 'danger');
   }
-}
+};
 
-// --- TOAST state ---
-const toastEl = ref(null)
-const toastMessage = ref('')
-const toastVariant = ref('success') 
-
-// Icone
-const toastIcon = computed(() => {
-  switch (toastVariant.value) {
-    case 'success': return '✅'
-    case 'danger':  return '🛑'
-    case 'warning': return '⚠️'
-    default:        return 'ℹ️'
+const abbandona = async (eventId) => {
+  try {
+    await axios.delete(`http://localhost:3000/api/partecipazioni`, {
+      data: { user_id: userId, event_id: eventId }
+    });
+    partecipazioniUtente.value = partecipazioniUtente.value.filter(id => id !== eventId);
+    showToast('Hai abbandonato la partita.', 'danger', 5000);
+    await cercaPartite();
+  } catch (err) {
+    console.error('Errore durante l\'abbandono:', err);
+    showToast('Errore durante l\'abbandono. Riprova più tardi.', 'danger');
   }
-})
+};
 
-// Classi di colore (sfondo pieno + testo leggibile)
-const toastVariantClass = computed(() => {
-  switch (toastVariant.value) {
-    case 'success': return 'bg-success text-white'
-    case 'danger':  return 'bg-danger text-white'
-    case 'warning': return 'bg-warning text-dark'
-    default:        return 'bg-info text-white'
+const apriDettagli = (partita) => {
+  partitaSelezionata.value = partita;
+  searchUserQuery.value = '';
+  userSearchResults.value = [];
+  selectedUserToInvite.value = null;
+  const modalEl = document.getElementById('modalDettagli');
+  if (modalEl) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
   }
-})
+};
+
+const searchUsersForInvite = async () => {
+  if (searchUserQuery.value.trim() === '') {
+    userSearchResults.value = [];
+    return;
+  }
+  try {
+    const { data } = await axios.get(`http://localhost:3000/api/users/search?query=${searchUserQuery.value}`);
+    userSearchResults.value = data.filter(user => user.id.toString() !== userId);
+  } catch (error) {
+    console.error("Errore ricerca utenti per invito:", error);
+  }
+};
+
+const selectUserToInvite = (user) => {
+  selectedUserToInvite.value = user;
+  searchUserQuery.value = user.username;
+  userSearchResults.value = [];
+};
+
+const sendInvite = async () => {
+  if (!selectedUserToInvite.value || !partitaSelezionata.value) return;
+  try {
+    await axios.post(`http://localhost:3000/api/partite/${partitaSelezionata.value.id}/invite`, {
+      inviterId: userId,
+      inviteeId: selectedUserToInvite.value.id
+    });
+    showToast(`Invito inviato a ${selectedUserToInvite.value.username}!`, 'success');
+    searchUserQuery.value = '';
+    selectedUserToInvite.value = null;
+  } catch (error) {
+    console.error("Errore invio invito:", error);
+    showToast('Errore durante l\'invio dell\'invito.', 'danger');
+  }
+};
+
+const toastEl = ref(null);
+const toastMessage = ref('');
+const toastVariant = ref('success');
+const toastIcon = computed(() => ({'success': '✅', 'danger': '🛑', 'warning': '⚠️'})[toastVariant.value] || 'ℹ️');
+const toastVariantClass = computed(() => ({'success': 'bg-success text-white', 'danger': 'bg-danger text-white', 'warning': 'bg-warning text-dark'})[toastVariant.value] || 'bg-info text-white');
 
 // Durata più lunga + animazione
 function showToast(message, variant = 'success', delayMs = 5000) {
-  toastMessage.value = message
-  toastVariant.value  = variant
-  const t = new bootstrap.Toast(toastEl.value, {
-    autohide: true,
-    animation: true,
-    delay: delayMs   // ⬅️ 5s
-  })
-  t.show()
+  toastMessage.value = message;
+  toastVariant.value = variant;
+  const t = new bootstrap.Toast(toastEl.value, { autohide: true, animation: true, delay: delayMs });
+  t.show();
 }
 
 function lanciaPioggia(emoji) {
-  const container = emojiContainer.value
-  if (!container) return
-
+  const container = emojiContainer.value;
+  if (!container) return;
   for (let i = 0; i < 30; i++) {
-    const el = document.createElement('span')
-    el.textContent = emoji
-    el.className = 'emoji-fall'
-    el.style.left = Math.random() * 100 + 'vw'
-    el.style.animationDuration = 2 + Math.random() * 2 + 's'
-    container.appendChild(el)
-
-    setTimeout(() => {
-      container.removeChild(el)
-    }, 4000)
+    const el = document.createElement('span');
+    el.textContent = emoji;
+    el.className = 'emoji-fall';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.animationDuration = 2 + Math.random() * 2 + 's';
+    container.appendChild(el);
+    setTimeout(() => container.removeChild(el), 4000);
   }
 }
 
 const caricaPartecipazioniUtente = async () => {
   try {
-
-    const { data } = await axios.get(`http://localhost:3000/api/partecipazioni/mie/${userId}`)
-
-    partecipazioniUtente.value = data
+    const { data } = await axios.get(`http://localhost:3000/api/partecipazioni/mie/${userId}`);
+    partecipazioniUtente.value = data;
   } catch (err) {
-    console.error('Errore caricamento partecipazioni:', err)
+    console.error('Errore caricamento partecipazioni:', err);
   }
-}
-
-const abbandona = async (eventId) => {
-  try {
-
-    await axios.delete(`http://localhost:3000/api/partecipazioni`, {
-
-      data: {
-        user_id: userId,
-        event_id: eventId
-      }
-    })
-    partecipazioniUtente.value = partecipazioniUtente.value.filter(id => id !== eventId)
-    showToast('Hai abbandonato la partita.', 'danger', 5000)
-    await cercaPartite()
-  } catch (err) {
-    console.error('Errore durante l\'abbandono:', err)
-    showToast('Errore durante l\'abbandono. Riprova più tardi.', 'danger')
-  }
-}
-
-const apriDettagli = (partita) => {
-  partitaSelezionata.value = partita
-  const modal = new bootstrap.Modal(document.getElementById('modalDettagli'))
-  modal.show()
-}
+};
 
 function formatData(datetime) {
   const date = new Date(datetime)
@@ -454,26 +460,34 @@ function getCardClass(sport) {
 }
 
 onMounted(async () => {
-  nomeUtente.value = localStorage.getItem('userName') || 'Utente'
+  nomeUtente.value = localStorage.getItem('userName') || 'Utente';
   await Promise.all([
     cercaPartite(),
     caricaPartecipazioniUtente()
-  ])
+  ]);
 
-  const input = document.getElementById('autocomplete-luogo')
+  const eventIdToOpen = route.query.open_event;
+  if (eventIdToOpen) {
+    try {
+      const partita = await getPartitaById(eventIdToOpen);
+      apriDettagli(partita);
+    } catch (error) {
+      console.error("Impossibile aprire la partita dalla notifica:", error);
+      showToast('Impossibile trovare la partita selezionata.', 'danger');
+    }
+  }
 
-if (window.google && google.maps && google.maps.places) {
-  const autocomplete = new google.maps.places.Autocomplete(input, {
-    types: ['geocode'],
-    componentRestrictions: { country: 'it' }
-  })
-
-  autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace()
-    luogoFiltro.value = place.formatted_address || input.value
-  })
-} else {
-  console.warn('Google Maps API non è ancora pronta.')
-}
-})
+  const input = document.getElementById('autocomplete-luogo');
+  if (window.google && google.maps && google.maps.places) {
+    const autocomplete = new google.maps.places.Autocomplete(input, {
+      types: ['geocode'], componentRestrictions: { country: 'it' }
+    });
+    autocomplete.addListener('place_changed', () => {
+      const place = autocomplete.getPlace();
+      luogoFiltro.value = place.formatted_address || input.value;
+    });
+  } else {
+    console.warn('Google Maps API non è ancora pronta.');
+  }
+});
 </script>

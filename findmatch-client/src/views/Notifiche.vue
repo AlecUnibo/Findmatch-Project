@@ -3,20 +3,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="mb-0">🔔 Le tue notifiche</h2>
       <div class="d-flex gap-2">
-        <button
-          v-if="hasUnread"
-          @click="markAllAsRead"
-          class="btn btn-sm btn-outline-primary"
-          :disabled="actionInProgress"
-        >
+        <button v-if="hasUnread" @click="markAllAsRead" class="btn btn-sm btn-outline-primary" :disabled="actionInProgress">
           Segna tutte come lette
         </button>
-        <button
-          v-if="notifiche.length > 0"
-          @click="deleteAllNotifications"
-          class="btn btn-sm btn-outline-danger"
-          :disabled="actionInProgress"
-        >
+        <button v-if="notifiche.length > 0" @click="deleteAllNotifications" class="btn btn-sm btn-outline-danger" :disabled="actionInProgress">
           Elimina tutte
         </button>
       </div>
@@ -32,11 +22,13 @@
     </div>
 
     <div v-else class="list-group">
-      <div
+      <router-link
         v-for="notifica in notifiche"
         :key="notifica.id"
-        class="list-group-item d-flex align-items-center"
+        :to="notifica.event_id ? `/home?open_event=${notifica.event_id}` : '#'"
         :class="{ 'notification-read': notifica.is_read }"
+        class="list-group-item list-group-item-action d-flex align-items-center"
+        :event="notifica.event_id ? 'click' : ''"
       >
         <div class="me-3 fs-4">
           {{ getIcona(notifica.type) }}
@@ -46,27 +38,14 @@
           <small>{{ formattaData(notifica.created_at) }}</small>
         </div>
         <div class="ms-3 d-flex align-items-center gap-2 notification-actions">
-          <button
-            v-if="!notifica.is_read"
-            @click.stop="markOneAsRead(notifica)"
-            class="btn btn-sm btn-outline-success rounded-circle"
-            title="Segna come letto"
-            style="width: 32px; height: 32px;"
-            :disabled="actionInProgress"
-          >
+          <button v-if="!notifica.is_read" @click.prevent.stop="markOneAsRead(notifica)" class="btn btn-sm btn-outline-success rounded-circle" title="Segna come letto" style="width: 32px; height: 32px;" :disabled="actionInProgress">
             ✓
           </button>
-          <button
-            @click.stop="deleteNotification(notifica.id)"
-            class="btn btn-sm btn-outline-danger rounded-circle"
-            title="Elimina notifica"
-            style="width: 32px; height: 32px;"
-            :disabled="actionInProgress"
-          >
+          <button @click.prevent.stop="deleteNotification(notifica.id)" class="btn btn-sm btn-outline-danger rounded-circle" title="Elimina notifica" style="width: 32px; height: 32px;" :disabled="actionInProgress">
             &times;
           </button>
         </div>
-      </div>
+      </router-link>
     </div>
   </div>
 </template>
@@ -161,6 +140,11 @@ const getIcona = (tipo) => {
   switch (tipo) {
     case 'nuovo_follower': return '👤';
     case 'partita_unito': return '✅';
+    case 'partita_completa': return '🎉';
+    case 'nuova_partita_seguito': return '⭐';
+    case 'partita_annullata': return '🛑';
+    case 'invito_partita': return '✉️'; 
+    case 'promemoria_partita': return '⏰';
     case 'partita_aggiornata': return '🔄';
     case 'partita_abbandonata': return '❌';
     default: return '🔔';
@@ -190,12 +174,13 @@ const formattaData = (data) => {
 .list-group-item {
   background-color: #ffffff;
   color: #212529; /* Testo nero standard */
+  text-decoration: none; /* Rimuove la sottolineatura dai link */
 }
 
 /* Stile per le notifiche GIA' LETTE: aggiunge uno sfondo e un bordo a sinistra. */
 .notification-read {
-  background-color: #f0f2f5; /* Grigio chiaro, più netto del precedente */
-  border-left: 4px solid #ced4da; /* Bordo grigio per marcare la differenza */
+  background-color: #f0f2f5;
+  border-left: 4px solid #ced4da;
 }
 
 /* Stili per far apparire i pulsanti solo al passaggio del mouse */

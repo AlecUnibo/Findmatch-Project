@@ -173,4 +173,72 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// POST /api/partite/:id/invite - Invia un invito a un utente
+router.post('/:id/invite', async (req, res) => {
+  const { id: eventId } = req.params;
+  const { inviterId, inviteeId } = req.body; // ID di chi invita, ID di chi è invitato
+
+  if (!inviterId || !inviteeId) {
+    return res.status(400).json({ error: 'ID mancanti per l\'invito.' });
+  }
+  if (inviterId === inviteeId) {
+    return res.status(400).json({ error: 'Non puoi invitare te stesso.' });
+  }
+
+  try {
+    // Recupera i dettagli per il messaggio
+    const eventRes = await pool.query('SELECT sport, date_time, location FROM events WHERE id = $1', [eventId]);
+    const inviterRes = await pool.query('SELECT username FROM users WHERE id = $1', [inviterId]);
+
+    if (eventRes.rows.length === 0 || inviterRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Partita o utente non trovato.' });
+    }
+
+    const { sport, date_time, location } = eventRes.rows[0];
+    const { username: inviterUsername } = inviterRes.rows[0];
+    const d = new Date(date_time);
+    const formattedDateTime = `${d.toLocaleDateString('it-IT')} alle ${d.toLocaleTimeString('it-IT', {hour: '2-digit', minute: '2-digit'})}`;
+
+    // Crea la notifica
+    const message = `${inviterUsername} ti ha invitato alla sua partita di ${sport} del ${formattedDateTime} a ${location}.`;
+    await pool.query(
+      `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
+       VALUES ($1, $2, $3, 'invito_partita', $4)`,
+      [inviteeId, inviterId, eventId, message]
+    );
+
+    res.status(200).json({ message: 'Invito inviato con successo!' });
+
+  } catch (err) {
+    console.error('Errore durante l\'invio dell\'invito:', err);
+    res.status(500).json({ error: 'Errore del server.' });
+  }
+});
+
+// GET /api/partite/:id - Recupera i dettagli di una singola partita
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const query = `
+      SELECT
+        e.*,
+        u.username AS organizer_name,
+        (SELECT COUNT(*) FROM participants p WHERE p.event_id = e.id) AS partecipanti
+      FROM events e
+      JOIN users u ON e.organizer_id = u.id
+      WHERE e.id = $1
+    `;
+    const result = await pool.query(query, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Partita non trovata' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(`Errore nel recupero della partita ${id}:`, error);
+    res.status(500).json({ error: 'Errore nel recupero della partita' });
+  }
+});
+
 module.exports = router;

@@ -15,3 +15,7 @@ export const getPartite = async ({ sport, luogo, data, ora }) => {
   return response.data
 }
 
+export const getPartitaById = async (id) => {
+  const response = await axios.get(`${API_URL}/${id}`);
+  return response.data;
+};
