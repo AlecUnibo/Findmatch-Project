@@ -2,35 +2,53 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
+// Funzione helper per formattare la data e l'ora
+const formatDateTime = (dateTime) => {
+  const d = new Date(dateTime);
+  const date = d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const time = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  return `${date} alle ${time}`;
+};
+
 // Aggiungi partecipazione
 router.post('/', async (req, res) => {
   const { user_id, event_id } = req.body;
   try {
-    // Inserisce il partecipante
     await pool.query(
       'INSERT INTO participants (user_id, event_id) VALUES ($1, $2)',
       [user_id, event_id]
     );
 
-    // --- BLOCCO NOTIFICA: UTENTE SI È UNITO ---
-    try {
-      const eventRes = await pool.query('SELECT organizer_id, sport FROM events WHERE id = $1', [event_id]);
-      if (eventRes.rows.length > 0) {
-        const { organizer_id, sport } = eventRes.rows[0];
-        if (String(organizer_id) !== String(user_id)) {
-          const actorRes = await pool.query('SELECT username FROM users WHERE id = $1', [user_id]);
-          const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
-          await pool.query(
-            `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
-             VALUES ($1, $2, $3, 'partita_unito', $4)`,
-            [organizer_id, user_id, event_id, `${actorUsername} si è unito alla tua partita di ${sport}.`]
-          );
-        }
+    const eventRes = await pool.query('SELECT organizer_id, sport, max_players, date_time, location FROM events WHERE id = $1', [event_id]);
+    if (eventRes.rows.length > 0) {
+      const { organizer_id, sport, max_players, date_time, location } = eventRes.rows[0];
+      const formattedDateTime = formatDateTime(date_time);
+
+      // Notifica per l'organizzatore quando un utente si unisce
+      if (String(organizer_id) !== String(user_id)) {
+        const actorRes = await pool.query('SELECT username FROM users WHERE id = $1', [user_id]);
+        const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
+        const message = `${actorUsername} si è unito alla tua partita di ${sport} del ${formattedDateTime} a ${location}.`;
+        await pool.query(
+          `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
+           VALUES ($1, $2, $3, 'partita_unito', $4)`,
+          [organizer_id, user_id, event_id, message]
+        );
       }
-    } catch (notificationError) {
-      console.error('Errore (non bloccante) durante la creazione della notifica di join:', notificationError);
+
+      // Notifica quando la partita è al completo
+      const participantsCountRes = await pool.query('SELECT COUNT(*) FROM participants WHERE event_id = $1', [event_id]);
+      const currentParticipants = parseInt(participantsCountRes.rows[0].count, 10);
+
+      if (currentParticipants === max_players) {
+        const message = `La tua partita di ${sport} del ${formattedDateTime} a ${location} è al completo!`;
+        await pool.query(
+          `INSERT INTO notifications (user_id, event_id, type, message)
+           VALUES ($1, $2, 'partita_completa', $3)`,
+          [organizer_id, event_id, message]
+        );
+      }
     }
-    // --- FINE BLOCCO NOTIFICA ---
 
     res.status(201).json({ message: 'Partecipazione registrata' });
 
@@ -47,31 +65,27 @@ router.post('/', async (req, res) => {
 router.delete('/', async (req, res) => {
     const { user_id, event_id } = req.body;
     try {
-        // 1. Rimuove il partecipante
         await pool.query(
             'DELETE FROM participants WHERE user_id = $1 AND event_id = $2',
             [user_id, event_id]
         );
 
-        // --- BLOCCO NOTIFICA: UTENTE HA ABBANDONATO ---
-        try {
-            const eventRes = await pool.query('SELECT organizer_id, sport FROM events WHERE id = $1', [event_id]);
-            if (eventRes.rows.length > 0) {
-                const { organizer_id, sport } = eventRes.rows[0];
-                if (String(organizer_id) !== String(user_id)) {
-                    const actorRes = await pool.query('SELECT username FROM users WHERE id = $1', [user_id]);
-                    const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
-                    await pool.query(
-                        `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
-                         VALUES ($1, $2, $3, 'partita_abbandonata', $4)`,
-                        [organizer_id, user_id, event_id, `${actorUsername} ha abbandonato la tua partita di ${sport}.`]
-                    );
-                }
+        const eventRes = await pool.query('SELECT organizer_id, sport, date_time, location FROM events WHERE id = $1', [event_id]);
+        if (eventRes.rows.length > 0) {
+            const { organizer_id, sport, date_time, location } = eventRes.rows[0];
+            const formattedDateTime = formatDateTime(date_time);
+
+            if (String(organizer_id) !== String(user_id)) {
+                const actorRes = await pool.query('SELECT username FROM users WHERE id = $1', [user_id]);
+                const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
+                const message = `${actorUsername} ha abbandonato la tua partita di ${sport} del ${formattedDateTime} a ${location}.`;
+                await pool.query(
+                    `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
+                     VALUES ($1, $2, $3, 'partita_abbandonata', $4)`,
+                    [organizer_id, user_id, event_id, message]
+                );
             }
-        } catch (notificationError) {
-            console.error('Errore (non bloccante) durante la creazione della notifica di abbandono:', notificationError);
         }
-        // --- FINE BLOCCO NOTIFICA ---
 
         res.json({ message: 'Partecipazione rimossa con successo' });
     } catch (err) {

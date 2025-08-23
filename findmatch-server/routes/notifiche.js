@@ -8,13 +8,7 @@ router.get('/:userId', async (req, res) => {
   try {
     const { rows } = await pool.query(
       `SELECT
-         n.id,
-         n.user_id,
-         n.actor_id,
-         n.event_id,
-         n.type,
-         n.message,
-         n.is_read,
+         n.id, n.user_id, n.actor_id, n.event_id, n.type, n.message, n.is_read,
          n.created_at::text,
          u.username AS actor_username
        FROM notifications n
@@ -30,7 +24,7 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-// Conteggio notifiche non lette
+// GET /api/notifiche/unread-count/:userId - Conteggio notifiche non lette
 router.get('/unread-count/:userId', async (req, res) => {
   const { userId } = req.params;
   try {
@@ -45,7 +39,7 @@ router.get('/unread-count/:userId', async (req, res) => {
   }
 });
 
-// Segna TUTTE le notifiche come lette
+// POST /api/notifiche/mark-all-as-read/:userId - Segna TUTTE le notifiche come lette
 router.post('/mark-all-as-read/:userId', async (req, res) => {
   const { userId } = req.params;
   try {
@@ -60,7 +54,7 @@ router.post('/mark-all-as-read/:userId', async (req, res) => {
   }
 });
 
-// Segna UNA notifica come letta
+// PUT /api/notifiche/:notificationId/read - Segna UNA notifica come letta
 router.put('/:notificationId/read', async (req, res) => {
   const { notificationId } = req.params;
   const { userId } = req.body;
@@ -79,7 +73,7 @@ router.put('/:notificationId/read', async (req, res) => {
   }
 });
 
-// Elimina UNA notifica
+// DELETE /api/notifiche/:notificationId - Elimina UNA notifica
 router.delete('/:notificationId', async (req, res) => {
   const { notificationId } = req.params;
   const { userId } = req.body;
@@ -95,6 +89,21 @@ router.delete('/:notificationId', async (req, res) => {
   } catch (err) {
     console.error('Errore eliminazione notifica:', err);
     res.status(500).json({ error: 'Errore server' });
+  }
+});
+
+// DELETE /api/notifiche/delete-all/:userId - Elimina TUTTE le notifiche di un utente
+router.delete('/delete-all/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    await pool.query(
+      'DELETE FROM notifications WHERE user_id = $1',
+      [userId]
+    );
+    res.status(200).json({ message: 'Tutte le notifiche sono state eliminate con successo' });
+  } catch (err) {
+    console.error('Errore durante l\'eliminazione di tutte le notifiche:', err);
+    res.status(500).json({ error: 'Errore del server durante l\'eliminazione delle notifiche' });
   }
 });
 
