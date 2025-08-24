@@ -184,3 +184,34 @@
   min-width: 48px;
   text-align: center;
 }
+
+/* ---------- Notifiche.vue ---------- */
+
+/* Stile base per TUTTE le notifiche: sfondo bianco, testo nero. */
+.component-notifiche .list-group-item {
+  background-color: #ffffff;
+  color: #212529; 
+  text-decoration: none;
+}
+
+/* Stile per le notifiche GIA' LETTE: aggiunge uno sfondo e un bordo a sinistra. */
+.component-notifiche .notification-read {
+  background-color: #f0f2f5;
+  border-left: 4px solid #ced4da;
+}
+
+/* Stili per far apparire i pulsanti solo al passaggio del mouse */
+.component-notifiche .notification-actions {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.component-notifiche .list-group-item:hover .notification-actions {
+  opacity: 1;
+}
+
+/* Stile per i pulsanti di azione specifici delle notifiche */
+.component-notifiche .notification-inline-actions {
+  padding-left: 1rem;
+  margin-left: auto;
+}

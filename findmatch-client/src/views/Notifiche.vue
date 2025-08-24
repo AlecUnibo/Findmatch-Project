@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-5">
+  <div class="container mt-5 component-notifiche">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="mb-0">🔔 Le tue notifiche</h2>
       <div class="d-flex gap-2">
@@ -22,37 +22,52 @@
     </div>
 
     <div v-else class="list-group">
-      <router-link
+      <div
         v-for="notifica in notifiche"
         :key="notifica.id"
-        :to="notifica.event_id ? `/home?open_event=${notifica.event_id}` : '#'"
-        :class="{ 'notification-read': notifica.is_read }"
         class="list-group-item list-group-item-action d-flex align-items-center"
-        :event="notifica.event_id ? 'click' : ''"
+        :class="{ 'notification-read': notifica.is_read }"
       >
-        <div class="me-3 fs-4">
-          {{ getIcona(notifica.type) }}
-        </div>
+        <div class="me-3 fs-4">{{ getIcona(notifica.type) }}</div>
+        
         <div class="flex-grow-1">
           <p class="mb-0" v-html="formattaMessaggio(notifica)"></p>
           <small>{{ formattaData(notifica.created_at) }}</small>
         </div>
-        <div class="ms-3 d-flex align-items-center gap-2 notification-actions">
-          <button v-if="!notifica.is_read" @click.prevent.stop="markOneAsRead(notifica)" class="btn btn-sm btn-outline-success rounded-circle" title="Segna come letto" style="width: 32px; height: 32px;" :disabled="actionInProgress">
-            ✓
-          </button>
-          <button @click.prevent.stop="deleteNotification(notifica.id)" class="btn btn-sm btn-outline-danger rounded-circle" title="Elimina notifica" style="width: 32px; height: 32px;" :disabled="actionInProgress">
-            &times;
-          </button>
+
+        <div class="d-flex align-items-center notification-inline-actions">
+          <div v-if="notifica.type === 'invito_partita'" class="d-flex gap-2">
+            <button @click.prevent.stop="uniscitiPartita(notifica.event_id)" class="btn btn-sm btn-success">Unisciti</button>
+            <router-link :to="`/home?open_event=${notifica.event_id}`" class="btn btn-sm btn-outline-secondary">Dettagli</router-link>
+          </div>
+
+          <router-link v-else-if="notifica.event_id" :to="`/home?open_event=${notifica.event_id}`" class="btn btn-sm btn-outline-secondary">
+            Visualizza
+          </router-link>
         </div>
-      </router-link>
+        
+        <div class="ms-3 d-flex align-items-center gap-2 notification-actions">
+          <button v-if="!notifica.is_read" @click.prevent.stop="markOneAsRead(notifica)" class="btn btn-sm btn-outline-success rounded-circle" title="Segna come letto" style="width: 32px; height: 32px;" :disabled="actionInProgress">✓</button>
+          <button @click.prevent.stop="deleteNotification(notifica.id)" class="btn btn-sm btn-outline-danger rounded-circle" title="Elimina notifica" style="width: 32px; height: 32px;" :disabled="actionInProgress">&times;</button>
+        </div>
+      </div>
     </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+      <div ref="toastEl" class="toast align-items-center border-0 fade" role="status" aria-live="polite" aria-atomic="true">
+        <div :class="['toast-body', 'rounded-3', 'shadow-lg', toastVariantClass]">
+          <strong class="me-2">{{ toastIcon }}</strong> {{ toastMessage }}
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
+import * as bootstrap from 'bootstrap';
 
 const notifiche = ref([]);
 const loading = ref(true);
@@ -62,10 +77,7 @@ const userId = localStorage.getItem('userId');
 const hasUnread = computed(() => notifiche.value.some(n => !n.is_read));
 
 const fetchNotifiche = async () => {
-  if (!userId) {
-    loading.value = false;
-    return;
-  }
+  if (!userId) { loading.value = false; return; }
   try {
     const { data } = await axios.get(`http://localhost:3000/api/notifiche/${userId}`);
     notifiche.value = data;
@@ -84,7 +96,7 @@ const markAllAsRead = async () => {
     notifiche.value.forEach(n => n.is_read = true);
   } catch (err) {
     console.error('Errore nel segnare le notifiche come lette:', err);
-    alert('Si è verificato un errore. Le notifiche non sono state aggiornate.');
+    showToast('Si è verificato un errore.', 'danger');
   } finally {
     actionInProgress.value = false;
   }
@@ -112,7 +124,7 @@ const deleteNotification = async (notificationId) => {
     notifiche.value = notifiche.value.filter(n => n.id !== notificationId);
   } catch (err) {
     console.error('Errore nell\'eliminazione della notifica:', err);
-    alert('Si è verificato un errore. La notifica non è stata eliminata.');
+    showToast('Errore durante l\'eliminazione.', 'danger');
   } finally {
     actionInProgress.value = false;
   }
@@ -120,15 +132,39 @@ const deleteNotification = async (notificationId) => {
 
 const deleteAllNotifications = async () => {
   if (!userId || notifiche.value.length === 0 || actionInProgress.value) return;
-  if (!confirm('Sei sicuro di voler eliminare TUTTE le notifiche? L\'azione è irreversibile.')) return;
-  
+  if (!confirm('Sei sicuro di voler eliminare TUTTE le notifiche?')) return;
   actionInProgress.value = true;
   try {
     await axios.delete(`http://localhost:3000/api/notifiche/delete-all/${userId}`);
-    notifiche.value = []; // Svuota l'array solo in caso di successo
+    notifiche.value = [];
   } catch (err) {
     console.error('Errore durante l\'eliminazione di tutte le notifiche:', err);
-    alert('Si è verificato un errore. Le notifiche non sono state eliminate.');
+    showToast('Errore durante l\'eliminazione.', 'danger');
+  } finally {
+    actionInProgress.value = false;
+  }
+};
+
+// FUNZIONE PER UNIRSI ALLA PARTITA
+const uniscitiPartita = async (eventId) => {
+  if (!userId) {
+    showToast('Devi essere loggato per unirti.', 'warning');
+    return;
+  }
+  actionInProgress.value = true;
+  try {
+    await axios.post('http://localhost:3000/api/partecipazioni', {
+      user_id: userId,
+      event_id: eventId
+    });
+    showToast('Ti sei unito alla partita con successo!', 'success');
+  } catch (err) {
+    if (err.response?.status === 409) {
+      showToast('Sei già iscritto a questa partita.', 'warning');
+    } else {
+      showToast('Errore durante l\'iscrizione alla partita.', 'danger');
+    }
+    console.error('Errore durante l\'iscrizione:', err);
   } finally {
     actionInProgress.value = false;
   }
@@ -137,18 +173,12 @@ const deleteAllNotifications = async () => {
 onMounted(fetchNotifiche);
 
 const getIcona = (tipo) => {
-  switch (tipo) {
-    case 'nuovo_follower': return '👤';
-    case 'partita_unito': return '✅';
-    case 'partita_completa': return '🎉';
-    case 'nuova_partita_seguito': return '⭐';
-    case 'partita_annullata': return '🛑';
-    case 'invito_partita': return '✉️'; 
-    case 'promemoria_partita': return '⏰';
-    case 'partita_aggiornata': return '🔄';
-    case 'partita_abbandonata': return '❌';
-    default: return '🔔';
-  }
+  const icons = {
+    'nuovo_follower': '👤', 'partita_unito': '✅', 'partita_completa': '🎉',
+    'nuova_partita_seguito': '⭐', 'partita_annullata': '🛑', 'invito_partita': '✉️',
+    'promemoria_partita': '⏰', 'partita_aggiornata': '🔄', 'partita_abbandonata': '❌',
+  };
+  return icons[tipo] || '🔔';
 };
 
 const formattaMessaggio = (notifica) => {
@@ -160,36 +190,26 @@ const formattaMessaggio = (notifica) => {
 
 const formattaData = (data) => {
   const now = new Date();
-  const diff = Math.round((now - new Date(data)) / 1000); // secondi
-
-  if (diff < 60) return `${diff} secondi fa`;
-  if (diff < 3600) return `${Math.floor(diff / 60)} minuti fa`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} ore fa`;
+  const diffSeconds = Math.round((now - new Date(data)) / 1000);
+  if (diffSeconds < 60) return `${diffSeconds} secondi fa`;
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  if (diffMinutes < 60) return `${diffMinutes} minuti fa`;
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} ore fa`;
   return new Date(data).toLocaleDateString('it-IT');
 };
+
+// Logica per i Toast
+const toastEl = ref(null);
+const toastMessage = ref('');
+const toastVariant = ref('success');
+const toastIcon = computed(() => ({'success': '✅', 'danger': '🛑', 'warning': '⚠️'})[toastVariant.value] || 'ℹ️');
+const toastVariantClass = computed(() => ({'success': 'bg-success text-white', 'danger': 'bg-danger text-white', 'warning': 'bg-warning text-dark'})[toastVariant.value] || 'bg-info text-white');
+
+function showToast(message, variant = 'success', delayMs = 5000) {
+  toastMessage.value = message;
+  toastVariant.value = variant;
+  const t = new bootstrap.Toast(toastEl.value, { autohide: true, animation: true, delay: delayMs });
+  t.show();
+}
 </script>
-
-<style scoped>
-/* Stile base per TUTTE le notifiche: sfondo bianco, testo nero. Solido e leggibile. */
-.list-group-item {
-  background-color: #ffffff;
-  color: #212529; /* Testo nero standard */
-  text-decoration: none; /* Rimuove la sottolineatura dai link */
-}
-
-/* Stile per le notifiche GIA' LETTE: aggiunge uno sfondo e un bordo a sinistra. */
-.notification-read {
-  background-color: #f0f2f5;
-  border-left: 4px solid #ced4da;
-}
-
-/* Stili per far apparire i pulsanti solo al passaggio del mouse */
-.notification-actions {
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.list-group-item:hover .notification-actions {
-  opacity: 1;
-}
-</style>
