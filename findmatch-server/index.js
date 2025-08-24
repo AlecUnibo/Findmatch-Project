@@ -7,6 +7,7 @@ const partecipazioniRoutes = require('./routes/partecipazioni')
 const partiteRoutes = require('./routes/partite')
 const usersRoutes = require('./routes/users')
 const notificheRoutes = require('./routes/notifiche')
+require('./cron-jobs.js')
 
 const app = express()
 

@@ -12,6 +12,11 @@ Quindi procedere all'installazione guidata (come porta lasciare la 5432) e come 
 npm install
 ```
 
+4. Installare la dipendenza per il backend, posizionarsi nella cartella `findmatch_server` ed eseguire:
+```bash
+npm install node-cron
+```
+
 # 2. Creazione e aggiornamento DataBase
 
 ## 1. Creazione del database in PostgreSQL (usando pgAdmin)
@@ -73,3 +78,4 @@ npm run dev
 ```bash
 node index.js
 ```
+

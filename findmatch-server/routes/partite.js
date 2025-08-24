@@ -103,27 +103,57 @@ router.post('/', async (req, res) => {
   }
 })
 
-// Aggiorna partita esistente
+// Aggiorna partita esistente e notifica i partecipanti
 router.put('/:id', async (req, res) => {
-  const { id } = req.params
-  const { sport, location, date_time, max_players, description } = req.body
+  const { id } = req.params;
+  const { sport, location, date_time, max_players, description, organizer_id } = req.body;
+
   try {
+    await pool.query('BEGIN');
+
     const result = await pool.query(
       `UPDATE events
        SET sport = $1, location = $2, date_time = $3, max_players = $4, description = $5
        WHERE id = $6
        RETURNING *`,
       [sport, location, date_time, max_players, description, id]
-    )
+    );
+
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Partita non trovata' })
+      await pool.query('ROLLBACK');
+      return res.status(404).json({ error: 'Partita non trovata' });
     }
-    res.json(result.rows[0])
+
+    // --- BLOCCO NOTIFICA: AVVISA I PARTECIPANTI DELLA MODIFICA ---
+    try {
+        const participantsRes = await pool.query(
+            'SELECT user_id FROM participants WHERE event_id = $1 AND user_id != $2',
+            [id, organizer_id] // Escludiamo l'organizzatore dalla notifica
+        );
+        const participants = participantsRes.rows;
+        const formattedDateTime = formatDateTime(date_time);
+        const message = `I dettagli della partita di ${sport} del ${formattedDateTime} sono stati aggiornati. Controlla le modifiche!`;
+
+        for (const participant of participants) {
+            await pool.query(
+                `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
+                 VALUES ($1, $2, $3, 'partita_aggiornata', $4)`,
+                [participant.user_id, organizer_id, id, message]
+            );
+        }
+    } catch (notificationError) {
+        console.error('Errore (non bloccante) durante la notifica di modifica partita:', notificationError);
+    }
+
+    await pool.query('COMMIT');
+    res.json(result.rows[0]);
   } catch (err) {
-    console.error('Errore durante aggiornamento partita:', err)
-    res.status(500).json({ error: 'Errore durante aggiornamento partita' })
+    await pool.query('ROLLBACK');
+    console.error('Errore durante aggiornamento partita:', err);
+    res.status(500).json({ error: 'Errore durante aggiornamento partita' });
   }
-})
+});
+
 
 // Elimina una partita e notifica i partecipanti
 router.delete('/:id', async (req, res) => {
