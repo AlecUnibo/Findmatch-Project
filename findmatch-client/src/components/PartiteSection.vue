@@ -159,18 +159,28 @@ const props = defineProps({
   fetchEventoById: Function      // ✅ opzionale: (id) => Promise<eventoFresh>
 })
 
+const userId = localStorage.getItem('userId')
+
+// Filtra in base alla sezione: nella sezione "iscritto" escludi quelle create da me
+function filterBySection(arr = []) {
+  if (props.sezione === 'iscritto') {
+    return arr.filter(p => String(p.organizer_id) !== String(userId))
+  }
+  return arr
+}
+
 // Emits verso il parent
 const emit = defineEmits(['partita-aggiornata', 'partita-eliminata', 'partita-abbandonata'])
 
 // Lista locale reattiva (clonata da props)
-const lista = ref([...(props.partite ?? [])])
+const lista = ref(filterBySection(props.partite ?? []))
 watch(() => props.partite, (nv) => {
-  lista.value = [...(nv ?? [])]
-  // se il parent ci passa un fetch per id, aggiorna i conteggi dal server
+  lista.value = filterBySection(nv ?? [])
   if (typeof props.fetchEventoById === 'function') {
     syncAllCounts().catch(() => {})
   }
 }, { deep: true })
+
 
 const minDateTime = computed(() => {
   const d = new Date()
@@ -180,7 +190,6 @@ const minDateTime = computed(() => {
 
 const partitaSelezionata = ref(null)
 const partitaDaModificare = ref(null)
-const userId = localStorage.getItem('userId')
 
 // ---- Utility posti / progress
 const postiLiberi = (p) => Math.max(0, (Number(p.max_players) || 0) - (Number(p.partecipanti) || 0))

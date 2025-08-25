@@ -64,7 +64,8 @@
 
 .component-home .card[class*='card-sport-'] {
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden;  ← rimuovi / commenta */
+  overflow: visible;   /* ✅ lascia uscire la dropdown */
   background-color: transparent;
 }
 
@@ -79,9 +80,11 @@
   z-index: 0;
 }
 
+/* assicura che anche il contenuto non clipperi */
 .component-home .card .card-body {
   position: relative;
   z-index: 1;
+  overflow: visible;          /* ✅ importante per dropdown */
 }
 
 /* Sfondo sfumato per card */
@@ -93,47 +96,32 @@
 .component-home .card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
 .component-home .card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
 
+/* menu drop down Unisciti */
+.role-dropdown { position: static; }          /* usalo anche nel markup sul .btn-group */
+.role-dropdown .dropdown-menu {
+  z-index: 2000;                              /* sopra la card */
+  max-height: 260px;                          /* se diventa lunga */
+  overflow-y: auto;
+}
+
 /* Toast */
-.component-home .toast-container .toast {
-  --bs-toast-max-width: 520px;
-}
-.component-home .toast .toast-body {
-  font-size: 1.05rem;
-  padding: 0.95rem 1.15rem;
-}
-.component-home .toast.fade {
-  transition: opacity .6s ease;
-}
+.component-home .toast-container .toast { --bs-toast-max-width: 520px; }
+.component-home .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
+.component-home .toast.fade { transition: opacity .6s ease; }
 
 /* Emoji rain */
 .component-home .emoji-rain-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 9999;
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  pointer-events: none; overflow: hidden; z-index: 9999;
 }
-
 .component-home .emoji-fall {
-  position: absolute;
-  top: -2rem;
-  font-size: 2rem;
-  animation-name: fall;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
+  position: absolute; top: -2rem; font-size: 2rem;
+  animation-name: fall; animation-timing-function: linear; animation-fill-mode: forwards;
 }
+@keyframes fall { to { transform: translateY(110vh); opacity: 0; } }
 
-@keyframes fall {
-  to {
-    transform: translateY(110vh);
-    opacity: 0;
-  }
-}
 
-/* ---------- Settings/Impostazioni---------- */
+/* ---------- Impostazioni.vue ---------- */
 
 .component-settings .card h5 {
   font-weight: 600;
@@ -187,14 +175,14 @@
 
 /* ---------- Notifiche.vue ---------- */
 
-/* Stile base per TUTTE le notifiche: sfondo bianco, testo nero. */
+/* Stile base per TUTTE le notifiche */
 .component-notifiche .list-group-item {
   background-color: #ffffff;
   color: #212529; 
   text-decoration: none;
 }
 
-/* Stile per le notifiche GIA' LETTE: aggiunge uno sfondo e un bordo a sinistra. */
+/* Stile per le notifiche GIA' LETTE */
 .component-notifiche .notification-read {
   background-color: #f0f2f5;
   border-left: 4px solid #ced4da;

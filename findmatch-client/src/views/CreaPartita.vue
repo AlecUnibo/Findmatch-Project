@@ -18,16 +18,6 @@
         </select>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Luogo</label>
-        <input id="autocomplete" type="text" class="form-control" placeholder="Inserisci luogo" required />
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Data e ora</label>
-        <input type="datetime-local" v-model="form.date_time" :min="minDateTime" class="form-control" required />
-      </div>
-
       <!-- Se sport NON è Calcio a 11 o Calcio a 5 mostra numero massimo -->
       <div v-if="!(form.sport === 'Calcio a 11' || form.sport === 'Calcio a 5')" class="mb-3">
         <label class="form-label">Numero massimo di giocatori</label>
@@ -91,8 +81,18 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Info & Luogo</label>
-        <textarea v-model="form.description" class="form-control" rows="3" required></textarea>
+        <label class="form-label">Luogo</label>
+        <input id="autocomplete" type="text" class="form-control" placeholder="Inserisci luogo" v-model="form.location" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Data e ora</label>
+        <input type="datetime-local" v-model="form.date_time" :min="minDateTime" class="form-control" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Altro</label>
+        <textarea v-model="form.description" class="form-control" rows="3" placeholder="Info extra, specifiche luogo..."></textarea>
       </div>
 
       <div class="text-end">

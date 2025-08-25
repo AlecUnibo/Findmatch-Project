@@ -11,48 +11,135 @@ const formatDateTime = (dateTime) => {
 };
 
 // Aggiungi partecipazione
+// Aggiungi partecipazione (supporta ruolo specifico o random per il calcio)
 router.post('/', async (req, res) => {
-  const { user_id, event_id } = req.body;
+  const { user_id, event_id, role } = req.body; // role: 'portiere' | 'difensore' | ... | 'random' | undefined
+
+  if (!user_id || !event_id) {
+    return res.status(400).json({ error: 'user_id ed event_id sono obbligatori' });
+  }
+
   try {
-    await pool.query(
-      'INSERT INTO participants (user_id, event_id) VALUES ($1, $2)',
+    await pool.query('BEGIN');
+
+    // già iscritto?
+    const exists = await pool.query(
+      'SELECT 1 FROM participants WHERE user_id=$1 AND event_id=$2',
       [user_id, event_id]
     );
+    if (exists.rowCount > 0) {
+      await pool.query('ROLLBACK');
+      return res.status(409).json({ error: 'Sei già iscritto a questa partita.' });
+    }
 
-    const eventRes = await pool.query('SELECT organizer_id, sport, max_players, date_time, location FROM events WHERE id = $1', [event_id]);
-    if (eventRes.rows.length > 0) {
-      const { organizer_id, sport, max_players, date_time, location } = eventRes.rows[0];
-      const formattedDateTime = formatDateTime(date_time);
+    // carica evento + numero partecipanti
+    const evRes = await pool.query(
+      `SELECT e.sport, e.max_players, e.roles_needed,
+              (SELECT COUNT(*)::int FROM participants p WHERE p.event_id = e.id) AS partecipanti,
+              e.organizer_id, e.date_time, e.location
+       FROM events e
+       WHERE e.id=$1`,
+      [event_id]
+    );
+    if (evRes.rowCount === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(404).json({ error: 'Evento non trovato' });
+    }
+    const ev = evRes.rows[0];
+    const isCalcio = ['calcio a 11', 'calcio a 5'].includes(String(ev.sport || '').toLowerCase());
 
-      // Notifica per l'organizzatore quando un utente si unisce
-      if (String(organizer_id) !== String(user_id)) {
-        const actorRes = await pool.query('SELECT username FROM users WHERE id = $1', [user_id]);
-        const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
-        const message = `${actorUsername} si è unito alla tua partita di ${sport} del ${formattedDateTime} a ${location}.`;
+    let assignedRole = null;
+
+    if (isCalcio) {
+      const roles = ev.roles_needed || {};
+      // ruoli disponibili (>0)
+      const avail = Object.entries(roles).filter(([_, v]) => Number(v || 0) > 0);
+      if (avail.length === 0) {
+        await pool.query('ROLLBACK');
+        return res.status(409).json({ error: 'Nessun ruolo disponibile' });
+      }
+
+      if (!role || role === 'random') {
+        const pick = avail[Math.floor(Math.random() * avail.length)];
+        assignedRole = pick[0];
+      } else {
+        const rLeft = Number(roles[role] || 0);
+        if (rLeft <= 0) {
+          await pool.query('ROLLBACK');
+          return res.status(409).json({ error: `Ruolo ${role} non disponibile` });
+        }
+        assignedRole = role;
+      }
+
+      // decremento atomico del ruolo scelto
+      const dec = await pool.query(
+        `UPDATE events
+         SET roles_needed = jsonb_set(roles_needed, ARRAY[$2], to_jsonb(((roles_needed->>$2)::int - 1)))
+         WHERE id=$1 AND (roles_needed->>$2)::int > 0
+         RETURNING id`,
+        [event_id, assignedRole]
+      );
+      if (dec.rowCount === 0) {
+        await pool.query('ROLLBACK');
+        return res.status(409).json({ error: `Ruolo ${assignedRole} non disponibile (concorrenza)` });
+      }
+
+      await pool.query(
+        'INSERT INTO participants (user_id, event_id, role) VALUES ($1,$2,$3)',
+        [user_id, event_id, assignedRole]
+      );
+
+    } else {
+      // sport NON calcio: capienza via max_players
+      const max = Number(ev.max_players || 0);
+      const cur = Number(ev.partecipanti || 0);
+      if (!max || cur >= max) {
+        await pool.query('ROLLBACK');
+        return res.status(409).json({ error: 'Nessun posto disponibile' });
+      }
+      await pool.query(
+        'INSERT INTO participants (user_id, event_id, role) VALUES ($1,$2,NULL)',
+        [user_id, event_id]
+      );
+    }
+
+    // Notifiche (best-effort)
+    try {
+      const actorRes = await pool.query('SELECT username FROM users WHERE id=$1', [user_id]);
+      const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
+      const formattedDateTime = formatDateTime(ev.date_time);
+
+      if (String(ev.organizer_id) !== String(user_id)) {
+        const msg = isCalcio && assignedRole
+          ? `${actorUsername} si è unito alla tua partita di ${ev.sport} del ${formattedDateTime} a ${ev.location} (ruolo: ${assignedRole}).`
+          : `${actorUsername} si è unito alla tua partita di ${ev.sport} del ${formattedDateTime} a ${ev.location}.`;
         await pool.query(
           `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
            VALUES ($1, $2, $3, 'partita_unito', $4)`,
-          [organizer_id, user_id, event_id, message]
+          [ev.organizer_id, user_id, event_id, msg]
         );
       }
 
-      // Notifica quando la partita è al completo
-      const participantsCountRes = await pool.query('SELECT COUNT(*) FROM participants WHERE event_id = $1', [event_id]);
-      const currentParticipants = parseInt(participantsCountRes.rows[0].count, 10);
-
-      if (currentParticipants === max_players) {
-        const message = `La tua partita di ${sport} del ${formattedDateTime} a ${location} è al completo!`;
-        await pool.query(
-          `INSERT INTO notifications (user_id, event_id, type, message)
-           VALUES ($1, $2, 'partita_completa', $3)`,
-          [organizer_id, event_id, message]
-        );
+      // per sport non-calcio: se si è completata la capienza, avvisa l’organizzatore
+      if (!isCalcio && ev.max_players) {
+        const cnt = await pool.query('SELECT COUNT(*)::int AS c FROM participants WHERE event_id=$1', [event_id]);
+        if (cnt.rows[0].c === Number(ev.max_players)) {
+          const msg = `La tua partita di ${ev.sport} del ${formattedDateTime} a ${ev.location} è al completo!`;
+          await pool.query(
+            `INSERT INTO notifications (user_id, event_id, type, message)
+             VALUES ($1, $2, 'partita_completa', $3)`,
+            [ev.organizer_id, event_id, msg]
+          );
+        }
       }
+    } catch (notifErr) {
+      console.error('Errore notifica unione (non bloccante):', notifErr);
     }
 
-    res.status(201).json({ message: 'Partecipazione registrata' });
-
+    await pool.query('COMMIT');
+    return res.status(201).json({ message: 'Partecipazione registrata', role: assignedRole || null });
   } catch (err) {
+    await pool.query('ROLLBACK');
     if (err.code === '23505') {
       return res.status(409).json({ error: 'Sei già iscritto a questa partita.' });
     }
@@ -62,37 +149,77 @@ router.post('/', async (req, res) => {
 });
 
 // Rimuovi partecipazione
+// Rimuovi partecipazione (rimette a disposizione il ruolo se calcio)
 router.delete('/', async (req, res) => {
-    const { user_id, event_id } = req.body;
-    try {
-        await pool.query(
-            'DELETE FROM participants WHERE user_id = $1 AND event_id = $2',
-            [user_id, event_id]
-        );
+  const { user_id, event_id } = req.body;
+  if (!user_id || !event_id) {
+    return res.status(400).json({ error: 'user_id ed event_id sono obbligatori' });
+  }
 
-        const eventRes = await pool.query('SELECT organizer_id, sport, date_time, location FROM events WHERE id = $1', [event_id]);
-        if (eventRes.rows.length > 0) {
-            const { organizer_id, sport, date_time, location } = eventRes.rows[0];
-            const formattedDateTime = formatDateTime(date_time);
+  try {
+    await pool.query('BEGIN');
 
-            if (String(organizer_id) !== String(user_id)) {
-                const actorRes = await pool.query('SELECT username FROM users WHERE id = $1', [user_id]);
-                const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
-                const message = `${actorUsername} ha abbandonato la tua partita di ${sport} del ${formattedDateTime} a ${location}.`;
-                await pool.query(
-                    `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
-                     VALUES ($1, $2, $3, 'partita_abbandonata', $4)`,
-                    [organizer_id, user_id, event_id, message]
-                );
-            }
-        }
-
-        res.json({ message: 'Partecipazione rimossa con successo' });
-    } catch (err) {
-        console.error('Errore rimozione partecipazione:', err);
-        res.status(500).json({ error: 'Errore durante la rimozione della partecipazione' });
+    // ruolo assegnato a quell'utente in quell'evento?
+    const pr = await pool.query(
+      'SELECT role FROM participants WHERE user_id=$1 AND event_id=$2',
+      [user_id, event_id]
+    );
+    if (pr.rowCount === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(404).json({ error: 'Non sei iscritto a questa partita' });
     }
+    const assignedRole = pr.rows[0].role;
+
+    // elimina partecipazione
+    await pool.query(
+      'DELETE FROM participants WHERE user_id=$1 AND event_id=$2',
+      [user_id, event_id]
+    );
+
+    // ripristina ruolo se esisteva
+    if (assignedRole) {
+      await pool.query(
+        `UPDATE events
+         SET roles_needed = jsonb_set(
+           roles_needed,
+           ARRAY[$2],
+           to_jsonb( (COALESCE((roles_needed->>$2),'0')::int + 1) )
+         )
+         WHERE id=$1`,
+        [event_id, assignedRole]
+      );
+    }
+
+    // Notifiche (best-effort)
+    try {
+      const evRes = await pool.query('SELECT organizer_id, sport, date_time, location FROM events WHERE id=$1', [event_id]);
+      if (evRes.rowCount > 0) {
+        const ev = evRes.rows[0];
+        if (String(ev.organizer_id) !== String(user_id)) {
+          const actorRes = await pool.query('SELECT username FROM users WHERE id=$1', [user_id]);
+          const actorUsername = actorRes.rows[0]?.username || 'Qualcuno';
+          const formattedDateTime = formatDateTime(ev.date_time);
+          const msg = `${actorUsername} ha abbandonato la tua partita di ${ev.sport} del ${formattedDateTime} a ${ev.location}.`;
+          await pool.query(
+            `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
+             VALUES ($1, $2, $3, 'partita_abbandonata', $4)`,
+            [ev.organizer_id, user_id, event_id, msg]
+          );
+        }
+      }
+    } catch (notifErr) {
+      console.error('Errore notifica abbandono (non bloccante):', notifErr);
+    }
+
+    await pool.query('COMMIT');
+    res.json({ message: 'Partecipazione rimossa con successo' });
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    console.error('Errore rimozione partecipazione:', err);
+    res.status(500).json({ error: 'Errore durante la rimozione della partecipazione' });
+  }
 });
+
 
 router.get('/mie/:userId', async (req, res) => {
   const { userId } = req.params
@@ -135,6 +262,7 @@ router.get('/iscritto/:userId', async (req, res) => {
       JOIN events e ON p.event_id = e.id
       JOIN users u ON e.organizer_id = u.id
       WHERE p.user_id = $1 AND e.date_time >= NOW()
+      AND e.organizer_id <> $1   -- escludi gli eventi creati da me
       ORDER BY e.date_time ASC
     `, [userId])
     res.json(result.rows)
@@ -143,7 +271,6 @@ router.get('/iscritto/:userId', async (req, res) => {
     res.status(500).json({ error: 'Errore recupero partite iscritte' })
   }
 })
-
 
 router.get('/storico/:userId', async (req, res) => {
   const { userId } = req.params

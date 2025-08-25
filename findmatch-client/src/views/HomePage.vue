@@ -65,7 +65,7 @@
               <div>
                 <h5 class="card-title mb-1">{{ getSportIcon(partita.sport) }} {{ partita.sport }}</h5>
                 <p class="card-text mb-0">
-                                    <!-- Stato posti -->
+                  <!-- Stato posti -->
                   <strong>Data:</strong> {{ formatData(partita.date_time) }} –
                   <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
                   <strong>Luogo:</strong> {{ partita.location }}
@@ -88,16 +88,53 @@
                 </p>
               </div>
               <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
-                                <!-- già iscritto -->
-                <button class="btn btn-sm btn-danger" v-if="partecipazioniUtente.includes(partita.id)" @click="abbandona(partita.id)">
-                  Abbandona
-                </button>
-                                <!-- puoi unirti -->
-                <button class="btn btn-sm btn-success" v-else @click="unisciti(partita.id, partita.organizer_id, partita.sport)">
-                  Unisciti
-                </button>
-              </div>
+  <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
+
+  <!-- SE ISCRITTO: SOLO ABBANDONA -->
+  <template v-if="isIscritto(partita.id)">
+    <button class="btn btn-sm btn-danger" @click="abbandona(partita.id)">Abbandona</button>
+  </template>
+
+  <!-- ALTRIMENTI: SPLIT PER CALCIO, BOTTONE SINGOLO PER ALTRO -->
+  <template v-else>
+    <div v-if="isCalcio(partita)"
+         class="btn-group position-static role-dropdown" data-bs-display="static">
+      <button class="btn btn-sm btn-success"
+              @click="uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, 'random')">
+        Unisciti
+      </button>
+      <button type="button"
+              class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
+              data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="visually-hidden">Toggle Dropdown</span>
+      </button>
+
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li v-for="(r, idx) in roleEntries(partita)"
+            :key="`${partita.id}-${r.key}-${idx}`">
+          <button class="dropdown-item"
+                  :disabled="r.count <= 0"
+                  @click="uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, r.key)">
+            {{ ruoloLabel(r.key) }}
+            <span class="badge bg-secondary ms-2">{{ r.count }}</span>
+          </button>
+        </li>
+        <li v-if="roleEntries(partita).length === 0">
+          <span class="dropdown-item disabled">Nessun ruolo disponibile</span>
+        </li>
+      </ul>
+    </div>
+
+    <button v-else class="btn btn-sm btn-success"
+            @click="unisciti(partita.id, partita.organizer_id, partita.sport)">
+      Unisciti
+    </button>
+  </template>
+</div>
+<!-- <pre class="text-light small" v-if="isCalcio(partita)">
+  {{ roleEntries(partita) }}
+</pre> -->
+
             </div>
           </div>
         </div>
@@ -116,7 +153,7 @@
                 </h5>
                 <p class="card-text mb-0">
 
-                                    <!-- Stato posti -->
+                  <!-- Stato posti -->
                   <div class="d-flex align-items-center gap-2 mt-2">
                     <span class="badge bg-light text-dark">
                       {{ postiLiberi(partita) }} posti liberi
@@ -127,11 +164,12 @@
                         role="progressbar"
                         :class="progressBarClass(partita)"
                         :style="{ width: progressPercent(partita) + '%' }"
-                        :aria-valuenow="partita.partecipanti"
+                        :aria-valuenow="partita.partecipanti ?? 0"
                         :aria-valuemin="0"
-                        :aria-valuemax="partita.max_players">
+                        :aria-valuemax="progressMax(partita)">
                     </div>
                   </div>
+
 
                   <strong>Data:</strong> {{ formatData(partita.date_time) }} –
                   <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
@@ -162,7 +200,21 @@
               <p><strong>Data:</strong> {{ formatData(partitaSelezionata.date_time) }}</p>
               <p><strong>Ora:</strong> {{ formatOra(partitaSelezionata.date_time) }}</p>
               <p><strong>Luogo:</strong> {{ partitaSelezionata.location }}</p>
-              <p><strong>Posti rimanenti:</strong> {{ partitaSelezionata.max_players - partitaSelezionata.partecipanti}} / {{ partitaSelezionata.max_players }}</p>
+              <!-- Se NON è calcio: mostra posti -->
+              <p v-if="!isCalcio(partitaSelezionata)">
+                <strong>Posti rimanenti:</strong>
+                {{ postiLiberi(partitaSelezionata) }} / {{ partitaSelezionata.max_players ?? 0 }}
+              </p>
+              <!-- Se è calcio: mostra ruoli -->
+              <div v-else>
+                <p class="mb-1">
+                  <strong>Ruoli mancanti:</strong>
+                  {{ formatRuoli(partitaSelezionata.roles_needed) }}
+                </p>
+                <p class="mb-1 text-muted">
+                 <strong>- Totale ruoli richiesti:</strong> {{ sumRolesNeeded(partitaSelezionata) }}
+                </p>
+              </div>
               <p><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_name }}</p>
               <p><strong>Descrizione:</strong> {{ partitaSelezionata.description || 'Nessuna descrizione disponibile.' }}</p>
 
@@ -232,12 +284,24 @@ const sportEmojis = {
   'tennis': '🎾', 'paddle': '🥎'
 };
 
-const postiLiberi = (p) => Math.max(0, (p.max_players ?? 0) - (p.partecipanti ?? 0));
+const postiLiberi = (p) => {
+  if (isCalcio(p)) return sumRolesNeeded(p);
+  return Math.max(0, (p.max_players ?? 0) - (p.partecipanti ?? 0));
+};
+
+// Per il meter/progress: usiamo un "totale virtuale" = partecipanti + ruoli mancanti nel caso del calcio
+const progressMax = (p) => {
+  if (isCalcio(p)) return (p.partecipanti ?? 0) + sumRolesNeeded(p);
+  return p.max_players ?? 0;
+};
+
 const progressPercent = (p) => {
-  const max = p.max_players ?? 0, cur = p.partecipanti ?? 0;
+  const max = progressMax(p);
+  const cur = p.partecipanti ?? 0;
   if (!max) return 0;
   return Math.min(100, Math.round((cur / max) * 100));
 };
+
 const progressBarClass = (p) => {
   const left = postiLiberi(p)
   if (left === 0) return 'bg-danger'     // piena
@@ -245,15 +309,31 @@ const progressBarClass = (p) => {
   return 'bg-success'                    // buona disponibilità
 };
 
+const isIscritto = (eventId) =>
+  partecipazioniUtente.value.some(id => String(id) === String(eventId));
+
 const partiteCreate = computed(() =>
-  partite.value.filter(p => String(p.organizer_id) === String(userId))
-);
-const partiteDisponibili = computed(() =>
   partite.value.filter(p =>
-    String(p.organizer_id) !== String(userId) &&
-    postiLiberi(p) > 0
+    String(p.organizer_id) === String(userId) &&
+    isTodayOrFuture(p.date_time)           // esclude le partite create da te già passate
   )
 );
+
+const partiteDisponibili = computed(() =>
+  partite.value.filter(p =>
+    String(p.organizer_id) !== String(userId) &&   // non mie
+    !isIscritto(p.id) &&                           // esclude dove sono già iscritto
+    postiLiberi(p) > 0                             // non piene
+  )
+);
+
+// Oggi a mezzanotte (locale)
+const startOfToday = computed(() => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+});
+const isTodayOrFuture = (dt) => new Date(dt) >= startOfToday.value;
 
 const cercaPartite = async () => {
   try {
@@ -261,11 +341,14 @@ const cercaPartite = async () => {
       sport: sportFiltro.value,
       luogo: luogoFiltro.value,
       data: dataFiltro.value,
-      ora: orarioFiltro.value
+      ora: orarioFiltro.value,
+      exclude_user_id: userId
     });
-        // Ordina per data e ora crescenti
-    partite.value = data.sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
+        partite.value = data
+      .filter(p => isTodayOrFuture(p.date_time))   // solo oggi+futuro
+      .sort((a, b) => new Date(a.date_time) - new Date(b.date_time));
   } catch (err) {
+
     console.error('Errore nel caricamento delle partite:', err);
   }
 };
@@ -277,6 +360,44 @@ const pulisciFiltri = async () => {
   orarioFiltro.value = '';
   document.getElementById('autocomplete-luogo').value = '';
   await cercaPartite();
+};
+
+// --- helper Calcio/Ruoli (definiscili una sola volta) ---
+const ruoloLabel = (key) => ({
+  portiere: 'Portiere',
+  difensore: 'Difensori',
+  centrocampista: 'Centrocampisti',
+  attaccante: 'Attaccanti',
+  all_around: 'All‑around'
+}[key] || key);
+
+const roleEntries = (p) => {
+  const o = p?.roles_needed || {};
+  return Object.keys(o)
+    .map(k => ({ key: k, count: Number(o[k] || 0) }))
+    .filter(r => r.count > 0);
+};
+
+
+const uniscitiCalcio = async (eventId, organizerId, sport, roleKey /* 'random' o chiave ruolo */) => {
+  if (!userId) {
+    showToast('Devi essere loggato per unirti a una partita.', 'warning', 6000);
+    return;
+  }
+  try {
+    const { data } = await axios.post('http://localhost:3000/api/partecipazioni', {
+      user_id: userId,
+      event_id: eventId,
+      role: roleKey // 'random' o 'portiere'/'difensore'/...
+    });
+    partecipazioniUtente.value.push(eventId);
+    await cercaPartite(); // ricarica per aggiornare conteggi ruoli
+    lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉');
+    showToast(`Iscritto! Ruolo: ${ruoloLabel(data.role) || 'assegnato'}`, 'success', 5000);
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Errore durante la registrazione.';
+    showToast(msg, 'danger');
+  }
 };
 
 const unisciti = async (eventId, organizerId, sport) => {
@@ -358,6 +479,32 @@ const sendInvite = async () => {
     console.error("Errore invio invito:", error);
     showToast('Errore durante l\'invio dell\'invito.', 'danger');
   }
+};
+
+// --- helper Calcio/Ruoli ---
+const isCalcio = (p) => {
+  const s = (p?.sport || '').toLowerCase();
+  return s === 'calcio a 11' || s === 'calcio a 5';
+};
+
+const sumRolesNeeded = (p) => {
+  const r = p?.roles_needed || {};
+  return Object.values(r).reduce((acc, v) => acc + Number(v || 0), 0);
+};
+
+const formatRuoli = (roles) => {
+  if (!roles || Object.keys(roles).length === 0) return '—';
+  const labels = {
+    portiere: 'Portiere',
+    difensore: 'Difensori',
+    centrocampista: 'Centrocampisti',
+    attaccante: 'Attaccanti',
+    all_around: 'All‑around'
+  };
+  return Object.entries(roles)
+    .filter(([_, v]) => Number(v) > 0)
+    .map(([k, v]) => `${labels[k] || k}: ${v}`)
+    .join(', ');
 };
 
 const toastEl = ref(null);
