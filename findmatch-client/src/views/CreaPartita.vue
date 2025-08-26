@@ -20,16 +20,19 @@
 
       <!-- Se sport NON è Calcio a 11 o Calcio a 5 mostra numero massimo -->
       <div v-if="!(form.sport === 'Calcio a 11' || form.sport === 'Calcio a 5')" class="mb-3">
-        <label class="form-label">Numero massimo di giocatori</label>
+        <label class="form-label">Numero massimo di giocatori (escluso te: i posti che inserisci sono posti liberi per altri utenti)</label>
         <input type="number" v-model.number="form.max_players" class="form-control" required min="1" />
+        <div class="form-text">
+          Nota: il valore inserito rappresenta i posti liberi per altri utenti — il sistema considera l'organizzatore a parte.
+        </div>
       </div>
 
       <!-- Se sport è Calcio a 11 o Calcio a 5 mostra selezione ruoli mancanti -->
       <div v-else class="mb-3">
         <label class="form-label">Scegli i ruoli che mancano</label>
 
-        <div class="mb-2" v-if="maxSlots > 0">
-          <small class="text-muted">Posti ruoli rimanenti: <strong>{{ remainingSlots }}</strong> / {{ maxSlots }}</small>
+        <div class="mb-2" v-if="freeMaxSlots > 0">
+          <small class="text-muted">Posti ruoli rimanenti: <strong>{{ remainingSlots }}</strong> / {{ freeMaxSlots }}</small>
         </div>
 
         <div class="list-group">
@@ -76,7 +79,7 @@
         </div>
 
         <div class="form-text mt-2">
-          Nota: la somma totale di tutti i ruoli non può superare <strong>{{ maxSlots }}</strong>. I conteggi non possono scendere sotto 0.
+          Nota: la somma totale di tutti i ruoli non può superare <strong>{{ freeMaxSlots }}</strong> (escluso il creatore). I conteggi non possono scendere sotto 0.
         </div>
       </div>
 
@@ -169,18 +172,33 @@ const sumRoles = computed(() => {
   return Object.values(roles.value).reduce((s, v) => s + Number(v || 0), 0)
 })
 
-// maxSlots dinamico: 21 per Calcio a 11, 9 per Calcio a 5, altrimenti 0
+// maxSlots dinamico: 21 per Calcio a 11, 9 per Calcio a 5
 const maxSlots = computed(() => {
-  if (form.value.sport === 'Calcio a 11') return 21
-  if (form.value.sport === 'Calcio a 5') return 9
+  if (form.value.sport === 'Calcio a 11') return 22
+  if (form.value.sport === 'Calcio a 5') return 10
   return 0
 })
 
-const remainingSlots = computed(() => Math.max(0, maxSlots.value - sumRoles.value))
+// freeMaxSlots: il numero di posti liberi che l'organizzatore può chiedere per ALTRI UTENTI
+// esclude l'organizzatore stesso (-1). Usato per la validazione e la UI.
+const freeMaxSlots = computed(() => {
+  if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
+    return Math.max(0, maxSlots.value - 1)
+  }
+  return 0
+})
+
+// remainingSlots: quanti posti liberi restano per i ruoli (calcio). È basato su freeMaxSlots.
+const remainingSlots = computed(() => {
+  if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
+    return Math.max(0, freeMaxSlots.value - sumRoles.value)
+  }
+  return 0
+})
 
 // incrementa / decrementa (rispettando i limiti)
 function incrementRole(roleKey) {
-  if (maxSlots.value === 0) return
+  if (freeMaxSlots.value === 0) return
   if (remainingSlots.value <= 0) return
   roles.value[roleKey] = Number(roles.value[roleKey] || 0) + 1
 }
@@ -193,7 +211,6 @@ function decrementRole(roleKey) {
 watch(() => form.value.sport, (nv, ov) => {
   // Azzeriamo sempre tutti i contatori dei ruoli quando cambia lo sport
   Object.keys(roles.value).forEach(k => roles.value[k] = 0)
-
 })
 
 const creaPartita = async () => {
@@ -204,8 +221,9 @@ const creaPartita = async () => {
       return
     }
 
-    if ((form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') && sumRoles.value > maxSlots.value) {
-      showToast(`La somma dei ruoli non può superare ${maxSlots.value}.`, 'warning', 6000)
+    // Validazione per calcio: la somma dei ruoli (posti per altri utenti) non può superare freeMaxSlots
+    if ((form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') && sumRoles.value > freeMaxSlots.value) {
+      showToast(`La somma dei ruoli non può superare ${freeMaxSlots.value} (escludendo il creatore).`, 'warning', 6000)
       return
     }
 
@@ -219,7 +237,7 @@ const creaPartita = async () => {
       })
       nuovaPartita = { ...nuovaPartita, max_players: null, roles_needed: rolesNeededObj }
     } else {
-      nuovaPartita.max_players = Number(form.value.max_players) || null
+      nuovaPartita.max_players = Number(form.value.max_players) ? Number(form.value.max_players) + 1 : null
     }
 
     await axios.post('http://localhost:3000/api/partite', nuovaPartita)
@@ -254,7 +272,7 @@ const toastVariantClass = computed(() => ({
   success: 'bg-success text-white',
   danger:  'bg-danger text-white',
   warning: 'bg-warning text-dark'
-}[toastVariant.value] || 'bg-info text-white'))
+}[toastVariant.value] || 'bg-info text-white')) 
 
 function showToast(message, variant = 'success', delayMs = 5000) {
   toastMessage.value = message
