@@ -54,8 +54,8 @@
           :roleEntries="roleEntries"
           :ruoloLabel="ruoloLabel"
           @dettagli="apriDettagli"
-          @unisciti="p => chiediConfermaUnisciti(p)"
-          @uniscitiCalcio="({ partita, roleKey }) => chiediConfermaUniscitiCalcio(partita, roleKey)"
+          @unisciti="p => chiediUniscitiConControllo(p)"
+          @uniscitiCalcio="({ partita, roleKey }) => chiediUniscitiCalcioConControllo(partita, roleKey)"
         />
       </div>
 
@@ -78,8 +78,8 @@
           :roleEntries="roleEntries"
           :ruoloLabel="ruoloLabel"
           @dettagli="apriDettagli"
-          @unisciti="p => chiediConfermaUnisciti(p)"
-          @uniscitiCalcio="({ partita, roleKey }) => chiediConfermaUniscitiCalcio(partita, roleKey)"
+          @unisciti="p => chiediUniscitiConControllo(p)"
+          @uniscitiCalcio="({ partita, roleKey }) => chiediUniscitiCalcioConControllo(partita, roleKey)"
         />
       </div>
 
@@ -165,7 +165,8 @@
               <small v-if="confirmSubMessage" class="text-muted" v-html="confirmSubMessage"></small>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="confirmBusy">
+              <!-- CANCEL: ora sfondo rosso e testo nero -->
+              <button type="button" class="btn btn-cancel" data-bs-dismiss="modal" :disabled="confirmBusy">
                 Annulla
               </button>
               <button type="button" class="btn" :class="confirmCtaClass" @click="doConfirm" :disabled="confirmBusy">
@@ -218,7 +219,11 @@ const orarioFiltro = ref('')
 const dataFiltro = ref('')
 
 const partite = ref([])
+// partecUtenteIds mantiene solo gli ID (usato per isIscritto)
 const partecipazioniUtente = ref([])
+// partecipazioniUtenteDetails mantiene gli oggetti partita a cui l'utente è iscritto (necessario per il check ±2h)
+const partecipazioniUtenteDetails = ref([])
+
 const partitaSelezionata = ref(null)
 const userId = localStorage.getItem('userId')
 const emojiContainer = ref(null)
@@ -325,14 +330,78 @@ const pulisciFiltri = async () => {
 
 const caricaPartecipazioniUtente = async () => {
   try {
+    // Chiediamo all'API le partecipazioni dell'utente.
+    // Gestiamo due possibili formati di risposta:
+    // 1) array di ID (es: [1,2,3])
+    // 2) array di oggetti partecipazione/partita con almeno id, date_time, sport
     const { data } = await axios.get(`http://localhost:3000/api/partecipazioni/mie/${userId}`)
-    partecipazioniUtente.value = data
+    // reset
+    partecipazioniUtente.value = []
+    partecipazioniUtenteDetails.value = []
+
+    if (!Array.isArray(data)) return
+
+    // Se gli elementi sono oggetti con proprietà utili (id, date_time), usali direttamente
+    if (data.length > 0 && typeof data[0] === 'object' && (data[0].date_time || data[0].id)) {
+      // assumiamo che ogni elemento sia un oggetto con almeno id e date_time (o che abbia event o partita al suo interno)
+      data.forEach(item => {
+        const eventObj = item.date_time ? item : (item.event || item.partita || item)
+        if (eventObj && eventObj.id) {
+          partecipazioniUtente.value.push(eventObj.id)
+          partecipazioniUtenteDetails.value.push(eventObj)
+        }
+      })
+    } else {
+      // altrimenti assumiamo che siano ID e facciamo fetch per ogni partita
+      const ids = data
+      partecipazioniUtente.value = ids.map(id => id)
+      // carichiamo i dettagli in parallelo (tolleriamo errori singoli)
+      const promises = ids.map(async (id) => {
+        try {
+          const p = await getPartitaById(id)
+          return p
+        } catch (e) {
+          console.warn('Impossibile caricare partita partecipazione id:', id, e)
+          return null
+        }
+      })
+      const results = await Promise.all(promises)
+      partecipazioniUtenteDetails.value = results.filter(r => r)
+    }
   } catch (err) {
     console.error('Errore caricamento partecipazioni:', err)
   }
 }
 
-// Conferme & join
+// Aggiunge al dettaglio delle partecipazioni l'evento appena iscritto (fetcha dettagli)
+const addParticipationDetails = async (eventId) => {
+  try {
+    const p = await getPartitaById(eventId)
+    if (p) partecipazioniUtenteDetails.value.push(p)
+  } catch (e) {
+    console.warn('Errore fetching dettagli partita appena iscritta', e)
+  }
+}
+
+// --- Temporal conflict check (±2 ore) ---
+const TWO_HOURS_MS = 2 * 60 * 60 * 1000
+function findTemporalConflict(targetPartita) {
+  if (!targetPartita || !targetPartita.date_time) return null
+  const targetTs = new Date(targetPartita.date_time).getTime()
+  for (const p of partecipazioniUtenteDetails.value) {
+    if (!p || !p.date_time) continue
+    // saltare se è la stessa partita (non ha senso controllare)
+    if (String(p.id) === String(targetPartita.id)) continue
+    const otherTs = new Date(p.date_time).getTime()
+    const diff = Math.abs(targetTs - otherTs)
+    if (diff < TWO_HOURS_MS) {
+      return p
+    }
+  }
+  return null
+}
+
+// Conferme & join (modificate per inserire il controllo temporale)
 function openConfirm({ title, message, subMessage = '', ctaText = 'Conferma', theme = 'primary', onOk }) {
   confirmTitle.value = title
   confirmMessage.value = message
@@ -344,6 +413,7 @@ function openConfirm({ title, message, subMessage = '', ctaText = 'Conferma', th
   confirmOnOk = onOk
 
   const modal = new bootstrap.Modal(document.getElementById('modalConferma'))
+  // Bootstrapped modal backdrop will be appended to body; CSS globale garantisce che sia davanti.
   modal.show()
 }
 
@@ -373,6 +443,8 @@ const unisciti = async (eventId, organizerId, sport) => {
       event_id: eventId
     })
     partecipazioniUtente.value.push(eventId)
+    // aggiungiamo anche i dettagli della partecipazione appena fatta
+    await addParticipationDetails(eventId)
     await cercaPartite()
     lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉')
     showToast('Ti sei unito con successo!', 'success', 5000)
@@ -393,6 +465,7 @@ const uniscitiCalcio = async (eventId, organizerId, sport, roleKey) => {
       role: roleKey
     })
     partecipazioniUtente.value.push(eventId)
+    await addParticipationDetails(eventId)
     await cercaPartite()
     lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉')
     showToast(`Iscritto! Ruolo: ${ruoloLabel(data.role) || 'assegnato'}`, 'success', 5000)
@@ -402,20 +475,37 @@ const uniscitiCalcio = async (eventId, organizerId, sport, roleKey) => {
   }
 }
 
-function chiediConfermaUnisciti(partita) {
-  const when = `${formatData(partita.date_time)} alle ${formatOra(partita.date_time)} – ${partita.location}`
-  openConfirm({
-    title: `Unirti a ${partita.sport}?`,
-    message: `Confermi l’iscrizione a <strong>${partita.sport}</strong>?`,
-    subMessage: when,
-    ctaText: 'Sì, uniscimi',
-    theme: 'success',
-    onOk: () => unisciti(partita.id, partita.organizer_id, partita.sport),
-  })
+// Funzioni che gestiscono la richiesta di iscrizione + controllo temporale
+function chiediUniscitiConControllo(partita) {
+  // controlliamo conflitti con le altre partecipazioni (±2 ore)
+  const conflict = findTemporalConflict(partita)
+  if (conflict) {
+    // Mostriamo il pop-up di avvertimento richiesto con "Annulla" e "Iscrivimi"
+    const msg = `Sei già iscritto ad una partita di <strong>${conflict.sport}</strong> il <strong>${formatData(conflict.date_time)}</strong> alle <strong>${formatOra(conflict.date_time)}</strong>. Sei sicuro di volerti iscrivere?`
+    openConfirm({
+      title: 'Conflitto orario',
+      message: msg,
+      subMessage: '',
+      ctaText: 'Iscrivimi',
+      theme: 'warning',
+      onOk: () => unisciti(partita.id, partita.organizer_id, partita.sport)
+    })
+  } else {
+    // nessun conflitto, procediamo con la normale conferma (come prima)
+    const when = `${formatData(partita.date_time)} alle ${formatOra(partita.date_time)} – ${partita.location}`
+    openConfirm({
+      title: `Unirti a ${partita.sport}?`,
+      message: `Confermi l’iscrizione a <strong>${partita.sport}</strong>?`,
+      subMessage: when,
+      ctaText: 'Sì, uniscimi',
+      theme: 'success',
+      onOk: () => unisciti(partita.id, partita.organizer_id, partita.sport),
+    })
+  }
 }
 
-function chiediConfermaUniscitiCalcio(partita, roleKey) {
-  const when = `${formatData(partita.date_time)} alle ${formatOra(partita.date_time)} – ${partita.location}`
+function chiediUniscitiCalcioConControllo(partita, roleKey) {
+  const conflict = findTemporalConflict(partita)
   const roleMap = {
     random: 'Assegnazione casuale',
     portiere: 'Portiere',
@@ -424,16 +514,29 @@ function chiediConfermaUniscitiCalcio(partita, roleKey) {
     attaccante: 'Attaccante',
     all_around: 'All-around',
   }
-  const roleLabel = roleMap[roleKey] || ruoloLabel(roleKey)
+  const roleLabelText = roleMap[roleKey] || ruoloLabel(roleKey)
 
-  openConfirm({
-    title: `Unirti a ${partita.sport}?`,
-    message: `Confermi l’iscrizione come <strong>${roleLabel}</strong>?`,
-    subMessage: when,
-    ctaText: 'Sì, uniscimi',
-    theme: 'success',
-    onOk: () => uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, roleKey),
-  })
+  if (conflict) {
+    const msg = `Sei già iscritto ad una partita di <strong>${conflict.sport}</strong> il <strong>${formatData(conflict.date_time)}</strong> alle <strong>${formatOra(conflict.date_time)}</strong>. Sei sicuro di volerti iscrivere come <strong>${roleLabelText}</strong>?`
+    openConfirm({
+      title: 'Conflitto orario',
+      message: msg,
+      subMessage: '',
+      ctaText: 'Iscrivimi',
+      theme: 'warning',
+      onOk: () => uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, roleKey)
+    })
+  } else {
+    const when = `${formatData(partita.date_time)} alle ${formatOra(partita.date_time)} – ${partita.location}`
+    openConfirm({
+      title: `Unirti a ${partita.sport}?`,
+      message: `Confermi l’iscrizione come <strong>${roleLabelText}</strong>?`,
+      subMessage: when,
+      ctaText: 'Sì, uniscimi',
+      theme: 'success',
+      onOk: () => uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, roleKey),
+    })
+  }
 }
 
 // Modale dettagli + inviti
@@ -634,3 +737,59 @@ onMounted(async () => {
   }
 })
 </script>
+
+<style scoped>
+/* piccolo styling per le emoji (se già presenti nel progetto, ignora) */
+.emoji-fall {
+  position: fixed;
+  top: -2rem;
+  font-size: 1.2rem;
+  pointer-events: none;
+  z-index: 12000;
+  animation-name: fall;
+  animation-timing-function: linear;
+}
+@keyframes fall {
+  to {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+
+/* stile btn-cancel solo all'interno del componente (scoped) */
+.btn-cancel {
+  background-color: #ff4d4d;
+  color: #000 !important;
+  border: none;
+}
+.btn-cancel:hover,
+.btn-cancel:focus {
+  background-color: #e04343;
+  color: #000 !important;
+  box-shadow: none;
+}
+</style>
+
+<!-- Regole globali per forzare i modal in primo piano rispetto a card/dropdown -->
+<style>
+/* Metti i modal davanti a tutto (sovrascrive Bootstrap se necessario) */
+.modal,
+.modal.show {
+  z-index: 20000 !important;
+}
+
+/* backdrop appena sotto il modal, ma sopra il contenuto della pagina */
+.modal-backdrop {
+  z-index: 19990 !important;
+}
+
+/* caso specifico: il dialog può anche avere z-index sul dialog */
+.modal-dialog {
+  z-index: 20001 !important;
+}
+
+/* assicurati che lo scrollbar non interferisca */
+body.modal-open {
+  overflow: hidden;
+}
+</style>
