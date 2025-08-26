@@ -11,8 +11,8 @@
 
       <form @submit.prevent="handleLogin">
         <div class="mb-3 text-start">
-          <label for="email" class="form-label">Email:</label>
-          <input type="email" id="email" v-model="email" class="form-control" required />
+          <label for="email" class="form-label">Email o Nome utente:</label>
+          <input type="text" id="identifier" v-model="identifier" class="form-control" required />
         </div>
 
         <div class="mb-3 text-start">
@@ -45,18 +45,19 @@ const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 const router = useRouter()
+const identifier = ref('')
 
 const handleLogin = async () => {
   try {
-    const response = await loginUser(email.value, password.value)
+    const response = await loginUser(identifier.value, password.value) 
     localStorage.setItem('token', response.token)
     localStorage.setItem('userName', response.user.username)
     localStorage.setItem('userId', response.user.id)
 
-    // Reindirizza alla pagina home
     router.push('/home')
   } catch (error) {
-    errorMessage.value = 'Email o password non validi.'
+    errorMessage.value = 'Credenziali non valide.'
   }
 }
+
 </script>

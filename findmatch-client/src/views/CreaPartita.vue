@@ -100,15 +100,29 @@
       </div>
     </form>
 
-    <div v-if="messaggio" class="alert alert-success mt-3 text-center">
-      {{ messaggio }}
+    <!-- TOAST -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+      <div
+        ref="toastEl"
+        class="toast align-items-center border-0 fade"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <div :class="['toast-body', 'rounded-3', 'shadow-lg', toastVariantClass]">
+          <strong class="me-2">{{ toastIcon }}</strong> {{ toastMessage }}
+        </div>
+      </div>
     </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import axios from 'axios'
+import * as bootstrap from 'bootstrap'
+
 
 const form = ref({
   sport: '',
@@ -180,56 +194,45 @@ watch(() => form.value.sport, (nv, ov) => {
   // Azzeriamo sempre tutti i contatori dei ruoli quando cambia lo sport
   Object.keys(roles.value).forEach(k => roles.value[k] = 0)
 
-  // (Opzionale) se vuoi resettare anche max_players quando passi a calcio, puoi farlo qui:
-  // if (nv === 'Calcio a 11' || nv === 'Calcio a 5') form.value.max_players = ''
-  // else form.value.max_players = form.value.max_players
 })
 
 const creaPartita = async () => {
   try {
     const organizer_id = localStorage.getItem('userId')
-
     if (!organizer_id) {
-      alert('Utente non autenticato.')
+      showToast('Devi essere loggato per creare una partita.', 'warning', 6000)
       return
     }
 
     if ((form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') && sumRoles.value > maxSlots.value) {
-      alert(`La somma dei ruoli non può superare ${maxSlots.value}.`)
+      showToast(`La somma dei ruoli non può superare ${maxSlots.value}.`, 'warning', 6000)
       return
     }
 
-    // Costruisci il payload
-    let nuovaPartita = {
-      ...form.value,
-      organizer_id
-    }
+    let nuovaPartita = { ...form.value, organizer_id }
 
     if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
-      // roles_needed = oggetto con ruoli con valore > 0 (chiavi come in roles)
       const rolesNeededObj = {}
       Object.keys(roles.value).forEach(k => {
         const v = Number(roles.value[k] || 0)
         if (v > 0) rolesNeededObj[k] = v
       })
-
-      nuovaPartita = {
-        ...nuovaPartita,
-        max_players: null,
-        roles_needed: rolesNeededObj
-      }
+      nuovaPartita = { ...nuovaPartita, max_players: null, roles_needed: rolesNeededObj }
     } else {
       nuovaPartita.max_players = Number(form.value.max_players) || null
     }
 
     await axios.post('http://localhost:3000/api/partite', nuovaPartita)
 
-    messaggio.value = 'Partita creata con successo!'
+    showToast('Partita creata con successo!', 'success', 5000)
+
+    // reset form
     form.value = { sport: '', location: '', date_time: '', max_players: '', description: '' }
     Object.keys(roles.value).forEach(k => roles.value[k] = 0)
   } catch (err) {
     console.error('Errore nella creazione della partita:', err)
-    alert('Errore durante la creazione della partita.')
+    const msg = err.response?.data?.error || 'Errore durante la creazione della partita.'
+    showToast(msg, 'danger', 6000)
   }
 }
 
@@ -241,6 +244,25 @@ const minDateTime = computed(() => {
   const minutes = pad(now.getMinutes())
   return `${year}-${month}-${day}T${hours}:${minutes}`
 })
+
+const toastEl = ref(null)
+const toastMessage = ref('')
+const toastVariant = ref('success')
+
+const toastIcon = computed(() => ({ success:'✅', danger:'🛑', warning:'⚠️' }[toastVariant.value] || 'ℹ️'))
+const toastVariantClass = computed(() => ({
+  success: 'bg-success text-white',
+  danger:  'bg-danger text-white',
+  warning: 'bg-warning text-dark'
+}[toastVariant.value] || 'bg-info text-white'))
+
+function showToast(message, variant = 'success', delayMs = 5000) {
+  toastMessage.value = message
+  toastVariant.value = variant
+  const t = new bootstrap.Toast(toastEl.value, { autohide: true, animation: true, delay: delayMs })
+  t.show()
+}
+
 
 onMounted(() => {
   const input = document.getElementById('autocomplete')

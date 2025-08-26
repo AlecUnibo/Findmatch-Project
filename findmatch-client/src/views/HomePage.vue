@@ -37,8 +37,8 @@
         </div>
 
         <div class="col-auto d-flex gap-2">
-          <button class="btn btn-outline-success d-flex align-items-center gap-2" @click="cercaPartite"><img src="/images/search-button.svg" alt="Cerca" width="16" height="16" />Cerca</button>
-          <button class="btn btn-outline-danger" @click="pulisciFiltri">Pulisci</button>
+          <button class="btn btn-success d-flex align-items-center gap-2" @click="cercaPartite"><img src="/images/search-button.svg" alt="Cerca" width="16" height="16" />Cerca</button>
+          <button class="btn btn-danger" @click="pulisciFiltri"><img src="/images/trash.svg" alt="Cerca" width="16" height="16" /> Pulisci</button>
         </div>
 
       </div>
@@ -90,51 +90,64 @@
               <div class="d-flex gap-2">
   <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
 
-  <!-- SE ISCRITTO: SOLO ABBANDONA -->
+
   <template v-if="isIscritto(partita.id)">
-    <button class="btn btn-sm btn-danger" @click="abbandona(partita.id)">Abbandona</button>
+    <button class="btn btn-sm btn-danger" @click="chiediConfermaAbbandona(partita.id)"> Abbandona </button>
   </template>
-
-  <!-- ALTRIMENTI: SPLIT PER CALCIO, BOTTONE SINGOLO PER ALTRO -->
+<!------------------------------------------------------------------------------------------------------------------------->
+  <!-- PULSANTI UNIONE ALLE PARTITE -->
   <template v-else>
-    <div v-if="isCalcio(partita)"
-         class="btn-group position-static role-dropdown" data-bs-display="static">
-      <button class="btn btn-sm btn-success"
-              @click="uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, 'random')">
-        Unisciti
-      </button>
-      <button type="button"
-              class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
-              data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="visually-hidden">Toggle Dropdown</span>
-      </button>
+    <div v-if="isCalcio(partita)" class="dropdown">
+  <button
+    class="btn btn-sm btn-success dropdown-toggle"
+    type="button"
+    data-bs-toggle="dropdown"
+    data-bs-display="static"
+    data-bs-auto-close="outside"
+    aria-expanded="false"
+  >
+    Unisciti
+  </button>
 
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li v-for="(r, idx) in roleEntries(partita)"
-            :key="`${partita.id}-${r.key}-${idx}`">
-          <button class="dropdown-item"
-                  :disabled="r.count <= 0"
-                  @click="uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, r.key)">
-            {{ ruoloLabel(r.key) }}
-            <span class="badge bg-secondary ms-2">{{ r.count }}</span>
-          </button>
-        </li>
-        <li v-if="roleEntries(partita).length === 0">
-          <span class="dropdown-item disabled">Nessun ruolo disponibile</span>
-        </li>
-      </ul>
-    </div>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <!-- Opzione casuale -->
+    <li>
+      <button class="dropdown-item"
+              @click="chiediConfermaUniscitiCalcio(partita, 'random')">
+        Unisciti (casuale)
+      </button>
+    </li>
+    <li><hr class="dropdown-divider"></li>
 
-    <button v-else class="btn btn-sm btn-success"
-            @click="unisciti(partita.id, partita.organizer_id, partita.sport)">
-      Unisciti
-    </button>
+    <!-- Ruoli disponibili -->
+    <li v-for="(r, idx) in roleEntries(partita)" :key="`${partita.id}-${r.key}-${idx}`">
+      <button class="dropdown-item"
+              :disabled="r.count <= 0"
+              @click="chiediConfermaUniscitiCalcio(partita, r.key)">
+        {{ ruoloLabel(r.key) }}
+        <span class="badge bg-secondary ms-2">{{ r.count }}</span>
+      </button>
+    </li>
+
+    <!-- Nessun ruolo -->
+    <li v-if="roleEntries(partita).length === 0">
+      <span class="dropdown-item disabled">Nessun ruolo disponibile</span>
+    </li>
+  </ul>
+</div>
+
+<!-- SE NON È CALCIO: BOTTONE NORMALE -->
+<button v-else class="btn btn-sm btn-success"
+        @click="chiediConfermaUnisciti(partita)">
+  Unisciti
+</button>
   </template>
+<!------------------------------------------------------------------------------------------------------------------------->
+
 </div>
 <!-- <pre class="text-light small" v-if="isCalcio(partita)">
   {{ roleEntries(partita) }}
 </pre> -->
-
             </div>
           </div>
         </div>
@@ -178,8 +191,6 @@
               </div>
               <div class="d-flex gap-2">
                 <button class="btn btn-sm btn-primary" @click="apriDettagli(partita)">Dettagli</button>
-                 <!-- opzionale: pulsante gestisci/elimina se già previsto nel backend -->
-                <!-- <button class="btn btn-sm btn-outline-danger" @click="eliminaPartita(partita.id)">Elimina</button> -->
               </div>
             </div>
           </div>
@@ -188,7 +199,7 @@
       </div>
 
 
-            <!-- MODALE DETTAGLI -->
+      <!-- MODALE DETTAGLI -->
       <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
           <div class="modal-content">
@@ -229,7 +240,33 @@
                   {{ user.username }}
                 </li>
               </ul>
+            </div>
+          </div>
+        </div>
+      </div>
 
+<!-- Modale unione partita-->
+      <div class="modal fade" id="modalConferma" tabindex="-1" aria-labelledby="modalConfermaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0">
+            <div class="modal-header" :class="confirmHeaderClass">
+              <h5 class="modal-title" id="modalConfermaLabel">{{ confirmTitle }}</h5>
+              <button type="button" class="btn-close"
+                      :class="confirmHeaderClass.includes('text-white') ? 'btn-close-white' : ''"
+                      data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-2" v-html="confirmMessage"></p>
+              <small v-if="confirmSubMessage" class="text-muted" v-html="confirmSubMessage"></small>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="confirmBusy">
+                Annulla
+              </button>
+              <button type="button" class="btn" :class="confirmCtaClass" @click="doConfirm" :disabled="confirmBusy">
+                <span v-if="confirmBusy" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                {{ confirmCtaText }}
+              </button>
             </div>
           </div>
         </div>
@@ -277,6 +314,15 @@ const tab = ref('disponibili');
 const searchUserQuery = ref('');
 const userSearchResults = ref([]);
 const selectedUserToInvite = ref(null);
+const confirmTitle = ref('');
+const confirmMessage = ref('');
+const confirmSubMessage = ref('');
+const confirmCtaText = ref('Conferma');
+const confirmCtaClass = ref('btn-primary');       // colore bottone conferma
+const confirmHeaderClass = ref('bg-primary text-white'); // header modale
+const confirmBusy = ref(false);
+let confirmOnOk = null;
+
 
 const sportEmojis = {
   'calcio a 5': '⚽', 'calcio a 11': '⚽', 'basket': '🏀',
@@ -433,6 +479,69 @@ const abbandona = async (eventId) => {
     showToast('Errore durante l\'abbandono. Riprova più tardi.', 'danger');
   }
 };
+
+function openConfirm({ title, message, subMessage = '', ctaText = 'Conferma', theme = 'primary', onOk }) {
+  confirmTitle.value = title;
+  confirmMessage.value = message;     
+  confirmSubMessage.value = subMessage;
+  confirmCtaText.value = ctaText;
+  confirmCtaClass.value = `btn-${theme}`;
+  confirmHeaderClass.value = `bg-${theme} ${theme === 'warning' ? 'text-dark' : 'text-white'}`;
+  confirmBusy.value = false;
+  confirmOnOk = onOk;
+
+  const modal = new bootstrap.Modal(document.getElementById('modalConferma'));
+  modal.show();
+}
+
+async function doConfirm() {
+  if (!confirmOnOk) return;
+  confirmBusy.value = true;
+  const modalEl = document.getElementById('modalConferma');
+  try {
+    await confirmOnOk();
+    bootstrap.Modal.getInstance(modalEl)?.hide();
+  } catch (e) {
+    // la funzione onOk gestisce già toast/errori
+  } finally {
+    confirmBusy.value = false;
+    confirmOnOk = null;
+  }
+}
+
+function chiediConfermaUnisciti(partita) {
+  const when = `${formatData(partita.date_time)} alle ${formatOra(partita.date_time)} – ${partita.location}`;
+  openConfirm({
+    title: `Unirti a ${partita.sport}?`,
+    message: `Confermi l’iscrizione a <strong>${partita.sport}</strong>?`,
+    subMessage: when,
+    ctaText: 'Sì, uniscimi',
+    theme: 'success',
+    onOk: () => unisciti(partita.id, partita.organizer_id, partita.sport),
+  });
+}
+
+function chiediConfermaUniscitiCalcio(partita, roleKey) {
+  const when = `${formatData(partita.date_time)} alle ${formatOra(partita.date_time)} – ${partita.location}`;
+  const roleMap = {
+    random: 'Assegnazione casuale',
+    portiere: 'Portiere',
+    difensore: 'Difensore',
+    centrocampista: 'Centrocampista',
+    attaccante: 'Attaccante',
+    all_around: 'All-around',
+  };
+  const roleLabel = roleMap[roleKey] || ruoloLabel(roleKey);
+
+  openConfirm({
+    title: `Unirti a ${partita.sport}?`,
+    message: `Confermi l’iscrizione come <strong>${roleLabel}</strong>?`,
+    subMessage: when,
+    ctaText: 'Sì, uniscimi',
+    theme: 'success',
+    onOk: () => uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, roleKey),
+  });
+}
 
 const apriDettagli = (partita) => {
   partitaSelezionata.value = partita;

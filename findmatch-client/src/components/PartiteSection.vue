@@ -48,17 +48,18 @@
             <!-- Azioni per "Create da te" -->
             <template v-if="isPartitaCreataDaUtente(partita)">
               <button class="btn btn-warning btn-sm me-2" @click="mostraModifica(partita)">Modifica</button>
-              <button class="btn btn-danger  btn-sm me-2" @click="eliminaPartita(partita.id)">Elimina</button>
+              <button class="btn btn-danger btn-sm me-2" @click="chiediConfermaElimina(partita.id)">Elimina</button>
             </template>
 
             <!-- Azione per sezione "A cui sei iscritto" -->
             <button
               v-if="props.sezione === 'iscritto'"
               class="btn btn-danger btn-sm me-2"
-              @click="abbandona(partita.id)"
+              @click="chiediConfermaAbbandona(partita.id)"
             >
               Abbandona
             </button>
+
           </div>
         </div>
       </div>
@@ -131,8 +132,58 @@
       </div>
     </div>
 
+    <!-- MODALE CONFERMA ELIMINAZIONE -->
+    <div class="modal fade" id="modalConfermaElimina" tabindex="-1" aria-labelledby="modalConfermaEliminaLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title" id="modalConfermaEliminaLabel">Eliminare la partita?</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2">Questa azione è <strong>definitiva</strong> e non può essere annullata.</p>
+            <small class="text-muted">La partita non sarà più visibile agli altri utenti.</small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="eliminando">
+              Annulla
+            </button>
+            <button type="button" class="btn btn-danger" @click="confermaEliminazione" :disabled="eliminando">
+              <span v-if="eliminando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Elimina definitivamente
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALE CONFERMA ABBANDONO -->
+    <div class="modal fade" id="modalConfermaAbbandono" tabindex="-1" aria-labelledby="modalConfermaAbbandonoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+          <div class="modal-header bg-danger text-dark">
+            <h5 class="modal-title" id="modalConfermaAbbandonoLabel">Abbandonare la partita?</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-2">Se abbandoni perderai il tuo posto in questa partita.</p>
+            <small class="text-muted">L’azione è immediata.</small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="abbandonando">
+              Annulla
+            </button>
+            <button type="button" class="btn btn-danger text-dark" @click="confermaAbbandono" :disabled="abbandonando">
+              <span v-if="abbandonando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Abbandona
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- TOAST -->
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11000">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
       <div
         ref="toastEl"
         class="toast align-items-center border-0 fade"
@@ -156,7 +207,7 @@ import axios from 'axios'
 const props = defineProps({
   partite: Array,
   sezione: String,               // 'mie' | 'iscritto' | altro
-  fetchEventoById: Function      // ✅ opzionale: (id) => Promise<eventoFresh>
+  fetchEventoById: Function      // opzionale: (id) => Promise<eventoFresh>
 })
 
 const userId = localStorage.getItem('userId')
@@ -285,20 +336,77 @@ async function salvaModifiche() {
   }
 }
 
-async function eliminaPartita(partitaId) {
-  if (!confirm('Sei sicuro di voler eliminare questa partita?')) return
+const idDaEliminare = ref(null)
+const eliminando = ref(false)
+
+function chiediConfermaElimina(id) {
+  idDaEliminare.value = id
+  const modal = new bootstrap.Modal(document.getElementById('modalConfermaElimina'))
+  modal.show()
+}
+
+async function confermaEliminazione() {
+  if (!idDaEliminare.value) return
+  eliminando.value = true
+  const modalEl = document.getElementById('modalConfermaElimina')
   try {
-    // Invia l'ID dell'utente nel corpo della richiesta DELETE
-    await axios.delete(`http://localhost:3000/api/partite/${partitaId}`, {
+    // Invia l'ID dell'utente nel body della DELETE (come facevi già)
+    await axios.delete(`http://localhost:3000/api/partite/${idDaEliminare.value}`, {
       data: { userId: userId }
-    });
-    
-    lista.value = lista.value.filter(p => p.id !== partitaId)
-    emit('partita-eliminata', partitaId)
+    })
+    // aggiorna lista e UI
+    lista.value = lista.value.filter(p => p.id !== idDaEliminare.value)
+    emit('partita-eliminata', idDaEliminare.value)
+
+    // chiudi modale
+    bootstrap.Modal.getInstance(modalEl)?.hide()
+
     showToast('Partita eliminata con successo!', 'danger', 5000)
   } catch (err) {
     console.error('Errore eliminazione partita:', err)
     showToast('Errore durante l\'eliminazione della partita.', 'danger', 5000)
+  } finally {
+    eliminando.value = false
+    idDaEliminare.value = null
+  }
+}
+
+
+const idDaAbbandonare = ref(null)
+const abbandonando = ref(false)
+
+function chiediConfermaAbbandona(id) {
+  idDaAbbandonare.value = id
+  const modal = new bootstrap.Modal(document.getElementById('modalConfermaAbbandono'))
+  modal.show()
+}
+
+async function confermaAbbandono() {
+  if (!idDaAbbandonare.value) return
+  abbandonando.value = true
+  const modalEl = document.getElementById('modalConfermaAbbandono')
+  try {
+    await axios.delete(`http://localhost:3000/api/partecipazioni`, {
+      data: { user_id: userId, event_id: idDaAbbandonare.value }
+    })
+
+    if (props.sezione === 'iscritto') {
+      lista.value = lista.value.filter(p => p.id !== idDaAbbandonare.value)
+      emit('partita-abbandonata', idDaAbbandonare.value)
+    } else {
+      updatePartecipantiLocal(idDaAbbandonare.value, -1)
+    }
+
+    bootstrap.Modal.getInstance(modalEl)?.hide()
+    showToast('Hai abbandonato la partita.', 'danger', 5000)
+
+    syncEvento(idDaAbbandonare.value)
+  } catch (err) {
+    console.error("Errore durante l'abbandono:", err)
+    showToast('Errore durante l\'abbandono. Riprova più tardi.', 'danger')
+  } finally {
+    abbandonando.value = false
+    idDaAbbandonare.value = null
   }
 }
 

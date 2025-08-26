@@ -62,13 +62,6 @@
 
 /* ---------- HomePage.vue ---------- */
 
-.component-home .card[class*='card-sport-'] {
-  position: relative;
-  /* overflow: hidden;  ← rimuovi / commenta */
-  overflow: visible;   /* ✅ lascia uscire la dropdown */
-  background-color: transparent;
-}
-
 .component-home .card[class*='card-sport-']::before {
   content: '';
   position: absolute;
@@ -78,13 +71,6 @@
   background-repeat: no-repeat;
   background-blend-mode: normal;
   z-index: 0;
-}
-
-/* assicura che anche il contenuto non clipperi */
-.component-home .card .card-body {
-  position: relative;
-  z-index: 1;
-  overflow: visible;          /* ✅ importante per dropdown */
 }
 
 /* Sfondo sfumato per card */
@@ -97,10 +83,10 @@
 .component-home .card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
 
 /* menu drop down Unisciti */
-.role-dropdown { position: static; }          /* usalo anche nel markup sul .btn-group */
+.role-dropdown { position: static; }         
 .role-dropdown .dropdown-menu {
-  z-index: 2000;                              /* sopra la card */
-  max-height: 260px;                          /* se diventa lunga */
+  z-index: 2000;                              
+  max-height: 260px;                          
   overflow-y: auto;
 }
 
@@ -108,6 +94,37 @@
 .component-home .toast-container .toast { --bs-toast-max-width: 520px; }
 .component-home .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
 .component-home .toast.fade { transition: opacity .6s ease; }
+
+.component-home .card[class*='card-sport-'] {
+  position: relative;
+  overflow: visible;
+  background-color: transparent;
+}
+
+.component-home .card .card-body {
+  position: relative;
+  overflow: visible;
+  z-index: auto;
+}
+
+.component-home .card:has(.dropdown-menu.show) {
+  z-index: 30000; 
+}
+
+/* il menu sopra alla sua card e a tutto il resto */
+.component-home .card .dropdown-menu {
+  position: absolute !important;
+  z-index: 30001;   /* sopra */
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+/* wrapper dedicato */
+.role-dropdown { position: static; }
+
+/* rimuove eventuali regole globali più deboli che danno fastidio */
+.card .dropdown-menu { z-index: auto; } 
+
 
 /* Emoji rain */
 .component-home .emoji-rain-container {
@@ -171,6 +188,20 @@
 .component-crea-partita .role-count {
   min-width: 48px;
   text-align: center;
+}
+
+/* Toast in CreaPartita */
+.component-crea-partita .toast-container .toast {
+  --bs-toast-max-width: 520px;
+}
+
+.component-crea-partita .toast .toast-body {
+  font-size: 1.05rem;
+  padding: 0.95rem 1.15rem;
+}
+
+.component-crea-partita .toast.fade {
+  transition: opacity .6s ease;
 }
 
 /* ---------- Notifiche.vue ---------- */

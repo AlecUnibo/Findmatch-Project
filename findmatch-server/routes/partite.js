@@ -302,54 +302,64 @@ router.put('/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/partite/:id  - elimina e notifica i partecipanti
 // ---------------------------------------------------------------------------
+// DELETE /api/partite/:id  - elimina e notifica i partecipanti
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-  const { userId } = req.body;
+  const { id } = req.params
 
+  const client = await pool.connect()
   try {
-    await pool.query('BEGIN');
+    await client.query('BEGIN')
 
-    const participantsRes = await pool.query(
-      'SELECT user_id FROM participants WHERE event_id = $1 AND user_id != $2',
-      [id, userId]
-    );
-    const participants = participantsRes.rows;
-
-    const eventRes = await pool.query(
-      'SELECT sport, date_time, location FROM events WHERE id = $1',
+    // 1) Recupera evento (serve anche organizer_id per le notifiche)
+    const evRes = await client.query(
+      'SELECT id, sport, date_time, location, organizer_id FROM events WHERE id = $1',
       [id]
-    );
-    const eventDetails = eventRes.rows[0] || null;
-
-    const deleteResult = await pool.query(
-      'DELETE FROM events WHERE id = $1 RETURNING *',
-      [id]
-    );
-
-    if (deleteResult.rows.length === 0) {
-      await pool.query('ROLLBACK');
-      return res.status(404).json({ error: 'Partita non trovata o già eliminata' });
+    )
+    if (evRes.rows.length === 0) {
+      await client.query('ROLLBACK')
+      return res.status(404).json({ error: 'Partita non trovata o già eliminata' })
     }
+    const ev = evRes.rows[0]
 
-    if (eventDetails) {
-      const message = `La partita di ${eventDetails.sport} del ${formatDateTime(eventDetails.date_time)} a ${eventDetails.location} è stata annullata dall'organizzatore.`;
-      for (const participant of participants) {
-        await pool.query(
-          `INSERT INTO notifications (user_id, actor_id, type, message)
-           VALUES ($1, $2, 'partita_annullata', $3)`,
-          [participant.user_id, userId, message]
-        );
+    // 2) Prendi i partecipanti (escludi l’organizzatore)
+    const partRes = await client.query(
+      'SELECT user_id FROM participants WHERE event_id = $1 AND user_id <> $2',
+      [id, ev.organizer_id]
+    )
+    const participants = partRes.rows
+
+    // 3) Elimina dipendenze (FK safe)
+    await client.query('DELETE FROM participants WHERE event_id = $1', [id])
+
+    // 4) Elimina evento
+    await client.query('DELETE FROM events WHERE id = $1', [id])
+
+    // 5) Notifiche (best effort)
+    try {
+      const message = `La partita di ${ev.sport} del ${formatDateTime(ev.date_time)} a ${ev.location} è stata annullata dall'organizzatore.`
+      for (const { user_id } of participants) {
+        await client.query(
+          `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
+           VALUES ($1, $2, $3, 'partita_annullata', $4)`,
+          [user_id, ev.organizer_id, ev.id, message]
+        )
       }
+    } catch (notifErr) {
+      console.error('Notifiche annullamento (non bloccante):', notifErr)
+      // non facciamo ROLLBACK per le notifiche
     }
 
-    await pool.query('COMMIT');
-    res.json({ message: 'Partita eliminata con successo e partecipanti notificati' });
+    await client.query('COMMIT')
+    // 204 = no content
+    return res.status(204).send()
   } catch (err) {
-    await pool.query('ROLLBACK');
-    console.error('Errore durante eliminazione partita:', err);
-    res.status(500).json({ error: 'Errore durante eliminazione partita' });
+    await client.query('ROLLBACK')
+    console.error('Errore durante eliminazione partita:', err)
+    return res.status(500).json({ error: 'Errore durante eliminazione partita' })
+  } finally {
+    client.release()
   }
-});
+})
 
 // ---------------------------------------------------------------------------
 // POST /api/partite/:id/invite  - invito a un utente
