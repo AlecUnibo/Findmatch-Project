@@ -234,3 +234,27 @@
   padding-left: 1rem;
   margin-left: auto;
 }
+
+.future-chat {
+  border: 2px dashed #dee2e6;
+  border-radius: 1rem;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(108, 117, 125, 0.06),
+    rgba(108, 117, 125, 0.06) 10px,
+    rgba(108, 117, 125, 0.12) 10px,
+    rgba(108, 117, 125, 0.12) 20px
+  );
+  min-height: 220px;
+}
+
+/* Stile toast, coerente con Home */
+.component-notifiche .toast { --bs-toast-max-width: 520px; }
+.component-notifiche .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
+.component-notifiche .toast.fade { transition: opacity .6s ease; }
+
+/* Notifica letta */
+.notification-read {
+  opacity: 0.7;
+  background-color: #f8f9fa;
+}
