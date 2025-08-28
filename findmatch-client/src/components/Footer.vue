@@ -1,5 +1,5 @@
 <template>
-  <footer class="component-footer bg-light text-dark py-4 border-top mt-auto">
+  <footer class="component-footer bg-light text-dark py-4 border-top mt-auto" role="contentinfo" aria-label="Footer del sito">
     <div class="container">
       <div class="row">
 
@@ -7,9 +7,21 @@
         <div class="col-md-4 mb-3">
           <h5>Contatti</h5>
           <ul class="list-unstyled">
-            <li><a href="mailto:alessandro.cacchi@studio.unibo.it" class="text-decoration-none text-muted">alessandro.cacchi@studio.unibo.it</a></li>
-            <li><a href="mailto:luca.zenobi2@studio.unibo.it" class="text-decoration-none text-muted">luca.zenobi2@studio.unibo.it</a></li>
-            <li><a href="mailto:stefano.tassinari6@studio.unibo.it" class="text-decoration-none text-muted">stefano.tassinari6@studio.unibo.it</a></li>
+            <li>
+              <a href="mailto:alessandro.cacchi@studio.unibo.it" class="text-decoration-none text-muted">
+                alessandro.cacchi@studio.unibo.it
+              </a>
+            </li>
+            <li>
+              <a href="mailto:luca.zenobi2@studio.unibo.it" class="text-decoration-none text-muted">
+                luca.zenobi2@studio.unibo.it
+              </a>
+            </li>
+            <li>
+              <a href="mailto:stefano.tassinari6@studio.unibo.it" class="text-decoration-none text-muted">
+                stefano.tassinari6@studio.unibo.it
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -17,11 +29,32 @@
         <div class="col-md-4 mb-3">
           <h5>Social</h5>
           <div class="d-flex align-items-center gap-3">
-            <a href="https://www.instagram.com/findmatch.it" target="_blank" rel="noopener">
-              <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" width="24" height="24" />
+            <a
+              href="https://www.instagram.com/findmatch.it"
+              class="social-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
+                   alt=""
+                   aria-hidden="true"
+                   width="24"
+                   height="24" />
+              <span class="visually-hidden">FindMatch su Instagram (si apre in una nuova scheda)</span>
             </a>
-            <a href="https://www.linkedin.com/company/google/" target="_blank" rel="noopener">
-              <img src="https://cdn-icons-png.flaticon.com/512/145/145807.png" alt="LinkedIn" width="24" height="24" />
+
+            <a
+              href="https://www.linkedin.com/company/google/"
+              class="social-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src="https://cdn-icons-png.flaticon.com/512/145/145807.png"
+                   alt=""
+                   aria-hidden="true"
+                   width="24"
+                   height="24" />
+              <span class="visually-hidden">FindMatch su LinkedIn (si apre in una nuova scheda)</span>
             </a>
           </div>
         </div>

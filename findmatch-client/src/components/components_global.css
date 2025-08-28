@@ -1,16 +1,136 @@
-/*
-   Styles estratti da Footer.vue
-*/
+/* -------------------------------------------------- Footer.vue -------------------------------------------------- */
 
 .component-footer img {
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.15s ease;
+  display: inline-block;
 }
 
-.component-footer img:hover {
+.component-footer a:hover img,
+.component-footer a:focus-visible img {
   transform: scale(1.2);
 }
 
-/* ---------- Navbar.vue (scoped -> global namespaced) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .component-footer img,
+  .component-footer a:hover img,
+  .component-footer a:focus-visible img {
+    transform: none;
+    transition: none;
+  }
+}
+
+.component-footer .social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 6px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.component-footer a:focus-visible,
+.component-footer button:focus-visible {
+  outline: 3px solid #0a66c2;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.component-footer .text-muted {
+  color: #374151 !important;
+}
+
+.component-footer a:hover,
+.component-footer a:focus-visible {
+  text-decoration: underline;
+  color: inherit;
+}
+
+.component-footer hr {
+  border-color: rgba(55,65,81,0.12);
+}
+
+@media (max-width: 576px) {
+  .component-footer .social-link {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+
+/* -------------------------------------------------- HomeSearchBar.vue -------------------------------------------------- */
+
+.home-search-card .form-control::placeholder {
+  color: rgba(55, 65, 81, 0.6);
+  opacity: 1;
+}
+
+.home-search-card .btn {
+  min-height: 38px;
+  padding-left: 0.6rem;
+  padding-right: 0.6rem;
+  align-items: center;
+  cursor: pointer;
+}
+
+.home-search-card .btn img {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+  width: 16px;
+  height: 16px;
+}
+
+.home-search-card .form-control:focus-visible,
+.home-search-card .form-select:focus-visible,
+.home-search-card .btn:focus-visible {
+  outline: 3px solid rgba(10, 102, 194, 0.9);
+  outline-offset: 2px;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.home-search-card .form-control:focus,
+.home-search-card .form-select:focus {
+  box-shadow: 0 0 0 .15rem rgba(255,255,255,.35);
+}
+
+.home-search-card .row {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-search-card .form-control,
+  .home-search-card .form-select,
+  .home-search-card .btn {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .home-search-card .form-control,
+  .home-search-card .form-select {
+    min-width: 110px;
+  }
+  .home-search-card .btn {
+    min-height: 40px;
+  }
+}
+
 
 /* --- NAVBAR --- */
 .component-navbar.custom-navbar {
@@ -27,7 +147,6 @@
   object-fit: contain;
 }
 
-/* --- MODALE PROFILO (versione "scoped" sotto la navbar, se NON usi teleport) --- */
 .component-navbar .overlay-backdrop {
   position: fixed;
   inset: 0;
@@ -68,7 +187,6 @@
 .component-navbar .user-modal-card h6 { color: #fff; }
 .component-navbar .user-modal-card .text-muted { color: #ddd !important; }
 
-/* --- MODALE PROFILO (versione "globale" se USI <teleport to="body">) --- */
 .overlay-backdrop {
   position: fixed;
   inset: 0;
@@ -129,13 +247,10 @@
 }
 .component-partite .card .card-body { position: relative; z-index: 1; }
 
-/* Progress & badge su sfondo immagine */
 .component-partite .progress { background-color: rgba(255,255,255,.25); }
 .component-partite .progress-bar { transition: width .25s ease; }
 .component-partite .badge.bg-light.text-dark { backdrop-filter: blur(2px); }
 
-/* Sfondo per sport */
-/* Mantieni i percorsi immagini come li hai usati; se erano /public/images/*, lasciali */
 .component-partite .card-sport-tennis::before { background-image: url('/public/images/tennis-mask.png'); }
 .component-partite .card-sport-paddle::before { background-image: url('/public/images/paddle-mask.png'); }
 .component-partite .card-sport-racchettoni::before { background-image: url('/public/images/racchettoni-mask.png'); }
@@ -144,7 +259,6 @@
 .component-partite .card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
 .component-partite .card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
 
-/* Toast */
 .component-partite .toast-container .toast { --bs-toast-max-width: 520px; }
 .component-partite .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
 .component-partite .toast.fade { transition: opacity .6s ease; }
@@ -157,12 +271,10 @@
   color: #fff;
 }
 
-/* Mantieni tutto in linea, più stretto possibile */
 .home-search-card .row {
   flex-wrap: nowrap !important;
 }
 
-/* Input e select: compatti e leggibili sullo sfondo */
 .home-search-card .form-control,
 .home-search-card .form-select {
   border: none;
@@ -172,7 +284,7 @@
   padding: .35rem .6rem;
   box-shadow: none;
   transition: box-shadow .15s ease, background .15s ease;
-  min-width: 150px; /* evita che diventino troppo stretti */
+  min-width: 150px;
 }
 .home-search-card .form-control:focus,
 .home-search-card .form-select:focus {
@@ -180,7 +292,6 @@
   box-shadow: 0 0 0 .2rem rgba(255,255,255,.35);
 }
 
-/* Bottoni */
 .home-search-card .btn {
   border-radius: 999px;
   padding: .45rem 1rem;
@@ -195,13 +306,11 @@
   background: rgba(255,255,255,.18);
 }
 
-/* Spaziatura interna della card */
 .home-search-card .card-body {
   padding-left: 1rem;
   padding-right: 1rem;
 }
 
-/* Riduci leggermente i breakpoint per stare tutto in riga su schermi piccoli */
 @media (max-width: 576px) {
   .home-search-card .form-control,
   .home-search-card .form-select {
@@ -215,12 +324,11 @@
   }
 }
 
-/* Contenitore del modale */
 .user-modal-card {
   width: 100%;
-  max-width: 640px;           /* più largo, non tagliato */
-  max-height: 85vh;           /* evita che esca dal viewport */
-  overflow: auto;             /* scroll interno se serve */
+  max-width: 640px;
+  max-height: 85vh;
+  overflow: auto;
   background: rgba(68, 128, 187, 0.8);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -230,7 +338,6 @@
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
 }
 
-/* Contenuto bianco interno (come avevi) */
 .user-card {
   background-color: #fff;
   color: #000;
@@ -244,10 +351,9 @@
 }
 
 .btn-close {
-  filter: invert(1);          /* visibile su sfondo scuro */
+  filter: invert(1);
 }
 
-/* Optional: evita scroll del body quando il modale è aperto */
 .body-modal-open {
   overflow: hidden;
 }

@@ -311,12 +311,9 @@ const closeModal = () => {
 
 const seguiUtente = async (targetUserId) => {
   if (!currentUserId) return alert('Devi essere loggato');
-  if (String(targetUserId) === String(currentUserId)) return; // no self-follow
-
-    // se già segue, ignora (o implementa toggle)
+  if (String(targetUserId) === String(currentUserId)) return;
   if (selectedUser.value?.is_following) return;
 
-  // Optimistic UI
   const prev = {
     followers_count: selectedUser.value.followers_count,
     is_following: selectedUser.value.is_following
@@ -329,7 +326,6 @@ const seguiUtente = async (targetUserId) => {
       `http://localhost:3000/api/users/${targetUserId}/follow`,
       { followerId: currentUserId }
     );
-        // allinea al dato server (in caso di concorrenza)
     selectedUser.value.followers_count = data.followers_count ?? selectedUser.value.followers_count;
   } catch (err) {
     console.error('Errore follow:', err);
@@ -340,7 +336,6 @@ const seguiUtente = async (targetUserId) => {
   }
 };
 
-// opzionale: toggla unfollow
 const smettiDiSeguire = async (targetUserId) => {
   if (!currentUserId) return;
   if (!selectedUser.value?.is_following) return;
@@ -370,7 +365,7 @@ const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('userName')
   localStorage.removeItem('userId')
-  router.push('/') // Torna alla pagina di login
+  router.push('/')
 }
 
 onMounted(() => {
