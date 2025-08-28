@@ -59,11 +59,12 @@
       </li>
     </ul>
         <!-- MODALE PROFILO UTENTE -->
-    <div
-      v-if="showModal"
-      class="modal-backdrop d-flex align-items-center justify-content-center"
-      @click.self="closeModal"
-    >
+      <teleport to="body">
+      <div
+        v-if="showModal"
+        class="overlay-backdrop d-flex align-items-center justify-content-center"
+        @click.self="closeModal"
+      >
       <div class="modal-content user-modal-card">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="mb-0">Profilo Utente</h5>
@@ -75,7 +76,10 @@
           Caricamento...
         </div>
 
-        <div v-else-if="selectedUser" class="user-card p-3 shadow-sm border-0 bg-white text-dark rounded">
+      <div v-else-if="selectedUser" class="user-card p-3 shadow-sm border-0 bg-white text-dark rounded">
+
+        <!-- VISTA PROFILO (default) -->
+        <template v-if="!showFollowersView">
           <div class="d-flex align-items-center mb-3">
             <img
               src="/images/immagine_profilo.jpg"
@@ -101,7 +105,11 @@
               </div>
             </div>
             <div class="col">
-              <div class="stat-box border rounded p-2">
+              <div
+                class="stat-box border rounded p-2 clickable"
+                @click="openFollowersView"
+                title="Vedi follower"
+              >
                 <div class="small text-secondary">Follower</div>
                 <div class="fs-5 fw-bold text-dark">
                   {{ selectedUser.followers_count ?? 0 }}
@@ -118,7 +126,6 @@
             <p v-else class="text-muted">Nessuna biografia disponibile</p>
           </div>
 
-          <!-- se non sto visitando il profilo con cui sono loggato -->
           <div v-if="String(selectedUser.id) !== String(currentUserId)">
             <button
               v-if="!selectedUser.is_following"
@@ -138,11 +145,50 @@
               Segui già
             </button>
           </div>
+        </template>
 
-        </div>
+        <!-- VISTA FOLLOWER (lista) -->
+        <template v-else>
+          <div class="d-flex align-items-center mb-3">
+            <button class="btn btn-sm btn-outline-secondary me-2" @click="closeFollowersView">← Indietro</button>
+            <h5 class="mb-0">Follower di {{ selectedUser.username }}</h5>
+          </div>
+
+          <div v-if="followersSelectedLoading" class="text-center py-2">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            Caricamento...
+          </div>
+
+          <ul v-else-if="followersSelectedList.length" class="list-group">
+            <li
+              v-for="u in followersSelectedList"
+              :key="u.id"
+              class="list-group-item d-flex align-items-center"
+            >
+              <img
+                src="/images/immagine_profilo.jpg"
+                alt="pfp"
+                width="36"
+                height="36"
+                class="rounded-circle me-2"
+                style="object-fit: cover;"
+              />
+              <div class="flex-grow-1">
+                <div class="fw-semibold">{{ u.username }}</div>
+                <small class="text-muted">{{ u.email }}</small>
+              </div>
+            </li>
+          </ul>
+          <p v-else class="text-muted mb-0">Nessun follower.</p>
+
+          <p v-if="followersSelectedError" class="text-danger small mt-2">{{ followersSelectedError }}</p>
+        </template>
+      </div>
+
 
       </div>
     </div>
+    </teleport>
 
   </nav>
 </template>
@@ -151,6 +197,7 @@
 import { useRouter } from 'vue-router'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
+import * as bootstrap from 'bootstrap' 
 
 const router = useRouter()
 
@@ -163,6 +210,12 @@ const showModal = ref(false)
 const loadingUser = ref(false)
 const currentUserId = localStorage.getItem('userId')
 const unreadNotifications = ref(0)
+const loadingFollowersSelected = ref(false)
+const showFollowersView = ref(false)
+const followersSelectedList = ref([])
+const followersSelectedLoading = ref(false)
+const followersSelectedError = ref('')
+
 let notificationInterval = null
 
 const fetchUnreadCount = async () => {
@@ -222,11 +275,39 @@ const openUserModal = async (userId) => {
   }
 }
 
+const openFollowersView = async () => {
+  if (!selectedUser.value?.id) return
+  followersSelectedError.value = ''
+  followersSelectedLoading.value = true
+  showFollowersView.value = true
+
+  try {
+    const { data } = await axios.get(
+      `http://localhost:3000/api/users/${selectedUser.value.id}/followers`
+    )
+    followersSelectedList.value = data || []
+  } catch (err) {
+    console.error('Errore nel recupero follower utente selezionato:', err)
+    followersSelectedError.value = 'Impossibile caricare la lista dei follower.'
+    followersSelectedList.value = []
+  } finally {
+    followersSelectedLoading.value = false
+  }
+}
+
+const closeFollowersView = () => {
+  showFollowersView.value = false
+}
+
 
 const closeModal = () => {
   showModal.value = false
   selectedUser.value = null
+  showFollowersView.value = false
+  followersSelectedList.value = []
+  followersSelectedError.value = ''
 }
+
 
 const seguiUtente = async (targetUserId) => {
   if (!currentUserId) return alert('Devi essere loggato');

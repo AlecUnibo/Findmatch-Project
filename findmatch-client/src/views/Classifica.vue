@@ -1,5 +1,5 @@
 <template>
-  <div class="leaderboard component-leaderboard">
+  <div class="leaderboard component-leaderboard mb-4 mt-4">
     <h2>Classifica - Questo mese</h2>
     <ul>
       <li v-for="(player, index) in players" :key="player.username" :class="rankClass(index)">

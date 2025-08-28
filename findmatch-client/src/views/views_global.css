@@ -125,7 +125,6 @@
 /* rimuove eventuali regole globali più deboli che danno fastidio */
 .card .dropdown-menu { z-index: auto; } 
 
-
 /* Emoji rain */
 .component-home .emoji-rain-container {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -180,29 +179,114 @@
   font-weight: bold;
 }
 
-/* ---------- CreaPartita.vue ---------- */
-.component-crea-partita .role-label {
-  min-width: 160px;
+.clickable {
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+
+/* ---------- CreaPartita.vue ---------- */
+.fm-card {
+  background: #fff;
+  border-radius: 1.25rem;
+}
+
+.fm-header {
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
+  position: relative;
+}
+
+.fm-header .fm-badge {
+  font-size: .9rem;
+  padding: .35rem .75rem;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 999px;
+}
+
+/* Input e select più "soft" */
+.component-crea-partita .fm-control {
+  border-radius: .8rem;
+  border-color: #e7e7e9;
+  background: #fafafa;
+}
+.component-crea-partita .fm-control:focus {
+  border-color: #b9d0ff;
+  box-shadow: 0 0 0 .25rem rgba(13,110,253,.15);
+  background: #fff;
+}
+
+/* Progress ruoli */
+.component-crea-partita .fm-progress {
+  height: 12px;
+}
+.component-crea-partita .fm-progress .progress-bar {
+  font-size: .75rem;
+  line-height: 12px;
+}
+
+/* Lista ruoli */
+.component-crea-partita .fm-roles .list-group-item {
+  background: #ffffff;
+  transition: transform .1s ease, box-shadow .1s ease;
+}
+.component-crea-partita .fm-roles .list-group-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 .35rem 1rem rgba(0,0,0,.06);
+}
+.component-crea-partita .fm-role-badge {
+  background: #f1f4ff;
+  border: 1px solid #dbe3ff;
+  color: #3654ff;
+  padding: .35rem .55rem;
+  border-radius: .6rem;
+  font-size: .9rem;
+}
+
+/* Counter + bottoni +/- */
+.component-crea-partita .fm-qty {
+  width: 36px;
+  height: 36px;
+  border-radius: .7rem !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.component-crea-partita .fm-count {
+  min-width: 52px;
+  text-align: center;
+  border-radius: .7rem;
+  background: #f7f7f9;
+  border: 1px solid #ececf1;
+  padding: .4rem .75rem;
+  font-weight: 600;
+}
+
+/* CTA */
+.component-crea-partita .fm-submit {
+  box-shadow: 0 .5rem 1.25rem rgba(68, 128, 187, 0.8);
+}
+.component-crea-partita .fm-submit:hover {
+  transform: translateY(-1px);
+}
+
+/* Role label width (tua regola + piccolo tuning) */
+.component-crea-partita .role-label { min-width: 160px; }
+
+/* Count width (tua regola) */
 .component-crea-partita .role-count {
   min-width: 48px;
   text-align: center;
 }
 
-/* Toast in CreaPartita */
-.component-crea-partita .toast-container .toast {
-  --bs-toast-max-width: 520px;
-}
-
-.component-crea-partita .toast .toast-body {
-  font-size: 1.05rem;
-  padding: 0.95rem 1.15rem;
-}
-
-.component-crea-partita .toast.fade {
-  transition: opacity .6s ease;
-}
+/* Toast in CreaPartita (tue regole mantenute) */
+.component-crea-partita .toast-container .toast { --bs-toast-max-width: 520px; }
+.component-crea-partita .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
+.component-crea-partita .toast.fade { transition: opacity .6s ease; }
 
 /* ---------- Notifiche.vue ---------- */
 
@@ -257,4 +341,16 @@
 .notification-read {
   opacity: 0.7;
   background-color: #f8f9fa;
+}
+
+/* --- MODALE DI CONFERMA --- */
+.component-notifiche .modal-content {
+  border-radius: 1rem;
+}
+.component-notifiche .modal-header {
+  background-color: #ffc107 !important;
+  color: #fff;
+}
+.component-notifiche .modal-footer {
+  border-top: 0;
 }

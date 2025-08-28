@@ -119,8 +119,7 @@
       <div v-else-if="currentTab === 'chat'" class="py-4">
         <h3 class="h5 mb-3">Chat </h3>
         <p class="text-muted">
-          Questa sezione ospiterà la chat tra utenti (DM e chat di gruppo legate alle partite).
-          Attualmente non è ancora implementata.
+          Futura implementazione.
         </p>
 
       </div>
@@ -135,6 +134,30 @@
       </div>
     </div>
   </div>
+
+  <!-- MODALE DI CONFERMA -->
+<div class="modal fade" tabindex="-1" ref="confirmModalEl" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">{{ confirmTitle }}</h5>
+        <button type="button" class="btn-close" @click="resolveConfirm(false)" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">{{ confirmMessage }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" @click="resolveConfirm(false)">
+          Annulla
+        </button>
+        <button type="button" class="btn" :class="confirmBtnClass" @click="resolveConfirm(true)">
+          {{ confirmBtnText }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </template>
 
 <script setup>
@@ -142,7 +165,6 @@ import { ref, onMounted, computed, watch } from 'vue'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
 
-/* ---- TABS ---- */
 const currentTab = ref(localStorage.getItem('notificheTab') || 'notifiche')
 const tabs = [
   { label: '🔔 Notifiche', value: 'notifiche' },
@@ -150,11 +172,52 @@ const tabs = [
 ]
 watch(currentTab, (val) => localStorage.setItem('notificheTab', val))
 
-/* ---- TUO SCRIPT (invariato) ---- */
 const notifiche = ref([])
 const loading = ref(true)
 const actionInProgress = ref(false)
 const userId = localStorage.getItem('userId')
+
+/* ---- MODALE DI CONFERMA ELIMINAZIONE NOTIFICjE ---- */
+const confirmModalEl = ref(null)
+let confirmModalInstance = null
+const confirmTitle = ref('Conferma azione')
+const confirmMessage = ref('Sei sicuro?')
+const confirmBtnText = ref('Conferma')
+const confirmBtnClass = ref('btn-danger')
+
+let _confirmResolver = null
+
+function askConfirm({
+  title = 'Conferma azione',
+  message = 'Sei sicuro?',
+  confirmText = 'Conferma',
+  variant = 'danger', // 'danger' | 'primary' | 'warning'
+} = {}) {
+  confirmTitle.value = title
+  confirmMessage.value = message
+  confirmBtnText.value = confirmText
+  confirmBtnClass.value = variant === 'warning'
+    ? 'btn-warning'
+    : variant === 'primary'
+    ? 'btn-primary'
+    : 'btn-danger'
+
+  if (!confirmModalInstance) {
+    confirmModalInstance = new bootstrap.Modal(confirmModalEl.value, { backdrop: 'static', keyboard: false })
+  }
+  confirmModalInstance.show()
+
+  return new Promise((resolve) => { _confirmResolver = resolve })
+}
+
+function resolveConfirm(answer) {
+  if (confirmModalInstance) confirmModalInstance.hide()
+  if (_confirmResolver) {
+    _confirmResolver(answer)
+    _confirmResolver = null
+  }
+}
+
 
 const hasUnread = computed(
   () => Array.isArray(notifiche.value) && notifiche.value.some(n => !n.is_read)
@@ -202,11 +265,20 @@ const markOneAsRead = async (notifica) => {
 
 const deleteNotification = async (notificationId) => {
   if (!userId || actionInProgress.value) return
-  if (!confirm('Sei sicuro di voler eliminare questa notifica?')) return
+
+  const ok = await askConfirm({
+    title: 'Eliminare questa notifica?',
+    message: 'Questa azione non può essere annullata.',
+    confirmText: 'Elimina',
+    variant: 'danger',
+  })
+  if (!ok) return
+
   actionInProgress.value = true
   try {
     await axios.delete(`http://localhost:3000/api/notifiche/${notificationId}`, { data: { userId } })
     notifiche.value = notifiche.value.filter(n => n.id !== notificationId)
+    showToast('Notifica eliminata.', 'success')
   } catch (err) {
     console.error('Errore nell\'eliminazione della notifica:', err)
     showToast('Errore durante l\'eliminazione.', 'danger')
@@ -215,13 +287,23 @@ const deleteNotification = async (notificationId) => {
   }
 }
 
+
 const deleteAllNotifications = async () => {
   if (!userId || (notifiche.value?.length || 0) === 0 || actionInProgress.value) return
-  if (!confirm('Sei sicuro di voler eliminare TUTTE le notifiche?')) return
+
+  const ok = await askConfirm({
+    title: 'Eliminare tutte le notifiche?',
+    message: 'Verranno rimosse tutte le notifiche presenti. Procedere?',
+    confirmText: 'Elimina tutte',
+    variant: 'danger',
+  })
+  if (!ok) return
+
   actionInProgress.value = true
   try {
     await axios.delete(`http://localhost:3000/api/notifiche/delete-all/${userId}`)
     notifiche.value = []
+    showToast('Tutte le notifiche sono state eliminate.', 'success')
   } catch (err) {
     console.error('Errore durante l\'eliminazione di tutte le notifiche:', err)
     showToast('Errore durante l\'eliminazione.', 'danger')
@@ -229,6 +311,7 @@ const deleteAllNotifications = async () => {
     actionInProgress.value = false
   }
 }
+
 
 // FUNZIONE PER UNIRSI ALLA PARTITA
 const uniscitiPartita = async (eventId) => {

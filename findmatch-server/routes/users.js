@@ -29,30 +29,28 @@ router.get('/:id', async (req, res) => {
     const result = await pool.query(
       `
       SELECT 
-        u.id,
-        u.username,
-        u.email,
-        u.bio,
-        -- conteggio follower live
-        (SELECT COUNT(*) FROM followers f WHERE f.user_id = u.id) AS followers_count,
-        -- partite giocate: partecipazioni a eventi già passati
-        COALESCE((
-          SELECT COUNT(DISTINCT p.event_id)
-          FROM participants p 
-          JOIN events e ON e.id = p.event_id
-          WHERE p.user_id = u.id
-            AND e.date_time < NOW()
-        ), 0) AS matches_played,
-        -- facoltativo: se il viewer segue già questo utente
-        CASE 
-          WHEN $2::int IS NULL THEN false
-          ELSE EXISTS(
-            SELECT 1 FROM followers f2 
-            WHERE f2.user_id = u.id AND f2.follower_id = $2::int
-          )
-        END AS is_following
-      FROM users u
-      WHERE u.id = $1
+      u.id,
+      u.username,
+      u.email,
+      u.bio,
+      (SELECT COUNT(*) FROM followers f WHERE f.user_id = u.id)       AS followers_count,
+      (SELECT COUNT(*) FROM followers f WHERE f.follower_id = u.id)    AS following_count,
+      COALESCE((
+        SELECT COUNT(DISTINCT p.event_id)
+        FROM participants p 
+        JOIN events e ON e.id = p.event_id
+        WHERE p.user_id = u.id AND e.date_time < NOW()
+      ), 0) AS matches_played,
+      CASE 
+        WHEN $2::int IS NULL THEN false
+        ELSE EXISTS(
+          SELECT 1 FROM followers f2 
+          WHERE f2.user_id = u.id AND f2.follower_id = $2::int
+        )
+      END AS is_following
+    FROM users u
+    WHERE u.id = $1
+
       `,
       [id, viewerId || null]
     );
@@ -217,6 +215,57 @@ router.delete('/:id/follow', async (req, res) => {
   } catch (err) {
     console.error('Errore unfollow:', err);
     res.status(500).json({ error: 'Errore unfollow' });
+  }
+});
+
+// Lista "Seguiti" (utenti che l'utente :id segue)
+router.get('/:id/following', async (req, res) => {
+  const { id } = req.params;
+  const limit = Math.min(parseInt(req.query.limit || '100', 10), 200);
+  const offset = Math.max(parseInt(req.query.offset || '0', 10), 0);
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT u.id, u.username, u.email
+      FROM followers f
+      JOIN users u ON u.id = f.user_id         -- user_id = seguito
+      WHERE f.follower_id = $1                 -- follower_id = chi segue (l'utente loggato)
+      ORDER BY u.username ASC
+      LIMIT $2 OFFSET $3
+      `,
+      [id, limit, offset]
+    );
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Errore nel recupero seguiti:', err);
+    res.status(500).json({ error: 'Errore nel recupero seguiti' });
+  }
+});
+
+// Lista "Follower" (utenti che seguono l'utente :id)
+router.get('/:id/followers', async (req, res) => {
+  const { id } = req.params;
+  const limit = Math.min(parseInt(req.query.limit || '100', 10), 200);
+  const offset = Math.max(parseInt(req.query.offset || '0', 10), 0);
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT u.id, u.username, u.email
+      FROM followers f
+      JOIN users u ON u.id = f.follower_id   -- follower_id = chi segue
+      WHERE f.user_id = $1                   -- user_id = l'utente seguito (tu)
+      ORDER BY u.username ASC
+      LIMIT $2 OFFSET $3
+      `,
+      [id, limit, offset]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Errore nel recupero follower:', err);
+    res.status(500).json({ error: 'Errore nel recupero follower' });
   }
 });
 

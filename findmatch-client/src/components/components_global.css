@@ -12,62 +12,13 @@
 
 /* ---------- Navbar.vue (scoped -> global namespaced) ---------- */
 
+/* --- NAVBAR --- */
 .component-navbar.custom-navbar {
-  background-color: rgba(68, 128, 187, 0.8);
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s ease;
-}
-
-.component-navbar .modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.361);
-  z-index: 1050;
-}
-
-.component-navbar .user-card {
-  background-color: #fff;
-  color: #000;
-  border-radius: 10px;
-}
-
-.component-navbar .user-card h4 {
-  color: #000 !important;
-}
-
-.component-navbar .stat-box {
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  color: #222;
-}
-
-.component-navbar .user-modal-card {
-  max-width: 600px;
-  min-width: 360px;
-  width: 100%;
-  background-color: rgba(68, 127, 187, 0.955);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: white;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.353);
-}
-
-.component-navbar .user-modal-card .btn-close {
-  filter: invert(1);
-}
-
-.component-navbar .user-modal-card h4,
-.component-navbar .user-modal-card h5,
-.component-navbar .user-modal-card h6 {
-  color: #fff;
-}
-
-.component-navbar .user-modal-card .text-muted {
-  color: #ddd !important;
 }
 
 .component-navbar .navbar-logo {
@@ -75,6 +26,89 @@
   width: auto;
   object-fit: contain;
 }
+
+/* --- MODALE PROFILO (versione "scoped" sotto la navbar, se NON usi teleport) --- */
+.component-navbar .overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.component-navbar .user-modal-card {
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+  overflow: auto;
+  background-color: rgba(68, 127, 187, 0.95);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+.component-navbar .user-card {
+  background-color: #fff;
+  color: #000;
+  border-radius: 10px;
+}
+.component-navbar .user-card h4 { color: #000 !important; }
+.component-navbar .stat-box {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  color: #222;
+}
+.component-navbar .user-modal-card .btn-close { filter: invert(1); }
+.component-navbar .user-modal-card h4,
+.component-navbar .user-modal-card h5,
+.component-navbar .user-modal-card h6 { color: #fff; }
+.component-navbar .user-modal-card .text-muted { color: #ddd !important; }
+
+/* --- MODALE PROFILO (versione "globale" se USI <teleport to="body">) --- */
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.user-modal-card {
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+  overflow: auto;
+  background-color: rgba(68, 127, 187, 0.95);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+.user-card {
+  background-color: #fff;
+  color: #000;
+  border-radius: 10px;
+}
+.user-card h4 { color: #000 !important; }
+.stat-box {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  color: #222;
+}
+.user-modal-card .btn-close { filter: invert(1); }
+.user-modal-card h4,
+.user-modal-card h5,
+.user-modal-card h6 { color: #fff; }
+.user-modal-card .text-muted { color: #ddd !important; }
+
 
 /* ---------- PartiteList.vue (scoped -> global namespaced) ---------- */
 
@@ -114,4 +148,108 @@
 .component-partite .toast-container .toast { --bs-toast-max-width: 520px; }
 .component-partite .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
 .component-partite .toast.fade { transition: opacity .6s ease; }
+
+/* ===== HOME SEARCH CARD (solo estetica) ===== */
+.home-search-card {
+  background: linear-gradient(135deg, rgba(68,128,187,0.8), #567cc9);
+  border: none;
+  border-radius: 1rem;
+  color: #fff;
+}
+
+/* Mantieni tutto in linea, più stretto possibile */
+.home-search-card .row {
+  flex-wrap: nowrap !important;
+}
+
+/* Input e select: compatti e leggibili sullo sfondo */
+.home-search-card .form-control,
+.home-search-card .form-select {
+  border: none;
+  border-radius: .65rem;
+  background: rgba(255,255,255,.95);
+  height: 38px;
+  padding: .35rem .6rem;
+  box-shadow: none;
+  transition: box-shadow .15s ease, background .15s ease;
+  min-width: 150px; /* evita che diventino troppo stretti */
+}
+.home-search-card .form-control:focus,
+.home-search-card .form-select:focus {
+  background: #fff;
+  box-shadow: 0 0 0 .2rem rgba(255,255,255,.35);
+}
+
+/* Bottoni */
+.home-search-card .btn {
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.home-search-card .btn-outline-light {
+  border: 2px solid rgba(255,255,255,.85);
+  color: #fff;
+}
+.home-search-card .btn-outline-light:hover {
+  background: rgba(255,255,255,.18);
+}
+
+/* Spaziatura interna della card */
+.home-search-card .card-body {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Riduci leggermente i breakpoint per stare tutto in riga su schermi piccoli */
+@media (max-width: 576px) {
+  .home-search-card .form-control,
+  .home-search-card .form-select {
+    min-width: 130px;
+    height: 34px;
+    font-size: .9rem;
+  }
+  .home-search-card .btn {
+    padding: .35rem .8rem;
+    font-size: .9rem;
+  }
+}
+
+/* Contenitore del modale */
+.user-modal-card {
+  width: 100%;
+  max-width: 640px;           /* più largo, non tagliato */
+  max-height: 85vh;           /* evita che esca dal viewport */
+  overflow: auto;             /* scroll interno se serve */
+  background: rgba(68, 128, 187, 0.8);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Contenuto bianco interno (come avevi) */
+.user-card {
+  background-color: #fff;
+  color: #000;
+  border-radius: 10px;
+}
+
+.stat-box {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  color: #222;
+}
+
+.btn-close {
+  filter: invert(1);          /* visibile su sfondo scuro */
+}
+
+/* Optional: evita scroll del body quando il modale è aperto */
+.body-modal-open {
+  overflow: hidden;
+}
+
 

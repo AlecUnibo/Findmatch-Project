@@ -149,7 +149,7 @@
       <!-- Modale conferma -->
       <div class="modal fade" id="modalConferma" tabindex="-1" aria-labelledby="modalConfermaLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border-0">
+          <div class="modal-content border-0 shadow">
             <div class="modal-header" :class="confirmHeaderClass">
               <h5 class="modal-title" id="modalConfermaLabel">{{ confirmTitle }}</h5>
               <button

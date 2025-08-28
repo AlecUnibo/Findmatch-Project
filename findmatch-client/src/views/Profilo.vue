@@ -21,21 +21,29 @@
 
       <hr />
 
-      <div class="row text-center mb-3">
-        <div class="col">
+      <!-- Partite - Follower - Seguiti -->
+      <div class="row text-center mb-3 g-3">
+        <div class="col-12 col-md-4">
           <div class="card shadow-sm p-3">
             <div class="small text-muted">Partite giocate</div>
             <div class="fs-4 fw-bold">{{ matchesPlayed }}</div>
           </div>
         </div>
-        <div class="col">
-          <div class="card shadow-sm p-3">
+         <div class="col-6 col-md-4">
+          <div class="card shadow-sm p-3 clickable" @click="apriModaleFollower">
             <div class="small text-muted">Follower</div>
             <div class="fs-4 fw-bold">{{ followersCount }}</div>
           </div>
         </div>
+        <div class="col-6 col-md-4">
+          <div class="card shadow-sm p-3 clickable" @click="apriModaleSeguiti">
+            <div class="small text-muted">Seguiti</div>
+            <div class="fs-4 fw-bold">{{ followingCount }}</div>
+          </div>
+        </div>
       </div>
 
+      <!-- Biografia -->
       <div class="mb-4">
         <h5>📝 Biografia</h5>
         <p v-if="user.bio && user.bio.trim().length" class="mb-0 bio-text">
@@ -69,7 +77,7 @@
       />
 
       <div v-else-if="currentTab === 'stats'" class="text-center text-muted py-4">
-        Nessuna statistica disponibile.
+        Futura implementazione
       </div>
     </div>
 
@@ -106,11 +114,113 @@
       </div>
     </div>
 
+    <!-- MODALE SEGUÌTI -->
+    <div
+      class="modal fade"
+      id="modalSeguiti"
+      tabindex="-1"
+      aria-labelledby="modalSeguitiLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalSeguitiLabel">Utenti seguiti</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+          <div class="modal-body">
+            <div v-if="loadingFollowing" class="text-center py-2">
+              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+              Caricamento...
+            </div>
+
+            <div v-else>
+              <ul v-if="followingList.length" class="list-group">
+                <li
+                  v-for="u in followingList"
+                  :key="u.id"
+                  class="list-group-item d-flex align-items-center"
+                >
+                  <img
+                    src="/images/immagine_profilo.jpg"
+                    alt="pfp"
+                    width="36"
+                    height="36"
+                    class="rounded-circle me-2"
+                    style="object-fit: cover;"
+                  />
+                  <div class="flex-grow-1">
+                    <div class="fw-semibold">{{ u.username }}</div>
+                    <small class="text-muted">{{ u.email }}</small>
+                  </div>
+                  <!-- Se vuoi, in futuro: bottone 'Apri profilo' -->
+                </li>
+              </ul>
+              <p v-else class="text-muted mb-0">Non stai seguendo nessuno.</p>
+            </div>
+
+            <p v-if="followingError" class="text-danger small mt-2">{{ followingError }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALE FOLLOWER -->
+    <div
+      class="modal fade"
+      id="modalFollower"
+      tabindex="-1"
+      aria-labelledby="modalFollowerLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalFollowerLabel">I tuoi follower</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+
+          <div class="modal-body">
+            <div v-if="loadingFollowers" class="text-center py-2">
+              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+              Caricamento...
+            </div>
+
+            <div v-else>
+              <ul v-if="followersList.length" class="list-group">
+                <li
+                  v-for="u in followersList"
+                  :key="u.id"
+                  class="list-group-item d-flex align-items-center"
+                >
+                  <img
+                    src="/images/immagine_profilo.jpg"
+                    alt="pfp"
+                    width="36"
+                    height="36"
+                    class="rounded-circle me-2"
+                    style="object-fit: cover;"
+                  />
+                  <div class="flex-grow-1">
+                    <div class="fw-semibold">{{ u.username }}</div>
+                    <small class="text-muted">{{ u.email }}</small>
+                  </div>
+                </li>
+              </ul>
+              <p v-else class="text-muted mb-0">Nessun follower.</p>
+            </div>
+
+            <p v-if="followersError" class="text-danger small mt-2">{{ followersError }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
 import PartiteSection from '@/components/PartiteSection.vue'
@@ -124,6 +234,7 @@ const user = ref({
 })
 
 const followersCount = ref(0)
+const followingCount = ref(0)      // <-- nuovo contatore "Seguiti"
 const matchesPlayed = ref(0)
 const playedMatches = ref([])
 
@@ -136,6 +247,16 @@ const tabs = [
 ]
 watch(currentTab, (val) => localStorage.setItem('profiloTab', val))
 
+// Stato per "Seguiti"
+const followingList = ref([])
+const loadingFollowing = ref(false)
+const followingError = ref('')
+
+// Stato per "Follower"
+const followersList = ref([])
+const loadingFollowers = ref(false)
+const followersError = ref('')
+
 onMounted(async () => {
   try {
     const { data } = await axios.get(`http://localhost:3000/api/users/${userId}`)
@@ -144,6 +265,23 @@ onMounted(async () => {
     followersCount.value = data.followers_count ?? 0
     matchesPlayed.value = data.matches_played ?? 0
 
+    // Se il backend restituisce già following_count:
+    if (typeof data.following_count !== 'undefined') {
+      followingCount.value = data.following_count
+    } else {
+      // In alternativa, proviamo a calcolarlo chiedendo la lista (se endpoint presente):
+      try {
+        const res = await axios.get(`http://localhost:3000/api/users/${userId}/following`)
+        followingList.value = res.data || []
+        followingCount.value = followingList.value.length
+      } catch (e) {
+        // Se l'endpoint non esiste ancora, lascia 0 senza errori visivi
+        followingList.value = []
+        followingCount.value = 0
+      }
+    }
+
+    // Storico partite
     const storicoRes = await axios.get(`http://localhost:3000/api/partecipazioni/storico/${userId}`)
     playedMatches.value = storicoRes.data
   } catch (err) {
@@ -168,4 +306,59 @@ async function salvaModifiche() {
     alert('❌ Errore durante il salvataggio della biografia.')
   }
 }
+
+// Apri modale "Seguiti" e carica lista
+async function apriModaleSeguiti() {
+  followingError.value = ''
+  loadingFollowing.value = true
+
+  const el = document.getElementById('modalSeguiti')
+  if (!el) return
+  const modal = new bootstrap.Modal(el)
+  modal.show()
+
+  try {
+    const res = await axios.get(`http://localhost:3000/api/users/${userId}/following`)
+    followingList.value = res.data || []
+    followingCount.value = followingList.value.length
+  } catch (err) {
+    console.error('Errore nel recupero seguiti:', err)
+    followingError.value = 'Impossibile caricare la lista dei seguiti.'
+    followingList.value = []
+  } finally {
+    loadingFollowing.value = false
+  }
+}
+
+async function apriModaleFollower() {
+  followersError.value = ''
+  loadingFollowers.value = true
+
+  const el = document.getElementById('modalFollower')
+  if (!el) return
+  const modal = new bootstrap.Modal(el)
+  modal.show()
+
+  try {
+    const res = await axios.get(`http://localhost:3000/api/users/${userId}/followers`)
+    followersList.value = res.data || []
+    // opzionale: puoi aggiornare followersCount.value = followersList.value.length
+  } catch (err) {
+    console.error('Errore nel recupero follower:', err)
+    followersError.value = 'Impossibile caricare la lista dei follower.'
+    followersList.value = []
+  } finally {
+    loadingFollowers.value = false
+  }
+}
 </script>
+
+<style scoped>
+img.rounded-circle {
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+.bio-text {
+  white-space: pre-wrap;
+}
+</style>
