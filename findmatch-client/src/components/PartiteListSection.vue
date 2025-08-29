@@ -19,9 +19,12 @@
         :roleEntries="roleEntries"
         :ruoloLabel="ruoloLabel"
         :showJoin="showJoin"
+        :showManage="showManage"  
         @dettagli="$emit('dettagli', $event)"
         @unisciti="$emit('unisciti', $event)"
         @unisciti-calcio="$emit('uniscitiCalcio', $event)"
+        @modifica="$emit('modifica', $event)"   
+        @elimina="$emit('elimina', $event)"     
       />
       <nav class="d-flex justify-content-center mt-3" :aria-label="`Paginazione ${titolo}`">
         <ul class="pagination" role="navigation" aria-label="Paginazione">
@@ -58,6 +61,7 @@ const props = defineProps({
   partite: { type: Array, default: () => [] },
   perPage: { type: Number, default: 8 },
   showJoin: { type: Boolean, default: true },
+  showManage: { type: Boolean, default: false }, // 👈 nuovo
 
   // helper functions passate dal parent (stesse di PartitaCard)
   getCardClass: { type: Function, required: true },
@@ -73,7 +77,7 @@ const props = defineProps({
   ruoloLabel: { type: Function, required: true },
 })
 
-const emit = defineEmits(['dettagli', 'unisciti', 'uniscitiCalcio'])
+const emit = defineEmits(['dettagli', 'unisciti', 'uniscitiCalcio', 'modifica', 'elimina']) // 👈 nuovo
 
 const page = ref(1)
 const totalPages = computed(() => Math.max(1, Math.ceil(props.partite.length / props.perPage)))

@@ -17,19 +17,17 @@
 
     <!-- Tab Content -->
     <PartiteSection
-      v-if="currentTab === 'create'"
-      :partite="createList"
-      sezione="create"
-    />
-    <PartiteSection
-      v-else-if="currentTab === 'iscritto'"
+      v-if="currentTab === 'iscritto'"
       :partite="iscrittoList"
       sezione="iscritto"
+      :fetchEventoById="fetchEventoById"
     />
 
     <PartiteSection
       v-else-if="currentTab === 'storico'"
       :partite="storicoList"
+      sezione="storico"
+      :fetchEventoById="fetchEventoById"
     />
   </div>
 </template>
@@ -40,34 +38,40 @@ import axios from 'axios'
 import PartiteSection from '../components/PartiteSection.vue'
 
 const userId = localStorage.getItem('userId')
-const createList = ref([])
 const iscrittoList = ref([])
 const storicoList = ref([])
 
-const currentTab = ref(localStorage.getItem('partiteTab') || 'create')
+const currentTab = ref(localStorage.getItem('partiteTab') || 'iscritto')
 
 watch(currentTab, (newValue) => {
   localStorage.setItem('partiteTab', newValue)
 })
 
 const tabs = [
-  { label: '📌 Create da te', value: 'create' },
   { label: '🗓️ A cui sei iscritto', value: 'iscritto' },
   { label: '📖 Storico partecipazioni', value: 'storico' }
 ]
 
+// Opzionale: usato da PartiteSection per sincronizzare un evento specifico
+const fetchEventoById = async (id) => {
+  try {
+    const { data } = await axios.get(`http://localhost:3000/api/partite/${id}`)
+    return data
+  } catch (e) {
+    // silenzioso: PartiteSection gestisce i fallback
+    return null
+  }
+}
+
 const loadData = async () => {
   if (!userId) return
-
   try {
-    const [createRes, iscrittoRes, storicoRes] = await Promise.all([
-      axios.get(`http://localhost:3000/api/partecipazioni/create/${userId}`),
+    const [iscrittoRes, storicoRes] = await Promise.all([
       axios.get(`http://localhost:3000/api/partecipazioni/iscritto/${userId}`),
       axios.get(`http://localhost:3000/api/partecipazioni/storico/${userId}`)
     ])
-    createList.value = createRes.data
-    iscrittoList.value = iscrittoRes.data
-    storicoList.value = storicoRes.data
+    iscrittoList.value = iscrittoRes.data || []
+    storicoList.value = storicoRes.data || []
   } catch (err) {
     console.error('Errore caricamento partite:', err)
   }

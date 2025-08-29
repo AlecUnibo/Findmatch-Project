@@ -11,16 +11,25 @@
         </p>
 
         <div class="d-flex align-items-center gap-2 mt-2">
-          <span class="badge bg-light text-dark posti-liberi-badge" :aria-label="`${postiLiberi(partita)} posti liberi`">
-            {{ postiLiberi(partita) }} posti liberi
+          <!-- Badge coerente con Home: per calcio = posti da coprire -->
+          <span
+            class="badge bg-light text-dark posti-liberi-badge"
+            :aria-label="isCalcio(partita)
+              ? `${postiLiberi(partita)} posti da coprire`
+              : `${postiLiberi(partita)} posti liberi`"
+          >
+            {{ postiLiberi(partita) }} {{ isCalcio(partita) ? 'posti da coprire' : 'posti liberi' }}
           </span>
         </div>
 
-        <div class="progress progress--thin mt-2" role="progressbar"
-             :aria-valuenow="partita.partecipanti ?? 0"
-             :aria-valuemin="0"
-             :aria-valuemax="partita.max_players ?? progressMax(partita)"
-             :aria-label="`Progresso partecipazione: ${progressPercent(partita)} percento`">
+        <div
+          class="progress progress--thin mt-2"
+          role="progressbar"
+          :aria-valuenow="partita.partecipanti ?? 0"
+          :aria-valuemin="0"
+          :aria-valuemax="progressMax(partita)"
+          :aria-label="`Progresso partecipazione: ${progressPercent(partita)} percento`"
+        >
           <div
             class="progress-bar"
             :class="progressBarClass(partita)"
@@ -39,7 +48,27 @@
           Dettagli
         </button>
 
-        <!-- Join buttons -->
+        <!-- Pulsanti gestione (solo per Create da te) -->
+        <template v-if="showManage">
+          <button
+            class="btn btn-sm btn-warning"
+            type="button"
+            @click="$emit('modifica', partita)"
+            :aria-label="`Modifica partita ${partita.id}`"
+          >
+            Modifica
+          </button>
+          <button
+            class="btn btn-sm btn-danger"
+            type="button"
+            @click="$emit('elimina', partita)"
+            :aria-label="`Elimina partita ${partita.id}`"
+          >
+            Elimina
+          </button>
+        </template>
+
+        <!-- Join buttons (solo se showJoin === true, es. 'Disponibili') -->
         <template v-if="showJoin">
           <div v-if="isCalcio(partita)" class="dropdown">
             <button
@@ -108,8 +137,9 @@
 
 <script setup>
 defineProps({
-  partita: Object,
+  partita: { type: Object, required: true },
   showJoin: { type: Boolean, default: true },
+  showManage: { type: Boolean, default: false }, // 👈 nuovo
 
   // helper functions passate dal parent
   getCardClass: { type: Function, required: true },
@@ -123,6 +153,6 @@ defineProps({
   isCalcio: { type: Function, required: true },
   roleEntries: { type: Function, required: true },
   ruoloLabel: { type: Function, required: true },
-});
-defineEmits(['dettagli', 'unisciti', 'unisciti-calcio']);
+})
+defineEmits(['dettagli', 'unisciti', 'unisciti-calcio', 'modifica', 'elimina']) // 👈 nuovo
 </script>

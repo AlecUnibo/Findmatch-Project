@@ -72,7 +72,6 @@
 
 
 /* -------------------------------------------------- HomeSearchBar.vue -------------------------------------------------- */
-
 .home-search-card {
   background: linear-gradient(135deg, rgba(68,128,187,0.8), #567cc9);
   border: none;
@@ -82,8 +81,6 @@
 
 .home-search-card .row {
   flex-wrap: nowrap !important;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .home-search-card .form-control,
@@ -95,47 +92,21 @@
   padding: .35rem .6rem;
   box-shadow: none;
   transition: box-shadow .15s ease, background .15s ease;
-  min-width: 150px;
+  min-width: 150px; /* evita che diventino troppo stretti */
 }
-
-.home-search-card .form-control::placeholder {
-  color: rgba(55, 65, 81, 0.6);
-  opacity: 1;
-}
-
 .home-search-card .form-control:focus,
 .home-search-card .form-select:focus {
   background: #fff;
-  box-shadow: 0 0 0 .15rem rgba(255,255,255,.35);
+  box-shadow: 0 0 0 .2rem rgba(255,255,255,.35);
 }
 
-.home-search-card .form-control:focus-visible,
-.home-search-card .form-select:focus-visible,
-.home-search-card .btn:focus-visible {
-  outline: 3px solid rgba(10, 102, 194, 0.9);
-  outline-offset: 2px;
-  border-radius: 8px;
-  box-shadow: none;
-}
-
+/* Bottoni */
 .home-search-card .btn {
   border-radius: 999px;
   padding: .45rem 1rem;
   font-weight: 600;
   white-space: nowrap;
-  min-height: 38px;
-  align-items: center;
-  cursor: pointer;
 }
-
-.home-search-card .btn img {
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 6px;
-  width: 16px;
-  height: 16px;
-}
-
 .home-search-card .btn-outline-light {
   border: 2px solid rgba(255,255,255,.85);
   color: #fff;
@@ -159,15 +130,6 @@
   .home-search-card .btn {
     padding: .35rem .8rem;
     font-size: .9rem;
-    min-height: 40px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .home-search-card .form-control,
-  .home-search-card .form-select,
-  .home-search-card .btn {
-    transition: none !important;
   }
 }
 

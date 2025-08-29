@@ -41,7 +41,7 @@
           titolo="📅 Partite disponibili"
           :partite="partiteDisponibili"
           :perPage="8"
-          :showJoin="true" 
+          :showJoin="true"
           :getCardClass="getCardClass"
           :getSportIcon="getSportIcon"
           :formatData="formatData"
@@ -66,6 +66,7 @@
           :partite="partiteCreate"
           :perPage="8"
           :showJoin="false"
+          :showManage="true"  
           :getCardClass="getCardClass"
           :getSportIcon="getSportIcon"
           :formatData="formatData"
@@ -78,8 +79,8 @@
           :roleEntries="roleEntries"
           :ruoloLabel="ruoloLabel"
           @dettagli="apriDettagli"
-          @unisciti="p => chiediUniscitiConControllo(p)"
-          @uniscitiCalcio="({ partita, roleKey }) => chiediUniscitiCalcioConControllo(partita, roleKey)"
+          @modifica="apriModifica"     
+          @elimina="chiediElimina" 
         />
       </div>
 
@@ -178,6 +179,118 @@
         </div>
       </div>
 
+<!-- MODALE MODIFICA PARTITA -->
+    <div class="modal fade" id="modalModifica" tabindex="-1" aria-labelledby="modalModificaLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-info text-white">
+            <h5 class="modal-title" id="modalModificaLabel">Modifica partita</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          </div>
+
+          <form @submit.prevent="salvaModifiche">
+            <div class="modal-body">
+              <div class="row g-3">
+                <!-- Sport (editable) -->
+                <div class="col-md-6">
+                  <label class="form-label">Sport</label>
+                  <input type="text" class="form-control" :value="editForm.sport" disabled />
+                </div>
+
+                <!-- Luogo -->
+                <div class="col-md-6">
+                  <label class="form-label">Luogo</label>
+                  <input v-model="editForm.location" type="text" class="form-control" placeholder="Via, città..." required />
+                </div>
+
+                <!-- Data -->
+                <div class="col-md-6">
+                  <label class="form-label">Data</label>
+                  <input v-model="editForm.date" type="date" class="form-control" required />
+                </div>
+
+                <!-- Ora -->
+                <div class="col-md-6">
+                  <label class="form-label">Ora</label>
+                  <input v-model="editForm.time" type="time" class="form-control" required />
+                </div>
+
+                <!-- Se NON è calcio: numero giocatori -->
+                <div class="col-md-6" v-if="!isEditCalcio">
+                  <label class="form-label">Numero giocatori</label>
+                  <input v-model.number="editForm.max_players" type="number" min="1" class="form-control" required />
+                </div>
+
+                <!-- Se è calcio a 5: ruoli -->
+                <div class="col-12" v-if="editForm.sport.toLowerCase() === 'calcio a 5'">
+                  <label class="form-label">Ruoli (Calcio a 5)</label>
+                  <div class="row g-2">
+                    <div class="col-md-4">
+                      <div class="input-group">
+                        <span class="input-group-text">Portiere</span>
+                        <input v-model.number="editForm.roles_needed.portiere" type="number" min="0" class="form-control" />
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="input-group">
+                        <span class="input-group-text">All-around</span>
+                        <input v-model.number="editForm.roles_needed.all_around" type="number" min="0" class="form-control" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Se è calcio a 11: ruoli -->
+                <div class="col-12" v-if="editForm.sport.toLowerCase() === 'calcio a 11'">
+                  <label class="form-label">Ruoli (Calcio a 11)</label>
+                  <div class="row g-2">
+                    <div class="col-md-3">
+                      <div class="input-group">
+                        <span class="input-group-text">Portiere</span>
+                        <input v-model.number="editForm.roles_needed.portiere" type="number" min="0" class="form-control" />
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="input-group">
+                        <span class="input-group-text">Difensore</span>
+                        <input v-model.number="editForm.roles_needed.difensore" type="number" min="0" class="form-control" />
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="input-group">
+                        <span class="input-group-text">Centroc.</span>
+                        <input v-model.number="editForm.roles_needed.centrocampista" type="number" min="0" class="form-control" />
+                      </div>
+                    </div>
+                    <div class="col-md-3">
+                      <div class="input-group">
+                        <span class="input-group-text">Attaccante</span>
+                        <input v-model.number="editForm.roles_needed.attaccante" type="number" min="0" class="form-control" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Descrizione -->
+                <div class="col-12">
+                  <label class="form-label">Descrizione</label>
+                  <textarea v-model="editForm.description" rows="3" class="form-control" placeholder="Dettagli utili..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Annulla</button>
+              <button type="submit" class="btn btn-success" :disabled="savingEdit">
+                <span v-if="savingEdit" class="spinner-border spinner-border-sm me-2"></span>
+                Salva modifiche
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
       <!-- TOAST -->
       <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
         <div
@@ -199,14 +312,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as bootstrap from 'bootstrap'
 import axios from 'axios'
 
 import HomeSearchBar from '@/components/HomeSearchBar.vue'
 import PartiteListSection from '@/components/PartiteListSection.vue'
-
 import { getPartite, getPartitaById } from '../services/partiteService'
 
 const route = useRoute()
@@ -219,10 +331,8 @@ const orarioFiltro = ref('')
 const dataFiltro = ref('')
 
 const partite = ref([])
-// partecUtenteIds mantiene solo gli ID (usato per isIscritto)
-const partecipazioniUtente = ref([])
-// partecipazioniUtenteDetails mantiene gli oggetti partita a cui l'utente è iscritto (necessario per il check ±2h)
-const partecipazioniUtenteDetails = ref([])
+const partecipazioniUtente = ref([])           // solo ID
+const partecipazioniUtenteDetails = ref([])    // oggetti partita (per controllo ±2h)
 
 const partitaSelezionata = ref(null)
 const userId = localStorage.getItem('userId')
@@ -244,7 +354,30 @@ const confirmHeaderClass = ref('bg-primary text-white')
 const confirmBusy = ref(false)
 let confirmOnOk = null
 
-// --- Emoji per pioggia
+// --- Stato MODIFICA ---
+const editForm = ref({
+  id: null,
+  sport: '',
+  location: '',
+  date: '',
+  time: '',
+  max_players: 0,
+  roles_needed: {},
+  description: '',
+})
+const savingEdit = ref(false)
+const isEditCalcio = computed(() => {
+  const s = (editForm.value.sport || '').toLowerCase()
+  return s === 'calcio a 5' || s === 'calcio a 11'
+})
+
+// Utility: combina data+ora in stringa ISO-like per backend
+function combineDateTime(dateStr, timeStr) {
+  // "YYYY-MM-DDTHH:mm:00"
+  return `${dateStr}T${timeStr}:00`
+}
+
+// --- Emoji
 const sportEmojis = {
   'calcio a 5': '⚽', 'calcio a 11': '⚽', 'basket': '🏀',
   'beach volley': '🏐', 'pallavolo': '🏐', 'racchettoni': '🏓',
@@ -252,17 +385,10 @@ const sportEmojis = {
 }
 
 // --- Helpers posti/progress
-const postiLiberi = (p) => {
-  if (isCalcio(p)) return sumRolesNeeded(p)
-  return Math.max(0, (p.max_players ?? 0) - (p.partecipanti ?? 0))
-}
-const progressMax = (p) => {
-  if (isCalcio(p)) return (p.partecipanti ?? 0) + sumRolesNeeded(p)
-  return p.max_players ?? 0
-}
+const postiLiberi = (p) => (isCalcio(p) ? sumRolesNeeded(p) : Math.max(0, (p.max_players ?? 0) - (p.partecipanti ?? 0)))
+const progressMax = (p) => (isCalcio(p) ? (p.partecipanti ?? 0) + sumRolesNeeded(p) : (p.max_players ?? 0))
 const progressPercent = (p) => {
-  const max = progressMax(p)
-  const cur = p.partecipanti ?? 0
+  const max = progressMax(p); const cur = p.partecipanti ?? 0
   if (!max) return 0
   return Math.min(100, Math.round((cur / max) * 100))
 }
@@ -274,29 +400,20 @@ const progressBarClass = (p) => {
 }
 
 // Iscrizioni
-const isIscritto = (eventId) =>
-  partecipazioniUtente.value.some(id => String(id) === String(eventId))
+const isIscritto = (eventId) => partecipazioniUtente.value.some(id => String(id) === String(eventId))
 
 // Filtri per liste
-const startOfToday = computed(() => {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
-})
+const startOfToday = computed(() => { const d = new Date(); d.setHours(0,0,0,0); return d })
 const isTodayOrFuture = (dt) => new Date(dt) >= startOfToday.value
 
 const partiteCreate = computed(() =>
-  partite.value.filter(p =>
-    String(p.organizer_id) === String(userId) &&
-    isTodayOrFuture(p.date_time)
-  )
+  partite.value.filter(p => String(p.organizer_id) === String(userId) && isTodayOrFuture(p.date_time))
 )
-
 const partiteDisponibili = computed(() =>
   partite.value.filter(p =>
-    String(p.organizer_id) !== String(userId) &&   // non mie
-    !isIscritto(p.id) &&                           // non già iscritto
-    postiLiberi(p) > 0                             // non piene
+    String(p.organizer_id) !== String(userId) &&
+    !isIscritto(p.id) &&
+    postiLiberi(p) > 0
   )
 )
 
@@ -330,20 +447,12 @@ const pulisciFiltri = async () => {
 
 const caricaPartecipazioniUtente = async () => {
   try {
-    // Chiediamo all'API le partecipazioni dell'utente.
-    // Gestiamo due possibili formati di risposta:
-    // 1) array di ID (es: [1,2,3])
-    // 2) array di oggetti partecipazione/partita con almeno id, date_time, sport
     const { data } = await axios.get(`http://localhost:3000/api/partecipazioni/mie/${userId}`)
-    // reset
     partecipazioniUtente.value = []
     partecipazioniUtenteDetails.value = []
-
     if (!Array.isArray(data)) return
 
-    // Se gli elementi sono oggetti con proprietà utili (id, date_time), usali direttamente
     if (data.length > 0 && typeof data[0] === 'object' && (data[0].date_time || data[0].id)) {
-      // assumiamo che ogni elemento sia un oggetto con almeno id e date_time (o che abbia event o partita al suo interno)
       data.forEach(item => {
         const eventObj = item.date_time ? item : (item.event || item.partita || item)
         if (eventObj && eventObj.id) {
@@ -352,28 +461,18 @@ const caricaPartecipazioniUtente = async () => {
         }
       })
     } else {
-      // altrimenti assumiamo che siano ID e facciamo fetch per ogni partita
       const ids = data
       partecipazioniUtente.value = ids.map(id => id)
-      // carichiamo i dettagli in parallelo (tolleriamo errori singoli)
-      const promises = ids.map(async (id) => {
-        try {
-          const p = await getPartitaById(id)
-          return p
-        } catch (e) {
-          console.warn('Impossibile caricare partita partecipazione id:', id, e)
-          return null
-        }
-      })
-      const results = await Promise.all(promises)
-      partecipazioniUtenteDetails.value = results.filter(r => r)
+      const results = await Promise.all(ids.map(async (id) => {
+        try { return await getPartitaById(id) } catch { return null }
+      }))
+      partecipazioniUtenteDetails.value = results.filter(Boolean)
     }
   } catch (err) {
     console.error('Errore caricamento partecipazioni:', err)
   }
 }
 
-// Aggiunge al dettaglio delle partecipazioni l'evento appena iscritto (fetcha dettagli)
 const addParticipationDetails = async (eventId) => {
   try {
     const p = await getPartitaById(eventId)
@@ -383,25 +482,21 @@ const addParticipationDetails = async (eventId) => {
   }
 }
 
-// --- Temporal conflict check (±2 ore) ---
+// --- Controllo conflitto temporale (±2h)
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000
 function findTemporalConflict(targetPartita) {
   if (!targetPartita || !targetPartita.date_time) return null
   const targetTs = new Date(targetPartita.date_time).getTime()
   for (const p of partecipazioniUtenteDetails.value) {
     if (!p || !p.date_time) continue
-    // saltare se è la stessa partita (non ha senso controllare)
     if (String(p.id) === String(targetPartita.id)) continue
     const otherTs = new Date(p.date_time).getTime()
-    const diff = Math.abs(targetTs - otherTs)
-    if (diff < TWO_HOURS_MS) {
-      return p
-    }
+    if (Math.abs(targetTs - otherTs) < TWO_HOURS_MS) return p
   }
   return null
 }
 
-// Conferme & join (modificate per inserire il controllo temporale)
+// Conferme
 function openConfirm({ title, message, subMessage = '', ctaText = 'Conferma', theme = 'primary', onOk }) {
   confirmTitle.value = title
   confirmMessage.value = message
@@ -411,12 +506,8 @@ function openConfirm({ title, message, subMessage = '', ctaText = 'Conferma', th
   confirmHeaderClass.value = `bg-${theme} ${theme === 'warning' ? 'text-dark' : 'text-white'}`
   confirmBusy.value = false
   confirmOnOk = onOk
-
-  const modal = new bootstrap.Modal(document.getElementById('modalConferma'))
-  // Bootstrapped modal backdrop will be appended to body; CSS globale garantisce che sia davanti.
-  modal.show()
+  new bootstrap.Modal(document.getElementById('modalConferma')).show()
 }
-
 async function doConfirm() {
   if (!confirmOnOk) return
   confirmBusy.value = true
@@ -424,26 +515,18 @@ async function doConfirm() {
   try {
     await confirmOnOk()
     bootstrap.Modal.getInstance(modalEl)?.hide()
-  } catch (e) {
-    // gestito a monte
   } finally {
     confirmBusy.value = false
     confirmOnOk = null
   }
 }
 
+// Join
 const unisciti = async (eventId, organizerId, sport) => {
-  if (!userId) {
-    showToast('Devi essere loggato per unirti a una partita.', 'warning', 6000)
-    return
-  }
+  if (!userId) return showToast('Devi essere loggato per unirti a una partita.', 'warning', 6000)
   try {
-    await axios.post('http://localhost:3000/api/partecipazioni', {
-      user_id: userId,
-      event_id: eventId
-    })
+    await axios.post('http://localhost:3000/api/partecipazioni', { user_id: userId, event_id: eventId })
     partecipazioniUtente.value.push(eventId)
-    // aggiungiamo anche i dettagli della partecipazione appena fatta
     await addParticipationDetails(eventId)
     await cercaPartite()
     lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉')
@@ -454,16 +537,9 @@ const unisciti = async (eventId, organizerId, sport) => {
 }
 
 const uniscitiCalcio = async (eventId, organizerId, sport, roleKey) => {
-  if (!userId) {
-    showToast('Devi essere loggato per unirti a una partita.', 'warning', 6000)
-    return
-  }
+  if (!userId) return showToast('Devi essere loggato per unirti a una partita.', 'warning', 6000)
   try {
-    const { data } = await axios.post('http://localhost:3000/api/partecipazioni', {
-      user_id: userId,
-      event_id: eventId,
-      role: roleKey
-    })
+    const { data } = await axios.post('http://localhost:3000/api/partecipazioni', { user_id: userId, event_id: eventId, role: roleKey })
     partecipazioniUtente.value.push(eventId)
     await addParticipationDetails(eventId)
     await cercaPartite()
@@ -475,114 +551,59 @@ const uniscitiCalcio = async (eventId, organizerId, sport, roleKey) => {
   }
 }
 
-// Funzioni che gestiscono la richiesta di iscrizione + controllo temporale
 function chiediUniscitiConControllo(partita) {
-  // controlliamo conflitti con le altre partecipazioni (±2 ore)
   const conflict = findTemporalConflict(partita)
   if (conflict) {
-    // Mostriamo il pop-up di avvertimento richiesto con "Annulla" e "Iscrivimi"
     const msg = `Sei già iscritto ad una partita di <strong>${conflict.sport}</strong> il <strong>${formatData(conflict.date_time)}</strong> alle <strong>${formatOra(conflict.date_time)}</strong>. Sei sicuro di volerti iscrivere?`
-    openConfirm({
-      title: 'Conflitto orario',
-      message: msg,
-      subMessage: '',
-      ctaText: 'Iscrivimi',
-      theme: 'warning',
-      onOk: () => unisciti(partita.id, partita.organizer_id, partita.sport)
-    })
+    openConfirm({ title: 'Conflitto orario', message: msg, ctaText: 'Iscrivimi', theme: 'warning', onOk: () => unisciti(partita.id, partita.organizer_id, partita.sport) })
   } else {
-    // nessun conflitto, procediamo con la normale conferma (come prima)
     const when = `${formatData(partita.date_time)} alle ${formatOra(partita.date_time)} – ${partita.location}`
-    openConfirm({
-      title: `Unirti a ${partita.sport}?`,
-      message: `Confermi l’iscrizione a <strong>${partita.sport}</strong>?`,
-      subMessage: when,
-      ctaText: 'Sì, uniscimi',
-      theme: 'success',
-      onOk: () => unisciti(partita.id, partita.organizer_id, partita.sport),
-    })
+    openConfirm({ title: `Unirti a ${partita.sport}?`, message: `Confermi l’iscrizione a <strong>${partita.sport}</strong>?`, subMessage: when, ctaText: 'Sì, uniscimi', theme: 'success', onOk: () => unisciti(partita.id, partita.organizer_id, partita.sport) })
   }
 }
 
 function chiediUniscitiCalcioConControllo(partita, roleKey) {
   const conflict = findTemporalConflict(partita)
-  const roleMap = {
-    random: 'Assegnazione casuale',
-    portiere: 'Portiere',
-    difensore: 'Difensore',
-    centrocampista: 'Centrocampista',
-    attaccante: 'Attaccante',
-    all_around: 'All-around',
-  }
+  const roleMap = { random: 'Assegnazione casuale', portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', all_around: 'All-around' }
   const roleLabelText = roleMap[roleKey] || ruoloLabel(roleKey)
 
   if (conflict) {
     const msg = `Sei già iscritto ad una partita di <strong>${conflict.sport}</strong> il <strong>${formatData(conflict.date_time)}</strong> alle <strong>${formatOra(conflict.date_time)}</strong>. Sei sicuro di volerti iscrivere come <strong>${roleLabelText}</strong>?`
-    openConfirm({
-      title: 'Conflitto orario',
-      message: msg,
-      subMessage: '',
-      ctaText: 'Iscrivimi',
-      theme: 'warning',
-      onOk: () => uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, roleKey)
-    })
+    openConfirm({ title: 'Conflitto orario', message: msg, ctaText: 'Iscrivimi', theme: 'warning', onOk: () => uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, roleKey) })
   } else {
     const when = `${formatData(partita.date_time)} alle ${formatOra(partita.date_time)} – ${partita.location}`
-    openConfirm({
-      title: `Unirti a ${partita.sport}?`,
-      message: `Confermi l’iscrizione come <strong>${roleLabelText}</strong>?`,
-      subMessage: when,
-      ctaText: 'Sì, uniscimi',
-      theme: 'success',
-      onOk: () => uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, roleKey),
-    })
+    openConfirm({ title: `Unirti a ${partita.sport}?`, message: `Confermi l’iscrizione come <strong>${roleLabelText}</strong>?`, subMessage: when, ctaText: 'Sì, uniscimi', theme: 'success', onOk: () => uniscitiCalcio(partita.id, partita.organizer_id, partita.sport, roleKey) })
   }
 }
 
-// Modale dettagli + inviti
+// Modale DETTAGLI + inviti
 const apriDettagli = (partita) => {
   partitaSelezionata.value = partita
   searchUserQuery.value = ''
   userSearchResults.value = []
   selectedUserToInvite.value = null
   const modalEl = document.getElementById('modalDettagli')
-  if (modalEl) {
-    const modal = new bootstrap.Modal(modalEl)
-    modal.show()
-  }
+  if (modalEl) new bootstrap.Modal(modalEl).show()
 }
 
 const searchUsersForInvite = async () => {
-  if (searchUserQuery.value.trim() === '') {
-    userSearchResults.value = []
-    return
-  }
+  if (searchUserQuery.value.trim() === '') { userSearchResults.value = []; return }
   try {
     const { data } = await axios.get(`http://localhost:3000/api/users/search?query=${searchUserQuery.value}`)
     userSearchResults.value = data.filter(user => user.id.toString() !== userId)
   } catch (error) {
-    console.error("Errore ricerca utenti per invito:", error)
+    console.error('Errore ricerca utenti per invito:', error)
   }
 }
-
-const selectUserToInvite = (user) => {
-  selectedUserToInvite.value = user
-  searchUserQuery.value = user.username
-  userSearchResults.value = []
-}
-
+const selectUserToInvite = (user) => { selectedUserToInvite.value = user; searchUserQuery.value = user.username; userSearchResults.value = [] }
 const sendInvite = async () => {
   if (!selectedUserToInvite.value || !partitaSelezionata.value) return
   try {
-    await axios.post(`http://localhost:3000/api/partite/${partitaSelezionata.value.id}/invite`, {
-      inviterId: userId,
-      inviteeId: selectedUserToInvite.value.id
-    })
+    await axios.post(`http://localhost:3000/api/partite/${partitaSelezionata.value.id}/invite`, { inviterId: userId, inviteeId: selectedUserToInvite.value.id })
     showToast(`Invito inviato a ${selectedUserToInvite.value.username}!`, 'success')
-    searchUserQuery.value = ''
-    selectedUserToInvite.value = null
+    searchUserQuery.value = ''; selectedUserToInvite.value = null
   } catch (error) {
-    console.error("Errore invio invito:", error)
+    console.error('Errore invio invito:', error)
     showToast('Errore durante l\'invio dell\'invito.', 'danger')
   }
 }
@@ -598,39 +619,107 @@ const sumRolesNeeded = (p) => {
 }
 const formatRuoli = (roles) => {
   if (!roles || Object.keys(roles).length === 0) return '—'
-  const labels = {
-    portiere: 'Portiere',
-    difensore: 'Difensori',
-    centrocampista: 'Centrocampisti',
-    attaccante: 'Attaccanti',
-    all_around: 'All-around'
-  }
-  return Object.entries(roles)
-    .filter(([_, v]) => Number(v) > 0)
-    .map(([k, v]) => `${labels[k] || k}: ${v}`)
-    .join(', ')
+  const labels = { portiere: 'Portiere', difensore: 'Difensori', centrocampista: 'Centrocampisti', attaccante: 'Attaccanti', all_around: 'All-around' }
+  return Object.entries(roles).filter(([_, v]) => Number(v) > 0).map(([k, v]) => `${labels[k] || k}: ${v}`).join(', ')
 }
-const ruoloLabel = (key) => ({
-  portiere: 'Portiere',
-  difensore: 'Difensore',
-  centrocampista: 'Centrocampista',
-  attaccante: 'Attaccante',
-  all_around: 'All-around'
-}[key] || key)
+const ruoloLabel = (key) => ({ portiere: 'Portiere', difensore: 'Difensore', centrocampista: 'Centrocampista', attaccante: 'Attaccante', all_around: 'All-around' }[key] || key)
 const roleEntries = (p) => {
   const o = p?.roles_needed || {}
-  return Object.keys(o)
-    .map(k => ({ key: k, count: Number(o[k] || 0) }))
-    .filter(r => r.count > 0)
+  return Object.keys(o).map(k => ({ key: k, count: Number(o[k] || 0) })).filter(r => r.count > 0)
+}
+
+// --- MODIFICA: apertura e precompilazione
+function apriModifica(partita) {
+  partitaSelezionata.value = partita
+
+  // Date/Time locali (no UTC shift)
+  const d = new Date(partita.date_time)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  const hh = String(d.getHours()).padStart(2, '0')
+  const mm = String(d.getMinutes()).padStart(2, '0')
+
+  const roles = JSON.parse(JSON.stringify(partita.roles_needed || {}))
+
+  editForm.value = {
+    id: partita.id,
+    sport: partita.sport || '',
+    location: partita.location || '',
+    date: `${y}-${m}-${day}`,
+    time: `${hh}:${mm}`,
+    max_players: partita.max_players ?? 0,
+    roles_needed: roles,
+    description: partita.description || '',
+  }
+
+  const modalEl = document.getElementById('modalModifica')
+  if (modalEl) new bootstrap.Modal(modalEl).show()
+}
+
+// Allinea i ruoli quando cambia sport
+watch(() => editForm.value.sport, (newVal) => {
+  const s = (newVal || '').toLowerCase()
+  if (s === 'calcio a 5') {
+    editForm.value.roles_needed = {
+      portiere: Number(editForm.value.roles_needed.portiere || 0),
+      all_around: Number(editForm.value.roles_needed.all_around || 0),
+    }
+  } else if (s === 'calcio a 11') {
+    editForm.value.roles_needed = {
+      portiere: Number(editForm.value.roles_needed.portiere || 0),
+      difensore: Number(editForm.value.roles_needed.difensore || 0),
+      centrocampista: Number(editForm.value.roles_needed.centrocampista || 0),
+      attaccante: Number(editForm.value.roles_needed.attaccante || 0),
+    }
+  } else {
+    editForm.value.roles_needed = {}
+  }
+})
+
+// Salvataggio modifiche
+async function salvaModifiche() {
+  try {
+    savingEdit.value = true
+
+    const payload = {
+      location: editForm.value.location,
+      date_time: combineDateTime(editForm.value.date, editForm.value.time),
+      description: editForm.value.description,
+    }
+
+
+    const s = (editForm.value.sport || '').toLowerCase()
+    if (s === 'calcio a 5' || s === 'calcio a 11') {
+      payload.roles_needed = editForm.value.roles_needed
+      payload.max_players = null
+    } else {
+      payload.max_players = Number(editForm.value.max_players || 0)
+      payload.roles_needed = {}
+    }
+
+    await axios.put(`http://localhost:3000/api/partite/${editForm.value.id}`, payload)
+    showToast('Partita aggiornata con successo!', 'success')
+    await cercaPartite()
+
+    const modalEl = document.getElementById('modalModifica')
+    bootstrap.Modal.getInstance(modalEl)?.hide()
+  } catch (err) {
+    console.error('Errore salvataggio modifica:', err)
+    const msg = err.response?.data?.error || 'Errore durante il salvataggio.'
+    showToast(msg, 'danger')
+  } finally {
+    savingEdit.value = false
+  }
 }
 
 // Toast
 const toastEl = ref(null)
 const toastMessage = ref('')
 const toastVariant = ref('success')
-const toastIcon = computed(() => ({ 'success': '✅', 'danger': '🛑', 'warning': '⚠️' })[toastVariant.value] || 'ℹ️')
+const toastIcon = computed(() => ({ success: '✅', danger: '🛑', warning: '⚠️' }[toastVariant.value] || 'ℹ️'))
 const toastVariantClass = computed(() =>
-  ({ 'success': 'bg-success text-white', 'danger': 'bg-danger text-white', 'warning': 'bg-warning text-dark' }[toastVariant.value] || 'bg-info text-white')
+  ({ success: 'bg-success text-white', danger: 'bg-danger text-white', warning: 'bg-warning text-dark' }[toastVariant.value] || 'bg-info text-white')
 )
 function showToast(message, variant = 'success', delayMs = 5000) {
   toastMessage.value = message
@@ -666,42 +755,27 @@ function formatOra(datetime) {
 function getSportIcon(sport) {
   switch ((sport || '').toLowerCase()) {
     case 'calcio a 5':
-    case 'calcio a 11':
-      return '⚽'
-    case 'basket':
-      return '🏀'
+    case 'calcio a 11': return '⚽'
+    case 'basket': return '🏀'
     case 'beach volley':
-    case 'pallavolo':
-      return '🏐'
-    case 'racchettoni':
-      return '🏓'
-    case 'tennis':
-      return '🎾'
-    case 'paddle':
-      return '🥎'
-    default:
-      return '🎯'
+    case 'pallavolo': return '🏐'
+    case 'racchettoni': return '🏓'
+    case 'tennis': return '🎾'
+    case 'paddle': return '🥎'
+    default: return '🎯'
   }
 }
 function getCardClass(sport) {
   switch ((sport || '').toLowerCase()) {
-    case 'tennis':
-      return 'card-sport-tennis'
-    case 'paddle':
-      return 'card-sport-paddle'
-    case 'racchettoni':
-      return 'card-sport-racchettoni'
+    case 'tennis': return 'card-sport-tennis'
+    case 'paddle': return 'card-sport-paddle'
+    case 'racchettoni': return 'card-sport-racchettoni'
     case 'calcio a 5':
-    case 'calcio a 11':
-      return 'card-sport-calcio'
-    case 'basket':
-      return 'card-sport-basket'
-    case 'pallavolo':
-      return 'card-sport-volley'
-    case 'beach volley':
-      return 'card-sport-beach'
-    default:
-      return ''
+    case 'calcio a 11': return 'card-sport-calcio'
+    case 'basket': return 'card-sport-basket'
+    case 'pallavolo': return 'card-sport-volley'
+    case 'beach volley': return 'card-sport-beach'
+    default: return ''
   }
 }
 
@@ -716,7 +790,7 @@ onMounted(async () => {
       const partita = await getPartitaById(eventIdToOpen)
       apriDettagli(partita)
     } catch (error) {
-      console.error("Impossibile aprire la partita dalla notifica:", error)
+      console.error('Impossibile aprire la partita dalla notifica:', error)
       showToast('Impossibile trovare la partita selezionata.', 'danger')
     }
   }
@@ -724,10 +798,7 @@ onMounted(async () => {
   // Google Places Autocomplete sul campo luogo
   const input = document.getElementById('autocomplete-luogo')
   if (input && window.google && google.maps && google.maps.places) {
-    const autocomplete = new google.maps.places.Autocomplete(input, {
-      types: ['geocode'],
-      componentRestrictions: { country: 'it' }
-    })
+    const autocomplete = new google.maps.places.Autocomplete(input, { types: ['geocode'], componentRestrictions: { country: 'it' } })
     autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace()
       luogoFiltro.value = place.formatted_address || input.value
@@ -737,6 +808,7 @@ onMounted(async () => {
   }
 })
 </script>
+
 
 <style scoped>
 /* piccolo styling per le emoji (se già presenti nel progetto, ignora) */

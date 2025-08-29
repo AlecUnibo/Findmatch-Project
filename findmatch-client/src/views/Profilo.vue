@@ -342,7 +342,6 @@ async function apriModaleFollower() {
   try {
     const res = await axios.get(`http://localhost:3000/api/users/${userId}/followers`)
     followersList.value = res.data || []
-    // opzionale: puoi aggiornare followersCount.value = followersList.value.length
   } catch (err) {
     console.error('Errore nel recupero follower:', err)
     followersError.value = 'Impossibile caricare la lista dei follower.'

@@ -100,28 +100,21 @@
   overflow: visible;
   background-color: transparent;
 }
-
 .component-home .card .card-body {
   position: relative;
   overflow: visible;
   z-index: auto;
 }
-
-.component-home .card:has(.dropdown-menu.show) {
-  z-index: 30000; 
-}
-
+.component-home .card:has(.dropdown-menu.show) { z-index: 30000; }
 /* il menu sopra alla sua card e a tutto il resto */
 .component-home .card .dropdown-menu {
   position: absolute !important;
-  z-index: 30001;   /* sopra */
+  z-index: 30001;
   max-height: 260px;
   overflow-y: auto;
 }
-
 /* wrapper dedicato */
 .role-dropdown { position: static; }
-
 /* rimuove eventuali regole globali più deboli che danno fastidio */
 .card .dropdown-menu { z-index: auto; } 
 
@@ -135,6 +128,108 @@
   animation-name: fall; animation-timing-function: linear; animation-fill-mode: forwards;
 }
 @keyframes fall { to { transform: translateY(110vh); opacity: 0; } }
+
+/* ============================= */
+/*          Modale Modifica      */
+/* ============================= */
+
+.component-home #modalModifica .modal-content {
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.25);
+  border: 0;
+}
+
+.component-home #modalModifica .modal-header {
+  border-bottom: 0;
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
+  color: #fff;
+  padding-block: 0.9rem;
+}
+
+.component-home #modalModifica .btn-close.btn-close-white {
+  filter: invert(1) grayscale(100%);
+  opacity: .9;
+}
+.component-home #modalModifica .btn-close.btn-close-white:hover {
+  opacity: 1;
+}
+
+.component-home #modalModifica .modal-body {
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.component-home #modalModifica .modal-footer {
+  border-top: 0;
+  padding: 0.75rem 1.25rem 1.25rem;
+  gap: .5rem;
+}
+
+/* Campi form */
+.component-home #modalModifica .form-label {
+  font-weight: 600;
+  color: #2b2f33;
+}
+.component-home #modalModifica .form-control,
+.component-home #modalModifica .form-select {
+  border-radius: 10px;
+  border: 1px solid #d7dde3;
+  background-color: #fff;
+}
+.component-home #modalModifica .form-control:focus,
+.component-home #modalModifica .form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .15);
+  outline: 0;
+}
+
+/* Input gruppo ruoli */
+.component-home #modalModifica .input-group-text {
+  background-color: #f3f5f7;
+  border: 1px solid #d7dde3;
+  border-right: 0;
+  font-weight: 600;
+}
+.component-home #modalModifica .input-group .form-control {
+  border-left: 0;
+}
+
+/* Campo sport in sola lettura (disabilitato) */
+.component-home #modalModifica input[disabled],
+.component-home #modalModifica .form-control[disabled] {
+  background-color: #f5f7fa !important;
+  color: #6c757d !important;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Pulsanti footer */
+.component-home #modalModifica .btn-cancel {
+  background-color: #ff4d4d;
+  color: #000 !important;
+  border: none;
+}
+.component-home #modalModifica .btn-cancel:hover,
+.component-home #modalModifica .btn-cancel:focus {
+  background-color: #e04343;
+  color: #000 !important;
+  box-shadow: none;
+}
+
+/* Responsivo */
+@media (max-width: 575.98px) {
+  .component-home #modalModifica .modal-dialog { margin: 0.75rem; }
+  .component-home #modalModifica .input-group-text { font-size: .9rem; }
+}
+
+/* Backdrop leggermente più scuro */
+.component-home .modal-backdrop.show {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+/* Garantisce che il modale resti sopra ai dropdown delle card */
+.component-home #modalModifica { z-index: 40000 !important; }
+.component-home .modal-backdrop { z-index: 39990 !important; }
+
 
 
 /* ---------- Impostazioni.vue ---------- */

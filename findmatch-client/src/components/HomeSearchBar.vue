@@ -73,7 +73,7 @@
             @click="$emit('cerca')"
             aria-label="Cerca partite"
           >
-            <img src="/images/search-button.svg" alt="" aria-hidden="true" width="16" height="16" />
+            <img src="/images/search-button.svg" alt="Cerca" aria-hidden="true" width="16" height="16" />
             <span>Cerca</span>
           </button>
 
@@ -83,7 +83,7 @@
             @click="$emit('pulisci')"
             aria-label="Pulisci filtri"
           >
-            <img src="/images/trash.svg" alt="" aria-hidden="true" width="16" height="16" />
+            <img src="/images/trash.svg" alt="Cancella filtri" aria-hidden="true" width="16" height="16" />
             <span>Pulisci</span>
           </button>
         </div>
