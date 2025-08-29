@@ -41,14 +41,27 @@
             <button
               class="btn btn-primary btn-sm me-2"
               @click="mostraDettagli(partita)"
+              :aria-label="`Dettagli: ${partita.sport} ${formatData(partita.date_time)} ${formatOra(partita.date_time)}`"
             >
               Dettagli
             </button>
 
             <!-- Azioni per "Create da te" -->
             <template v-if="isPartitaCreataDaUtente(partita)">
-              <button class="btn btn-warning btn-sm me-2" @click="mostraModifica(partita)">Modifica</button>
-              <button class="btn btn-danger btn-sm me-2" @click="chiediConfermaElimina(partita.id)">Elimina</button>
+              <button
+                class="btn btn-warning btn-sm me-2"
+                @click="mostraModifica(partita)"
+                :aria-label="`Modifica: ${partita.sport} ${formatData(partita.date_time)} ${formatOra(partita.date_time)}`"
+              >
+                Modifica
+              </button>
+              <button
+                class="btn btn-danger btn-sm me-2"
+                @click="chiediConfermaElimina(partita.id)"
+                :aria-label="`Elimina: ${partita.sport} ${formatData(partita.date_time)} ${formatOra(partita.date_time)}`"
+              >
+                Elimina
+              </button>
             </template>
 
             <!-- Azione per sezione "A cui sei iscritto" -->
@@ -56,6 +69,7 @@
               v-if="props.sezione === 'iscritto'"
               class="btn btn-danger btn-sm me-2"
               @click="chiediConfermaAbbandona(partita.id)"
+              :aria-label="`Abbandona: ${partita.sport} ${formatData(partita.date_time)} ${formatOra(partita.date_time)}`"
             >
               Abbandona
             </button>
@@ -124,7 +138,7 @@
                 <textarea v-model="partitaDaModificare.description" class="form-control"></textarea>
               </div>
               <div class="text-end">
-                <button type="submit" class="btn btn-primary">Salva</button>
+                <button type="submit" class="btn btn-primary" aria-label="Salva modifiche alla partita">Salva</button>
               </div>
             </form>
           </div>
@@ -145,10 +159,10 @@
             <small class="text-muted">La partita non sarà più visibile agli altri utenti.</small>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="eliminando">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="eliminando" aria-label="Annulla eliminazione">
               Annulla
             </button>
-            <button type="button" class="btn btn-danger" @click="confermaEliminazione" :disabled="eliminando">
+            <button type="button" class="btn btn-danger" @click="confermaEliminazione" :disabled="eliminando" aria-label="Elimina definitivamente la partita">
               <span v-if="eliminando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               Elimina definitivamente
             </button>
@@ -170,10 +184,10 @@
             <small class="text-muted">L’azione è immediata.</small>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="abbandonando">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="abbandonando" aria-label="Annulla abbandono">
               Annulla
             </button>
-            <button type="button" class="btn btn-danger text-dark" @click="confermaAbbandono" :disabled="abbandonando">
+            <button type="button" class="btn btn-danger text-dark" @click="confermaAbbandono" :disabled="abbandonando" aria-label="Conferma abbandono della partita">
               <span v-if="abbandonando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               Abbandona
             </button>
@@ -431,7 +445,7 @@ async function abbandona(eventId) {
     syncEvento(eventId)
   } catch (err) {
     console.error("Errore durante l'abbandono:", err)
-    showToast('Errore durante l\'abbandono. Riprova più tardi.', 'danger', 5000)
+    showToast('Errore durante l\'abbandono. Riprova più tardi.', 'danger')
   }
 }
 

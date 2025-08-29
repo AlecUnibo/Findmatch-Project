@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-5">
+  <div class="mb-5 component-partite-list">
     <h4 class="mb-3">{{ titolo }}</h4>
 
     <div v-if="partite && partite.length">
@@ -18,17 +18,15 @@
         :isCalcio="isCalcio"
         :roleEntries="roleEntries"
         :ruoloLabel="ruoloLabel"
-        :showJoin="showJoin"   
+        :showJoin="showJoin"
         @dettagli="$emit('dettagli', $event)"
         @unisciti="$emit('unisciti', $event)"
         @unisciti-calcio="$emit('uniscitiCalcio', $event)"
-        />
-
-
+      />
       <nav class="d-flex justify-content-center mt-3" :aria-label="`Paginazione ${titolo}`">
-        <ul class="pagination">
+        <ul class="pagination" role="navigation" aria-label="Paginazione">
           <li class="page-item" :class="{ disabled: page === 1 }">
-            <button class="page-link" @click="go(page - 1)">«</button>
+            <button class="page-link" @click="go(page - 1)" :aria-label="'Pagina precedente'">«</button>
           </li>
 
           <li
@@ -37,11 +35,11 @@
             :key="`p-${n}`"
             :class="{ active: n === page }"
           >
-            <button class="page-link" @click="go(n)">{{ n }}</button>
+            <button class="page-link" @click="go(n)" :aria-label="`Vai alla pagina ${n}`">{{ n }}</button>
           </li>
 
           <li class="page-item" :class="{ disabled: page === totalPages }">
-            <button class="page-link" @click="go(page + 1)">»</button>
+            <button class="page-link" @click="go(page + 1)" :aria-label="'Pagina successiva'">»</button>
           </li>
         </ul>
       </nav>
@@ -57,7 +55,7 @@ import PartitaCard from './PartiteCard.vue'
 
 const props = defineProps({
   titolo: String,
-  partite: Array,
+  partite: { type: Array, default: () => [] },
   perPage: { type: Number, default: 8 },
   showJoin: { type: Boolean, default: true },
 
