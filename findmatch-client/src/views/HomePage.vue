@@ -4,7 +4,7 @@
       <!-- Benvenuto -->
       <div class="text-center mb-4">
         <h2>Benvenuto, {{ nomeUtente }}! 👋</h2>
-        <p class="text-muted">Trova o unisciti alla tua prossima partita sportiva!</p>
+        <p class="text-muted">Trova o unisciti alla tua prossima partita!</p>
       </div>
 
       <!-- Ricerca (estratta in componente) -->
@@ -426,8 +426,27 @@ const isEditCalcio = computed(() => {
 
 // Utility: combina data+ora in stringa ISO-like per backend
 function combineDateTime(dateStr, timeStr) {
-  // "YYYY-MM-DDTHH:mm:00"
-  return `${dateStr}T${timeStr}:00`
+  // backend friendly: "YYYY-MM-DD HH:mm:00"
+  return `${dateStr} ${timeStr}:00`
+}
+
+function normalizeRoles(sport, roles = {}) {
+  const s = (sport || '').toLowerCase()
+  if (s === 'calcio a 5') {
+    return {
+      portiere: Number(roles.portiere ?? 0),
+      all_around: Number(roles.all_around ?? 0),
+    }
+  }
+  if (s === 'calcio a 11') {
+    return {
+      portiere: Number(roles.portiere ?? 0),
+      difensore: Number(roles.difensore ?? 0),
+      centrocampista: Number(roles.centrocampista ?? 0),
+      attaccante: Number(roles.attaccante ?? 0),
+    }
+  }
+  return {}
 }
 
 // --- Emoji
@@ -771,23 +790,41 @@ async function salvaModifiche() {
   try {
     savingEdit.value = true
 
-    const payload = {
-      location: editForm.value.location,
+    // Validazioni minime lato client
+    if (!editForm.value.location?.trim() || !editForm.value.date || !editForm.value.time) {
+      showToast('Compila tutti i campi obbligatori (luogo, data, ora).', 'warning')
+      return
+    }
+
+    const sportLower = (editForm.value.sport || '').toLowerCase()
+
+    const basePayload = {
+      sport: editForm.value.sport, // <-- importante per il validator del backend
+      location: editForm.value.location.trim(),
       date_time: combineDateTime(editForm.value.date, editForm.value.time),
-      description: editForm.value.description,
+      description: editForm.value.description ?? ''
     }
 
-
-    const s = (editForm.value.sport || '').toLowerCase()
-    if (s === 'calcio a 5' || s === 'calcio a 11') {
-      payload.roles_needed = editForm.value.roles_needed
-      payload.max_players = null
+    let payload
+    if (sportLower === 'calcio a 5' || sportLower === 'calcio a 11') {
+      // ruoli normalizzati con tutte le chiavi necessarie
+      const roles = normalizeRoles(editForm.value.sport, editForm.value.roles_needed)
+      payload = { ...basePayload, roles_needed: roles }
+      // NON mandare max_players in questo caso
     } else {
-      payload.max_players = Number(editForm.value.max_players || 0)
-      payload.roles_needed = {}
+      const maxPlayers = Number(editForm.value.max_players || 0)
+      if (!Number.isFinite(maxPlayers) || maxPlayers <= 0) {
+        showToast('Imposta un numero giocatori valido (> 0).', 'warning')
+        return
+      }
+      payload = { ...basePayload, max_players: maxPlayers }
+      // NON mandare roles_needed in questo caso
     }
 
-    await axios.put(`http://localhost:3000/api/partite/${editForm.value.id}`, payload)
+    await axios.put(`http://localhost:3000/api/partite/${editForm.value.id}`, payload/*, {
+      headers: { 'Content-Type': 'application/json' }
+    }*/)
+
     showToast('Partita aggiornata con successo!', 'success')
     await cercaPartite()
 
@@ -801,6 +838,7 @@ async function salvaModifiche() {
     savingEdit.value = false
   }
 }
+
 
 // Toast
 const toastEl = ref(null)
