@@ -26,49 +26,30 @@
                   {{ postiLiberi(partita) }} posti liberi
                 </span>
               </div>
-              <div class="progress mt-2" style="height: 6px;">
-                <div
-                  class="progress-bar"
-                  role="progressbar"
-                  :class="progressBarClass(partita)"
-                  :style="{ width: progressPercent(partita) + '%' }"
+              <div class="progress fm-progress rounded-pill mt-2" role="progressbar" 
                   :aria-valuenow="Number(partita.partecipanti) || 0"
                   aria-valuemin="0"
                   :aria-valuemax="progressMax(partita)">
+                <div
+                  class="progress-bar fm-progress-bar rounded-pill"
+                  :class="progressBarClass(partita)"
+                  :style="{ width: progressPercent(partita) + '%' }">
                 </div>
               </div>
             </div>
 
             <div class="d-flex align-items-center">
               <button
-                class="btn btn-primary btn-sm me-2"
+                class="btn btn-join me-2"
                 @click="mostraDettagli(partita)"
                 :aria-label="`Dettagli: ${partita.sport} ${formatData(partita.date_time)} ${formatOra(partita.date_time)}`"
               >
                 Dettagli
               </button>
 
-              <!-- Azioni solo quando NON siamo nello storico -->
-              <template v-if="props.sezione !== 'storico' && isPartitaCreataDaUtente(partita)">
-                <button
-                  class="btn btn-warning btn-sm me-2"
-                  @click="mostraModifica(partita)"
-                  :aria-label="`Modifica: ${partita.sport} ${formatData(partita.date_time)} ${formatOra(partita.date_time)}`"
-                >
-                  Modifica
-                </button>
-                <button
-                  class="btn btn-danger btn-sm me-2"
-                  @click="chiediConfermaElimina(partita.id)"
-                  :aria-label="`Elimina: ${partita.sport} ${formatData(partita.date_time)} ${formatOra(partita.date_time)}`"
-                >
-                  Elimina
-                </button>
-              </template>
-
               <button
                 v-if="props.sezione === 'iscritto'"
-                class="btn btn-danger btn-sm me-2"
+                class="d-flex align-items-center btn-leave"
                 @click="chiediConfermaAbbandona(partita.id)"
                 :aria-label="`Abbandona: ${partita.sport} ${formatData(partita.date_time)} ${formatOra(partita.date_time)}`"
               >
@@ -106,10 +87,7 @@
               </div>
 
               <div class="d-flex align-items-center">
-                <button
-                  class="btn btn-primary btn-sm"
-                  @click="mostraDettagli(partita)"
-                >
+                <button class="btn btn-join btn-sm" @click="mostraDettagli(partita)">
                   Dettagli
                 </button>
               </div>
@@ -140,13 +118,9 @@
               </div>
 
               <div class="d-flex align-items-center">
-                <button
-                  class="btn btn-primary btn-sm"
-                  @click="mostraDettagli(partita)"
-                >
+                <button class="btn btn-join btn-sm" @click="mostraDettagli(partita)">
                   Dettagli
                 </button>
-                <!-- Niente Modifica/Elimina nello storico -->
               </div>
             </div>
           </div>
@@ -157,168 +131,77 @@
       <div v-else class="text-muted">Nessuna partita nello storico.</div>
     </template>
 
-    <!-- MODALI & TOAST (invariati) -->
+    <!-- MODALI & TOAST -->
     <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalDettagliLabel">{{ partitaSelezionata?.sport || 'Dettagli Partita' }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header bg-info text-white">
+            <h5 class="modal-title" id="modalDettagliLabel">Dettagli partita</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
           </div>
+
           <div class="modal-body" v-if="partitaSelezionata">
-            <p><strong>Data:</strong> {{ formatData(partitaSelezionata.date_time) }}</p>
-            <p><strong>Ora:</strong> {{ formatOra(partitaSelezionata.date_time) }}</p>
-            <p><strong>Luogo:</strong> {{ partitaSelezionata.location }}</p>
-
-            <p v-if="!isCalcio(partitaSelezionata)">
-              <strong>Posti rimanenti:</strong>
-              {{ postiLiberi(partitaSelezionata) }} / {{ progressMax(partitaSelezionata) }}
-            </p>
-
-            <div v-else>
-              <p class="mb-1">
-                <strong>Ruoli mancanti:</strong>
-                {{ formatRuoli(extractRolesNeeded(partitaSelezionata)) }}
-              </p>
-              <p class="mb-1 text-muted">
-                <strong>- Totale ruoli richiesti:</strong> {{ sumRolesNeeded(partitaSelezionata) }}
-              </p>
-            </div>
-
-            <p v-if="partitaSelezionata.organizer_name"><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_name }}</p>
-            <p><strong>Descrizione:</strong> {{ partitaSelezionata.description || 'Nessuna descrizione.' }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal fade" id="modalModifica" tabindex="-1" aria-labelledby="modalModificaLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalModificaLabel">Modifica Partita</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-          </div>
-          <div class="modal-body" v-if="partitaDaModificare">
-            <!-- (form invariato) -->
-            <form @submit.prevent="salvaModifiche">
-              <div class="mb-3">
+            <div class="row g-3">
+              <div class="col-md-6">
                 <label class="form-label">Sport</label>
-                <input v-model="partitaDaModificare.sport" class="form-control" required />
+                <input type="text" class="form-control" :value="partitaSelezionata.sport" disabled />
               </div>
-              <div class="mb-3">
+              <div class="col-md-6" v-if="partitaSelezionata.organizer_name">
+                <label class="form-label">Organizzatore</label>
+                <input type="text" class="form-control" :value="partitaSelezionata.organizer_name" disabled />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Data</label>
+                <input type="text" class="form-control" :value="formatData(partitaSelezionata.date_time)" disabled />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Ora</label>
+                <input type="text" class="form-control" :value="formatOra(partitaSelezionata.date_time)" disabled />
+              </div>
+
+              <div class="col-12">
                 <label class="form-label">Luogo</label>
-                <input v-model="partitaDaModificare.location" class="form-control" required />
+                <input type="text" class="form-control" :value="partitaSelezionata.location" disabled />
               </div>
-              <div class="mb-3">
-                <label class="form-label">Data e Ora</label>
+
+              <!-- Non calcio: posti -->
+              <div class="col-12" v-if="!isCalcio(partitaSelezionata)">
+                <label class="form-label">Posti rimanenti</label>
                 <input
-                  type="datetime-local"
-                  :value="formatDateTimeLocal(partitaDaModificare.date_time)"
-                  @input="partitaDaModificare.date_time = $event.target.value"
-                  :min="minDateTime"
+                  type="text"
                   class="form-control"
-                  required
+                  :value="`${postiLiberi(partitaSelezionata)} / ${progressMax(partitaSelezionata)}`"
+                  disabled
                 />
               </div>
 
-              <div class="mb-3" v-if="!isCalcio(partitaDaModificare)">
-                <label class="form-label">Posti Massimi</label>
-                <input type="number" v-model.number="partitaDaModificare.max_players" class="form-control" required min="1" />
-              </div>
-
-              <div
-                v-if="isCalcio(partitaDaModificare) && isPartitaCreataDaUtente(partitaDaModificare)"
-                class="mb-3"
-              >
-                <label class="form-label d-flex align-items-center gap-2">
-                  Ruoli
-                </label>
-
+              <!-- Calcio: ruoli -->
+              <div class="col-12" v-else>
+                <label class="form-label">Ruoli mancanti</label>
                 <div class="row g-2">
-                  <div class="col-6 col-md-3">
+                  <div class="col-md-3" v-for="(v, k) in extractRolesNeeded(partitaSelezionata)" :key="k" v-if="Number(v) > 0">
                     <div class="input-group">
-                      <span class="input-group-text">Portiere</span>
-                      <input type="number" min="0" class="form-control"
-                             v-model.number="ruoliEditCalcio.portiere" />
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Difensore</span>
-                      <input type="number" min="0" class="form-control"
-                             v-model.number="ruoliEditCalcio.difensore" />
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Centroc.</span>
-                      <input type="number" min="0" class="form-control"
-                             v-model.number="ruoliEditCalcio.centrocampista" />
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                    <div class="input-group">
-                      <span class="input-group-text">Attaccante</span>
-                      <input type="number" min="0" class="form-control"
-                             v-model.number="ruoliEditCalcio.attaccante" />
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-3 mt-2">
-                    <div class="input-group">
-                      <span class="input-group-text">All-around</span>
-                      <input type="number" min="0" class="form-control"
-                             v-model.number="ruoliEditCalcio.all_around" />
+                      <span class="input-group-text">{{ ruoloLabel(k) }}</span>
+                      <input type="text" class="form-control" :value="v" disabled />
                     </div>
                   </div>
                 </div>
-
-                <small class="d-block mt-2 text-muted">
-                  Totale ruoli richiesti: <strong>{{ sommaRuoliCalcio }}</strong>
-                  <span class="ms-2">→ Nuovo totale target giocatori: <strong>{{ nuovoTotaleTarget }}</strong></span>
+                <small class="text-muted d-block mt-1">
+                  Totale ruoli richiesti: {{ sumRolesNeeded(partitaSelezionata) }}
                 </small>
               </div>
 
-              <div class="mb-3">
+              <div class="col-12">
                 <label class="form-label">Descrizione</label>
-                <textarea v-model="partitaDaModificare.description" class="form-control"></textarea>
+                <textarea
+                  class="form-control"
+                  rows="3"
+                  :value="partitaSelezionata.description || 'Nessuna descrizione disponibile.'"
+                  disabled
+                ></textarea>
               </div>
-
-              <div class="text-end">
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  aria-label="Salva modifiche alla partita"
-                >
-                  Salva
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODALE CONFERMA ELIMINAZIONE -->
-    <div class="modal fade" id="modalConfermaElimina" tabindex="-1" aria-labelledby="modalConfermaEliminaLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title" id="modalConfermaEliminaLabel">Eliminare la partita?</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
-          </div>
-          <div class="modal-body">
-            <p class="mb-2">Questa azione è <strong>definitiva</strong> e non può essere annullata.</p>
-            <small class="text-muted">La partita non sarà più visibile agli altri utenti.</small>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="eliminando" aria-label="Annulla eliminazione">
-              Annulla
-            </button>
-            <button type="button" class="btn btn-danger" @click="confermaEliminazione" :disabled="eliminando" aria-label="Elimina definitivamente la partita">
-              <span v-if="eliminando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              Elimina definitivamente
-            </button>
+            </div>
           </div>
         </div>
       </div>
@@ -330,7 +213,6 @@
         <div class="modal-content border-0">
           <div class="modal-header bg-danger text-dark">
             <h5 class="modal-title" id="modalConfermaAbbandonoLabel">Abbandonare la partita?</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
           </div>
           <div class="modal-body">
             <p class="mb-2">Se abbandoni perderai il tuo posto in questa partita.</p>
@@ -340,7 +222,7 @@
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" :disabled="abbandonando" aria-label="Annulla abbandono">
               Annulla
             </button>
-            <button type="button" class="btn btn-danger text-dark" @click="confermaAbbandono" :disabled="abbandonando" aria-label="Conferma abbandono della partita">
+            <button type="button" class="btn btn-danger text-white" @click="confermaAbbandono" :disabled="abbandonando" aria-label="Conferma abbandono della partita">
               <span v-if="abbandonando" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               Abbandona
             </button>
@@ -388,7 +270,7 @@ function filterBySection(arr = []) {
   return arr
 }
 
-const emit = defineEmits(['partita-aggiornata', 'partita-eliminata', 'partita-abbandonata'])
+const emit = defineEmits(['partita-aggiornata', 'partita-abbandonata'])
 
 const lista = ref(filterBySection(props.partite ?? []))
 watch(() => props.partite, (nv) => {
@@ -521,10 +403,6 @@ const sommaRuoliCalcio = computed(() =>
     .map(k => Number(ruoliEditCalcio.value[k] || 0))
     .reduce((a,b) => a + b, 0)
 )
-const nuovoTotaleTarget = computed(() => {
-  const cur = Number(partitaDaModificare.value?.partecipanti || 0)
-  return cur + sommaRuoliCalcio.value
-})
 
 /* ======================= Modali ======================= */
 const minDateTime = computed(() => {
@@ -533,98 +411,14 @@ const minDateTime = computed(() => {
   return d.toISOString().slice(0, 16)
 })
 const partitaSelezionata = ref(null)
-const partitaDaModificare = ref(null)
 
 function mostraDettagli(partita) {
   partitaSelezionata.value = partita
   const modal = new bootstrap.Modal(document.getElementById('modalDettagli'))
   modal.show()
 }
-function mostraModifica(partita) {
-  partitaDaModificare.value = { ...partita }
-  if (isCalcio(partitaDaModificare.value)) {
-    ruoliEditCalcio.value = { ...{ portiere:0, difensore:0, centrocampista:0, attaccante:0, all_around:0 }, ...extractRolesNeeded(partitaDaModificare.value) }
-  } else {
-    ruoliEditCalcio.value = { portiere:0, difensore:0, centrocampista:0, attaccante:0, all_around:0 }
-  }
-  const modal = new bootstrap.Modal(document.getElementById('modalModifica'))
-  modal.show()
-}
 
 /* ======================= Azioni ======================= */
-async function salvaModifiche() {
-  try {
-    const id = partitaDaModificare.value.id
-    const payload = { ...partitaDaModificare.value }
-
-    if (typeof payload.date_time === 'string' && !payload.date_time.endsWith('Z')) {
-      payload.date_time = new Date(payload.date_time).toISOString()
-    }
-
-    if (isCalcio(partitaDaModificare.value) && isPartitaCreataDaUtente(partitaDaModificare.value)) {
-      payload.roles_needed = {
-        portiere: Number(ruoliEditCalcio.value.portiere || 0),
-        difensore: Number(ruoliEditCalcio.value.difensore || 0),
-        centrocampista: Number(ruoliEditCalcio.value.centrocampista || 0),
-        attaccante: Number(ruoliEditCalcio.value.attaccante || 0),
-        all_around: Number(ruoliEditCalcio.value.all_around || 0)
-      }
-      payload.max_players = (Number(payload.partecipanti) || 0) +
-        Object.values(payload.roles_needed).reduce((a,b)=>a+Number(b||0),0)
-    }
-
-    const { data: updated } = await axios.put(`http://localhost:3000/api/partite/${id}`, payload)
-
-    const idx = lista.value.findIndex(p => p.id === id)
-    const nuovo = updated ?? payload
-    if (idx !== -1) {
-      lista.value[idx] = { ...lista.value[idx], ...nuovo }
-    }
-
-    const modal = bootstrap.Modal.getInstance(document.getElementById('modalModifica'))
-    modal?.hide()
-
-    if (partitaSelezionata.value?.id === id) {
-      partitaSelezionata.value = { ...lista.value[idx] }
-    }
-
-    emit('partita-aggiornata', { id, updated: lista.value[idx] })
-    showToast('Partita modificata con successo! ✏️', 'warning', 5000)
-    syncEvento(id)
-  } catch (err) {
-    console.error('Errore durante la modifica:', err)
-    showToast('Errore durante la modifica della partita.', 'danger', 5000)
-  }
-}
-
-const idDaEliminare = ref(null)
-const eliminando = ref(false)
-function chiediConfermaElimina(id) {
-  idDaEliminare.value = id
-  const modal = new bootstrap.Modal(document.getElementById('modalConfermaElimina'))
-  modal.show()
-}
-async function confermaEliminazione() {
-  if (!idDaEliminare.value) return
-  eliminando.value = true
-  const modalEl = document.getElementById('modalConfermaElimina')
-  try {
-    await axios.delete(`http://localhost:3000/api/partite/${idDaEliminare.value}`, {
-      data: { userId: userId }
-    })
-    lista.value = lista.value.filter(p => p.id !== idDaEliminare.value)
-    emit('partita-eliminata', idDaEliminare.value)
-    bootstrap.Modal.getInstance(modalEl)?.hide()
-    showToast('Partita eliminata con successo!', 'danger', 5000)
-  } catch (err) {
-    console.error('Errore eliminazione partita:', err)
-    showToast('Errore durante l\'eliminazione della partita.', 'danger', 5000)
-  } finally {
-    eliminando.value = false
-    idDaEliminare.value = null
-  }
-}
-
 const idDaAbbandonare = ref(null)
 const abbandonando = ref(false)
 function chiediConfermaAbbandona(id) {
@@ -710,6 +504,7 @@ function formatDateTimeLocal(datetime) {
   const tzOffset = date.getTimezoneOffset() * 60000
   return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16)
 }
+
 function getSportIcon(sport) {
   switch (String(sport).toLowerCase()) {
     case 'calcio a 5':

@@ -1,9 +1,8 @@
 <template>
   <div class="home-search-card card shadow-sm mb-4" role="search" aria-label="Ricerca partite">
     <div class="card-body py-3 px-3">
-      <div class="row align-items-center g-2 flex-nowrap justify-content-center">
-
-        <div class="col-md-3">
+      <div class="row align-items-center g-2 justify-content-center home-search-row">
+        <div class="col-12 col-sm-6 col-lg-3">
           <label for="autocomplete-luogo" class="visually-hidden">Luogo</label>
           <input
             id="autocomplete-luogo"
@@ -18,7 +17,7 @@
           />
         </div>
 
-        <div class="col-md-3">
+        <div class="col-12 col-sm-6 col-lg-3">
           <label for="select-sport" class="visually-hidden">Sport</label>
           <select
             id="select-sport"
@@ -40,7 +39,7 @@
           </select>
         </div>
 
-        <div class="col-md-2">
+        <div class="col-6 col-lg-2">
           <label for="date-field" class="visually-hidden">Data</label>
           <input
             id="date-field"
@@ -53,7 +52,7 @@
           />
         </div>
 
-        <div class="col-md-2">
+        <div class="col-6 col-lg-2">
           <label for="time-field" class="visually-hidden">Ora</label>
           <input
             id="time-field"
@@ -66,28 +65,30 @@
           />
         </div>
 
-        <div class="col-auto d-flex gap-2">
-          <button
-            type="button"
-            class="btn btn-success d-flex align-items-center gap-2"
-            @click="$emit('cerca')"
-            aria-label="Cerca partite"
-          >
-            <img src="/images/search-button.svg" alt="Cerca" aria-hidden="true" width="16" height="16" />
-            <span>Cerca</span>
-          </button>
+        <!-- Bottoni -->
+        <div class="col-12 col-lg-auto">
+          <div class="d-flex gap-2 flex-wrap justify-content-center justify-content-lg-start">
+            <button
+              type="button"
+              class="btn btn-search d-flex align-items-center gap-2 btn-fluid"
+              @click="$emit('cerca')"
+              aria-label="Cerca partite"
+            >
+              <img src="/images/search-button.svg" alt="Cerca" aria-hidden="true" width="16" height="16" />
+              <span>Cerca</span>
+            </button>
 
-          <button
-            type="button"
-            class="btn btn-danger d-flex align-items-center gap-2"
-            @click="$emit('pulisci')"
-            aria-label="Pulisci filtri"
-          >
-            <img src="/images/trash.svg" alt="Cancella filtri" aria-hidden="true" width="16" height="16" />
-            <span>Pulisci</span>
-          </button>
+            <button
+              type="button"
+              class="btn btn-delete d-flex align-items-center gap-2 btn-fluid"
+              @click="$emit('pulisci')"
+              aria-label="Pulisci filtri"
+            >
+              <img src="/images/trash.svg" alt="Cancella filtri" aria-hidden="true" width="16" height="16" />
+              <span>Pulisci</span>
+            </button>
+          </div>
         </div>
-
       </div>
     </div>
   </div>

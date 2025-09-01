@@ -22,18 +22,28 @@
       />
 
       <!-- Tabs -->
-      <ul class="nav nav-pills justify-content-center mb-3">
+      <ul class="nav nav-pills justify-content-center mb-4 custom-pills">
         <li class="nav-item">
-          <button class="nav-link" :class="{ active: tab==='disponibili' }" @click="tab='disponibili'">
+          <button
+            class="nav-link"
+            :class="{ active: tab==='disponibili' }"
+            @click="tab='disponibili'"
+          >
             Disponibili
           </button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" :class="{ active: tab==='mie' }" @click="tab='mie'">
+          <button
+            class="nav-link"
+            :class="{ active: tab==='mie' }"
+            @click="tab='mie'"
+          >
             Create da te
           </button>
         </li>
       </ul>
+
+
 
       <!-- Partite disponibili -->
       <div class="mb-5" v-if="tab==='disponibili'">
@@ -87,38 +97,78 @@
       <!-- MODALE DETTAGLI -->
       <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="modalDettagliLabel">{{ partitaSelezionata?.sport || 'Dettagli Partita' }}</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-info text-white">
+              <h5 class="modal-title" id="modalDettagliLabel">Dettagli partita</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
             </div>
+
             <div class="modal-body" v-if="partitaSelezionata">
-              <p><strong>Data:</strong> {{ formatData(partitaSelezionata.date_time) }}</p>
-              <p><strong>Ora:</strong> {{ formatOra(partitaSelezionata.date_time) }}</p>
-              <p><strong>Luogo:</strong> {{ partitaSelezionata.location }}</p>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Sport</label>
+                  <input type="text" class="form-control" :value="partitaSelezionata.sport" disabled />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Organizzatore</label>
+                  <input type="text" class="form-control" :value="partitaSelezionata.organizer_name" disabled />
+                </div>
 
-              <!-- Se NON è calcio: mostra posti -->
-              <p v-if="!isCalcio(partitaSelezionata)">
-                <strong>Posti rimanenti:</strong>
-                {{ postiLiberi(partitaSelezionata) }} / {{ partitaSelezionata.max_players ?? 0 }}
-              </p>
+                <div class="col-md-6">
+                  <label class="form-label">Data</label>
+                  <input type="text" class="form-control" :value="formatData(partitaSelezionata.date_time)" disabled />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Ora</label>
+                  <input type="text" class="form-control" :value="formatOra(partitaSelezionata.date_time)" disabled />
+                </div>
 
-              <!-- Se è calcio: mostra ruoli -->
-              <div v-else>
-                <p class="mb-1">
-                  <strong>Ruoli mancanti:</strong>
-                  {{ formatRuoli(partitaSelezionata.roles_needed) }}
-                </p>
-                <p class="mb-1 text-muted">
-                  <strong>- Totale ruoli richiesti:</strong> {{ sumRolesNeeded(partitaSelezionata) }}
-                </p>
+                <div class="col-12">
+                  <label class="form-label">Luogo</label>
+                  <input type="text" class="form-control" :value="partitaSelezionata.location" disabled />
+                </div>
+
+                <!-- NON calcio: posti -->
+                <div class="col-12" v-if="!isCalcio(partitaSelezionata)">
+                  <label class="form-label">Posti rimanenti</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    :value="`${postiLiberi(partitaSelezionata)} / ${(partitaSelezionata.max_players ?? 0)}`"
+                    disabled
+                  />
+                </div>
+
+                <!-- Calcio: ruoli -->
+                <div class="col-12" v-else>
+                  <label class="form-label">Ruoli mancanti</label>
+                  <div class="row g-2">
+                    <div class="col-md-3" v-for="r in roleEntries(partitaSelezionata)" :key="r.key">
+                      <div class="input-group">
+                        <span class="input-group-text">{{ ruoloLabel(r.key) }}</span>
+                        <input type="text" class="form-control" :value="r.count" disabled />
+                      </div>
+                    </div>
+                  </div>
+                  <small class="text-muted d-block mt-1">
+                    Totale ruoli richiesti: {{ sumRolesNeeded(partitaSelezionata) }}
+                  </small>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Descrizione</label>
+                  <textarea
+                    class="form-control"
+                    rows="3"
+                    :value="partitaSelezionata.description || 'Nessuna descrizione disponibile.'"
+                    disabled
+                  ></textarea>
+                </div>
               </div>
 
-              <p><strong>Organizzatore:</strong> {{ partitaSelezionata.organizer_name }}</p>
-              <p><strong>Descrizione:</strong> {{ partitaSelezionata.description || 'Nessuna descrizione disponibile.' }}</p>
+              <hr class="my-4" />
 
-              <hr />
-              <h6>Invita un utente</h6>
+              <h6 class="mb-2">Invita un utente</h6>
               <div class="input-group">
                 <input
                   type="text"
@@ -127,10 +177,16 @@
                   class="form-control"
                   placeholder="Cerca utente da invitare..."
                 />
-                <button class="btn btn-outline-secondary" type="button" @click="sendInvite" :disabled="!selectedUserToInvite">
+                <button
+                  class="btn text-white border-0 bg-info"
+                  type="button"
+                  @click="sendInvite"
+                  :disabled="!selectedUserToInvite"
+                >
                   Invita
                 </button>
               </div>
+
               <ul v-if="userSearchResults.length" class="list-group mt-2">
                 <li
                   v-for="user in userSearchResults"
@@ -143,9 +199,13 @@
                 </li>
               </ul>
             </div>
+
+            <div class="modal-footer">
+            </div>
           </div>
         </div>
       </div>
+
 
       <!-- Modale conferma -->
       <div class="modal fade" id="modalConferma" tabindex="-1" aria-labelledby="modalConfermaLabel" aria-hidden="true">
@@ -153,13 +213,6 @@
           <div class="modal-content border-0 shadow">
             <div class="modal-header" :class="confirmHeaderClass">
               <h5 class="modal-title" id="modalConfermaLabel">{{ confirmTitle }}</h5>
-              <button
-                type="button"
-                class="btn-close"
-                :class="confirmHeaderClass.includes('text-white') ? 'btn-close-white' : ''"
-                data-bs-dismiss="modal"
-                aria-label="Chiudi"
-              ></button>
             </div>
             <div class="modal-body">
               <p class="mb-2" v-html="confirmMessage"></p>
@@ -167,7 +220,7 @@
             </div>
             <div class="modal-footer">
               <!-- CANCEL: ora sfondo rosso e testo nero -->
-              <button type="button" class="btn btn-cancel" data-bs-dismiss="modal" :disabled="confirmBusy">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="confirmBusy">
                 Annulla
               </button>
               <button type="button" class="btn" :class="confirmCtaClass" @click="doConfirm" :disabled="confirmBusy">
@@ -280,7 +333,7 @@
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Annulla</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
               <button type="submit" class="btn btn-success" :disabled="savingEdit">
                 <span v-if="savingEdit" class="spinner-border spinner-border-sm me-2"></span>
                 Salva modifiche
@@ -520,6 +573,42 @@ async function doConfirm() {
     confirmOnOk = null
   }
 }
+
+// --- Eliminazione partita ---
+async function eliminaPartita(eventId) {
+  try {
+    await axios.delete(`http://localhost:3000/api/partite/${eventId}`)
+    showToast('Partita eliminata con successo.', 'success')
+    await cercaPartite() // ricarica liste
+  } catch (err) {
+    console.error('Errore eliminazione partita:', err)
+    const msg = err.response?.data?.error || 'Errore durante l’eliminazione.'
+    showToast(msg, 'danger')
+  }
+}
+
+/**
+ * Può ricevere l'oggetto partita o solo l'id (emesso dal child).
+ */
+function chiediElimina(partitaOrId) {
+  const id = typeof partitaOrId === 'object' ? partitaOrId.id : partitaOrId
+  const p  = typeof partitaOrId === 'object'
+    ? partitaOrId
+    : (partite.value.find(x => String(x.id) === String(id)) || {})
+
+  const when  = p.date_time ? `${formatData(p.date_time)} alle ${formatOra(p.date_time)} – ${p.location || ''}` : ''
+  const sport = p.sport || 'la partita'
+
+  openConfirm({
+    title: 'Eliminare la partita?',
+    message: `Confermi l’eliminazione di <strong>${sport}</strong>?`,
+    subMessage: when,
+    ctaText: 'Elimina',
+    theme: 'danger',
+    onOk: () => eliminaPartita(id),
+  })
+}
+
 
 // Join
 const unisciti = async (eventId, organizerId, sport) => {

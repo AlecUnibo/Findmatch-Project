@@ -13,7 +13,10 @@
         </div>
         <div>
           <h3 class="mb-0">{{ user.username }}</h3>
-          <button class="btn btn-primary btn-sm mt-2" @click="apriModaleModifica">
+          <button
+            class="btn text-white border-0 bg-details btn-pill mt-2"
+            @click="apriModaleModifica"
+          >
             Modifica
           </button>
         </div>
@@ -57,7 +60,7 @@
       <hr class="my-4" />
 
       <!-- Nav Tab -->
-      <ul class="nav nav-tabs justify-content-center mb-4">
+      <ul class="nav nav-pills justify-content-center mb-4 custom-pills">
         <li class="nav-item" v-for="tab in tabs" :key="tab.value">
           <button
             class="nav-link"
@@ -68,6 +71,7 @@
           </button>
         </li>
       </ul>
+
 
       <!-- Contenuto tab -->
       <PartiteSection

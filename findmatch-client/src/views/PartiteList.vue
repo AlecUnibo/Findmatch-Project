@@ -3,7 +3,7 @@
     <h2 class="text-center mb-4">📋 Le tue partite</h2>
 
     <!-- Nav Tab -->
-    <ul class="nav nav-tabs justify-content-center mb-4">
+    <ul class="nav nav-pills justify-content-center mb-4 custom-pills">
       <li class="nav-item" v-for="tab in tabs" :key="tab.value">
         <button
           class="nav-link"
@@ -14,6 +14,7 @@
         </button>
       </li>
     </ul>
+
 
     <!-- Tab Content -->
     <PartiteSection

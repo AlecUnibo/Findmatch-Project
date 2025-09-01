@@ -129,73 +129,86 @@
 }
 @keyframes fall { to { transform: translateY(110vh); opacity: 0; } }
 
-/* ============================= */
-/*          Modale Modifica      */
-/* ============================= */
+/* ============================= Modale Modifica + Dettagli ============================= */
 
-.component-home #modalModifica .modal-content {
+.component-home #modalModifica .modal-content,
+.component-home #modalDettagli .modal-content {
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0,0,0,.25);
   border: 0;
 }
 
-.component-home #modalModifica .modal-header {
+.component-home #modalModifica .modal-header,
+.component-home #modalDettagli .modal-header {
   border-bottom: 0;
   background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
   color: #fff;
   padding-block: 0.9rem;
 }
 
-.component-home #modalModifica .btn-close.btn-close-white {
+.component-home #modalModifica .btn-close.btn-close-white,
+.component-home #modalDettagli .btn-close.btn-close-white {
   filter: invert(1) grayscale(100%);
   opacity: .9;
 }
-.component-home #modalModifica .btn-close.btn-close-white:hover {
+.component-home #modalModifica .btn-close.btn-close-white:hover,
+.component-home #modalDettagli .btn-close.btn-close-white:hover {
   opacity: 1;
 }
 
-.component-home #modalModifica .modal-body {
+.component-home #modalModifica .modal-body,
+.component-home #modalDettagli .modal-body {
   padding: 1.25rem 1.25rem 0.75rem;
 }
 
-.component-home #modalModifica .modal-footer {
+.component-home #modalModifica .modal-footer,
+.component-home #modalDettagli .modal-footer {
   border-top: 0;
   padding: 0.75rem 1.25rem 1.25rem;
   gap: .5rem;
 }
 
 /* Campi form */
-.component-home #modalModifica .form-label {
+.component-home #modalModifica .form-label,
+.component-home #modalDettagli .form-label {
   font-weight: 600;
   color: #2b2f33;
 }
 .component-home #modalModifica .form-control,
-.component-home #modalModifica .form-select {
+.component-home #modalModifica .form-select,
+.component-home #modalDettagli .form-control,
+.component-home #modalDettagli .form-select {
   border-radius: 10px;
   border: 1px solid #d7dde3;
   background-color: #fff;
 }
 .component-home #modalModifica .form-control:focus,
-.component-home #modalModifica .form-select:focus {
+.component-home #modalModifica .form-select:focus,
+.component-home #modalDettagli .form-control:focus,
+.component-home #modalDettagli .form-select:focus {
   border-color: #86b7fe;
   box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .15);
   outline: 0;
 }
 
-/* Input gruppo ruoli */
-.component-home #modalModifica .input-group-text {
+/* Input-group (ruoli/valori) */
+.component-home #modalModifica .input-group-text,
+.component-home #modalDettagli .input-group-text {
   background-color: #f3f5f7;
   border: 1px solid #d7dde3;
   border-right: 0;
   font-weight: 600;
 }
-.component-home #modalModifica .input-group .form-control {
+.component-home #modalModifica .input-group .form-control,
+.component-home #modalDettagli .input-group .form-control {
   border-left: 0;
 }
 
-/* Campo sport in sola lettura (disabilitato) */
+/* Campi in sola lettura (disabled) */
 .component-home #modalModifica input[disabled],
-.component-home #modalModifica .form-control[disabled] {
+.component-home #modalModifica .form-control[disabled],
+.component-home #modalDettagli input[disabled],
+.component-home #modalDettagli .form-control[disabled] {
   background-color: #f5f7fa !important;
   color: #6c757d !important;
   cursor: not-allowed;
@@ -203,13 +216,16 @@
 }
 
 /* Pulsanti footer */
-.component-home #modalModifica .btn-cancel {
+.component-home #modalModifica .btn-cancel,
+.component-home #modalDettagli .btn-cancel {
   background-color: #ff4d4d;
   color: #000 !important;
   border: none;
 }
 .component-home #modalModifica .btn-cancel:hover,
-.component-home #modalModifica .btn-cancel:focus {
+.component-home #modalModifica .btn-cancel:focus,
+.component-home #modalDettagli .btn-cancel:hover,
+.component-home #modalDettagli .btn-cancel:focus {
   background-color: #e04343;
   color: #000 !important;
   box-shadow: none;
@@ -217,26 +233,119 @@
 
 /* Responsivo */
 @media (max-width: 575.98px) {
-  .component-home #modalModifica .modal-dialog { margin: 0.75rem; }
-  .component-home #modalModifica .input-group-text { font-size: .9rem; }
+  .component-home #modalModifica .modal-dialog,
+  .component-home #modalDettagli .modal-dialog { margin: 0.75rem; }
+  .component-home #modalModifica .input-group-text,
+  .component-home #modalDettagli .input-group-text { font-size: .9rem; }
 }
 
-/* Backdrop leggermente più scuro */
+/* Backdrop e layering */
 .component-home .modal-backdrop.show {
   background-color: rgba(0, 0, 0, 0.55);
 }
-
-/* Garantisce che il modale resti sopra ai dropdown delle card */
-.component-home #modalModifica { z-index: 40000 !important; }
+.component-home #modalModifica,
+.component-home #modalDettagli { z-index: 40000 !important; }
 .component-home .modal-backdrop { z-index: 39990 !important; }
 
+/* (Opzionale) Bottone "Invita" coerente col tema header */
+.component-home #modalDettagli .modal-footer .btn,
+.component-home #modalDettagli .btn.bg-info {
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
+  color: #fff;
+  border: none;
+}
 
+.component-home #modalDettagli .btn.bg-info:hover { filter: brightness(0.95); }
+
+/* Stile custom per i tab senza card */
+.custom-pills .nav-link {
+  border-radius: 999px; /* pill shape */
+  padding: 0.45rem 1.2rem;
+  font-weight: 600;
+  color: #2b2f33;
+  background-color: rgba(68,128,187,0.1); /* blu chiaro trasparente */
+  transition: all 0.2s ease;
+  margin: 0 0.25rem;
+}
+
+/* Hover e focus */
+.custom-pills .nav-link:hover,
+.custom-pills .nav-link:focus {
+  background-color: rgba(68,128,187,0.25);
+  color: #2b2f33;
+}
+
+/* Stato attivo */
+.custom-pills .nav-link.active {
+  background: linear-gradient(135deg, rgba(68,128,187,0.8), #567cc9);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
 
 /* ---------- Impostazioni.vue ---------- */
 
-.component-settings .card h5 {
-  font-weight: 600;
+/* ===== Settings Page Polishing ===== */
+.component-settings .card h5 { font-weight: 600; }
+
+/* Header */
+.component-settings .settings-header {
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
+  position: relative;
+  height: 120px;
 }
+
+/* Section wrapper */
+.component-settings .section-title {
+  display: flex; 
+  align-items: center; 
+  gap: .5rem;
+}
+
+/* Info tiles */
+.component-settings .info-tile {
+  border: 1px solid #e6e9ef;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(16,24,40,.04);
+}
+.component-settings .info-tile .label {
+  font-size: .8rem; color: #6b7280; letter-spacing: .2px;
+}
+.component-settings .info-tile .value {
+  font-weight: 600; font-size: 1.05rem; color: #111827;
+}
+
+/* Divider */
+.component-settings .settings-divider {
+  border: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, #e8ecf3, transparent);
+  margin: 1.5rem 0;
+}
+
+/* Inputs */
+.component-settings .form-floating > .form-control.fm-control {
+  border-radius: 12px;
+}
+.component-settings .form-control.fm-control {
+  border: 1px solid #d9dee8;
+  background-color: #fff;
+}
+.component-settings .form-control.fm-control:focus {
+  border-color: #5a8df0;
+  box-shadow: 0 0 0 .2rem rgba(90, 141, 240, .15);
+}
+
+/* Primary gradient button */
+.component-settings .btn-gradient-primary {
+  background: linear-gradient(135deg, #4f7fe0, #6b9af6);
+  border: none;
+  color: #fff;
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(90,141,240,.25);
+}
+.component-sett
+
 
 /* ---------- LoginPage.vue ---------- */
 .component-login .login-logo {
@@ -259,6 +368,26 @@
 .component-profilo img.rounded-circle {
   object-fit: cover;
   border: 2px solid #ddd;
+}
+
+.btn-pill {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.4rem 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.bg-details {
+  background: linear-gradient(135deg, rgba(68,128,187,0.85), #567cc9);
+  color: #fff !important;
+  border: none;
+}
+
+.bg-details:hover,
+.bg-details:focus {
+  background: linear-gradient(135deg, rgba(68,128,187,1), #476bb3);
+  color: #fff !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
 }
 
 .component-profilo .bio-text {
@@ -362,28 +491,94 @@
 }
 
 /* CTA */
-.component-crea-partita .fm-submit {
-  box-shadow: 0 .5rem 1.25rem rgba(68, 128, 187, 0.8);
-}
-.component-crea-partita .fm-submit:hover {
-  transform: translateY(-1px);
+.component-crea-partita .fm-header {
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
 }
 
-/* Role label width (tua regola + piccolo tuning) */
+/* override del bottone */
+.component-crea-partita .fm-submit.btn {
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.95), #567cc9) !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .6rem 1.35rem;
+  box-shadow: 0 .5rem 1.25rem rgba(68, 128, 187, 0.45);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.component-crea-partita .fm-submit.btn:hover,
+.component-crea-partita .fm-submit.btn:focus {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: 0 .7rem 1.5rem rgba(68, 128, 187, 0.55);
+}
+
+.component-crea-partita .fm-submit.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 .35rem 1rem rgba(68, 128, 187, 0.35);
+}
+
+/* focus accessibile */
+.component-crea-partita .fm-submit.btn:focus-visible {
+  outline: 3px solid rgba(255,255,255,.85);
+  outline-offset: 2px;
+}
+
+
+/* Role label width */
 .component-crea-partita .role-label { min-width: 160px; }
 
-/* Count width (tua regola) */
+/* Count width */
 .component-crea-partita .role-count {
   min-width: 48px;
   text-align: center;
 }
 
-/* Toast in CreaPartita (tue regole mantenute) */
+/* Toast in CreaPartita*/
 .component-crea-partita .toast-container .toast { --bs-toast-max-width: 520px; }
 .component-crea-partita .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
 .component-crea-partita .toast.fade { transition: opacity .6s ease; }
 
 /* ---------- Notifiche.vue ---------- */
+
+/* Bottoni pill dedicati alla pagina Notifiche */
+.btn-pill-action {
+  border-radius: 999px;   
+  font-weight: 600;
+  padding: 0.4rem 1.2rem;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+/* Segna tutte come lette */
+.btn-mark-read {
+  --join-grad-a: rgba(68,128,187,0.95);
+  --join-grad-b: #567cc9;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+}
+.btn-mark-read:hover,
+.btn-mark-read:focus {
+  background: linear-gradient(135deg, rgba(0,123,255,1), #004080);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+/* Elimina tutte */
+.btn-delete-all {
+  --join-grad-a: rgba(223, 135, 135, 0.95);
+  --join-grad-b: red;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+}
+.btn-delete-all:hover,
+.btn-delete-all:focus {
+  background: linear-gradient(135deg, rgba(220,53,69,1), #7a101d);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
 
 /* Stile base per TUTTE le notifiche */
 .component-notifiche .list-group-item {

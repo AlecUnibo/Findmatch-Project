@@ -79,8 +79,16 @@
   color: #fff;
 }
 
+/* di default CONSENTI il wrap per evitare overflow */
 .home-search-card .row {
-  flex-wrap: nowrap !important;
+  flex-wrap: wrap !important;
+}
+
+/* da lg in su torna a riga singola */
+@media (min-width: 992px) {
+  .home-search-card .row {
+    flex-wrap: nowrap !important;
+  }
 }
 
 .home-search-card .form-control,
@@ -92,7 +100,7 @@
   padding: .35rem .6rem;
   box-shadow: none;
   transition: box-shadow .15s ease, background .15s ease;
-  min-width: 150px; /* evita che diventino troppo stretti */
+  min-width: 150px; /* evita che diventino troppo stretti su desktop/tablet */
 }
 .home-search-card .form-control:focus,
 .home-search-card .form-select:focus {
@@ -120,19 +128,105 @@
   padding-right: 1rem;
 }
 
+/* Bottone "Cerca" verde gradient */
+.home-search-card .btn-search {
+  --join-grad-a: rgba(170, 189, 165, 0.95);
+  --join-grad-b: green;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+.home-search-card .btn-search:hover,
+.home-search-card .btn-search:focus {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transform: translateY(-1px);
+}
+.home-search-card .btn-search:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+.home-search-card .btn-search:focus-visible {
+  outline: 3px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+
+/* Bottone "Pulisci" rosso gradient (come Elimina di PartiteCard) */
+.home-search-card .btn-delete {
+  --join-grad-a: rgba(223, 135, 135, 0.95);
+  --join-grad-b: red;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+.home-search-card .btn-delete:hover,
+.home-search-card .btn-delete:focus {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transform: translateY(-1px);
+}
+.home-search-card .btn-delete:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+.home-search-card .btn-delete:focus-visible {
+  outline: 3px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+
+
+
+/* ---------- Responsive tweaks ---------- */
 @media (max-width: 576px) {
+  /* campi full-width su mobile */
   .home-search-card .form-control,
   .home-search-card .form-select {
-    min-width: 130px;
+    min-width: 100%;
+    width: 100%;
     height: 34px;
     font-size: .9rem;
   }
+
+  /* la colonna bottoni diventa a tutta larghezza,
+     così i bottoni scendono sotto i campi senza uscire dalla card */
+  .home-search-card .col-auto {
+    width: 100%;
+  }
+
+  /* bottoni fluidi su mobile */
   .home-search-card .btn {
+    width: 100%;
     padding: .35rem .8rem;
     font-size: .9rem;
   }
+
+  /* se i due bottoni sono affiancati, permetti il wrap con spazio */
+  .home-search-card .d-flex {
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
 }
 
+/* breakpoint intermedio: consentire comunque il wrap se serve */
+@media (max-width: 991.98px) {
+  .home-search-card .row {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* (resto file invariato) */
 .user-modal-card {
   width: 100%;
   max-width: 640px;
@@ -166,6 +260,7 @@
 .body-modal-open {
   overflow: hidden;
 }
+
 
 /* -------------------------------------------------- Navbar.vue -------------------------------------------------- */
 
@@ -402,6 +497,33 @@
   height: 100%;
 }
 
+.component-partita-card .fm-progress {
+  height: 12px;             
+  border-radius: 999px;
+  overflow: hidden;
+
+  /* larghezza contenuta, non tutta la card */
+  max-width: 1000px;           
+  width: 100%;
+
+  background: rgba(255,255,255,0.28);
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.25),
+    0 0 0 1px rgba(255,255,255,0.20);
+}
+
+@media (max-width: 576px) {
+  .component-partita-card .fm-progress {
+    max-width: 100%;
+  }
+}
+
+.component-partita-card .fm-progress-bar {
+  height: 100%;
+  transition: width .25s ease; /* colori: bg-success / bg-warning / bg-danger */
+}
+
+
 .component-partite .posti-liberi-badge {
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
@@ -429,6 +551,269 @@
 .component-partite .card-text {
   word-break: break-word;
 }
+
+/* -------------------------------------------------- PartiteCard.vue — Bottone "Dettagli" -------------------------------------------------- */
+
+.component-partita-card .btn-details {
+  --join-grad-a: rgba(68,128,187,0.95);
+  --join-grad-b: #567cc9;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.component-partita-card .btn-details:hover,
+.component-partita-card .btn-details:focus {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transform: translateY(-1px);
+}
+
+.component-partita-card .btn-details:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+.component-partita-card .btn-details:focus-visible {
+  outline: 3px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+
+.component-partita-card .btn-details:disabled,
+.component-partita-card .btn-details[aria-disabled="true"] {
+  opacity: .65;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Migliore usabilità su mobile */
+@media (max-width: 576px) {
+  .component-partita-card .btn-join { padding: .4rem .9rem; }
+  .component-partita-card .dropdown-menu.join-menu { min-width: 210px; }
+}
+
+/* Sicurezza layer rispetto ad altri elementi */
+.component-partita-card .dropdown-menu.join-menu { z-index: 30001; }
+
+/* -------------------------------------------------- PartiteCard.vue — Bottone "Modifica" -------------------------------------------------- */
+
+.component-partita-card .btn-edit {
+  --join-grad-a: rgba(170, 169, 127, 0.95);
+  --join-grad-b: yellow;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.component-partita-card .btn-edit:hover,
+.component-partita-card .btn-edit:focus {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transform: translateY(-1px);
+}
+
+.component-partita-card .btn-edit:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+.component-partita-card .btn-edit:focus-visible {
+  outline: 3px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+
+.component-partita-card .btn-edit:disabled,
+.component-partita-card .btn-edit[aria-disabled="true"] {
+  opacity: .65;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Migliore usabilità su mobile */
+@media (max-width: 576px) {
+  .component-partita-card .btn-join { padding: .4rem .9rem; }
+  .component-partita-card .dropdown-menu.join-menu { min-width: 210px; }
+}
+
+/* Sicurezza layer rispetto ad altri elementi */
+.component-partita-card .dropdown-menu.join-menu { z-index: 30001; }
+
+/* -------------------------------------------------- PartiteCard.vue — Bottone "Elimina" -------------------------------------------------- */
+
+.component-partita-card .btn-delete {
+  --join-grad-a: rgba(223, 135, 135, 0.95);
+  --join-grad-b: red;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.component-partita-card .btn-delete:hover,
+.component-partita-card .btn-delete:focus {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transform: translateY(-1px);
+}
+
+.component-partita-card .btn-delete:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+.component-partita-card .btn-delete:focus-visible {
+  outline: 3px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+
+.component-partita-card .btn-delete:disabled,
+.component-partita-card .btn-delete[aria-disabled="true"] {
+  opacity: .65;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Migliore usabilità su mobile */
+@media (max-width: 576px) {
+  .component-partita-card .btn-join { padding: .4rem .9rem; }
+  .component-partita-card .dropdown-menu.join-menu { min-width: 210px; }
+}
+
+/* Sicurezza layer rispetto ad altri elementi */
+.component-partita-card .dropdown-menu.join-menu { z-index: 30001; }
+
+/* -------------------------------------------------- PartiteCard.vue — Bottone "Unisciti" & Dropdown -------------------------------------------------- */
+
+.component-partita-card .btn-join {
+  --join-grad-a: rgba(170, 189, 165, 0.95);
+  --join-grad-b: green;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.component-partita-card .btn-join:hover,
+.component-partita-card .btn-join:focus {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transform: translateY(-1px);
+}
+
+.component-partita-card .btn-join:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+.component-partita-card .btn-join:focus-visible {
+  outline: 3px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+
+.component-partita-card .btn-join:disabled,
+.component-partita-card .btn-join[aria-disabled="true"] {
+  opacity: .65;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* caret della dropdown in bianco */
+.component-partita-card .btn-join.dropdown-toggle::after {
+  filter: brightness(0) invert(1);
+  margin-left: .45rem;
+}
+
+/* Wrapper per gestione layer del menu sopra la card */
+.component-partita-card .join-dropdown { position: relative; z-index: 3; }
+
+/* Dropdown menu estetico */
+.component-partita-card .dropdown-menu.join-menu {
+  --menu-bg: rgba(255,255,255,.98);
+  --menu-shadow: 0 12px 30px rgba(0,0,0,.28);
+  background: var(--menu-bg);
+  border: 0;
+  border-radius: 14px;
+  padding: .5rem;
+  min-width: 240px;
+  box-shadow: var(--menu-shadow);
+  overflow: hidden;
+}
+
+.component-partita-card .join-menu .dropdown-divider {
+  margin: .35rem .25rem;
+  opacity: .25;
+}
+
+.component-partita-card .join-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  border-radius: 10px;
+  padding: .55rem .65rem;
+  font-weight: 600;
+  color: #1f2937; /* slate-800 */
+  transition: background-color .12s ease, transform .06s ease;
+}
+
+.component-partita-card .join-menu .dropdown-item:hover,
+.component-partita-card .join-menu .dropdown-item:focus {
+  background-color: rgba(68,128,187,.10);
+}
+
+.component-partita-card .join-menu .dropdown-item:active {
+  transform: translateY(0);
+}
+
+.component-partita-card .join-menu .dropdown-item.disabled,
+.component-partita-card .join-menu .dropdown-item[disabled] {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* Badge numero ruoli disponibili */
+.component-partita-card .join-menu .role-badge {
+  background: #e5e7eb;         /* gray-200 */
+  color: #111827;              /* gray-900 */
+  font-weight: 700;
+  border-radius: 999px;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Allineamento visivo label+badge */
+.component-partita-card .join-menu .item-label { flex: 1 1 auto; }
+
+/* Migliore usabilità su mobile */
+@media (max-width: 576px) {
+  .component-partita-card .btn-join { padding: .4rem .9rem; }
+  .component-partita-card .dropdown-menu.join-menu { min-width: 210px; }
+}
+
+/* Sicurezza layer rispetto ad altri elementi */
+.component-partita-card .dropdown-menu.join-menu { z-index: 30001; }
 
 
 /* -------------------------------------------------- PartiteListSection.vue -------------------------------------------------- */
@@ -481,11 +866,213 @@
 .component-partite .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
 .component-partite .toast.fade { transition: opacity .6s ease; }
 
-.component-partite .progress {
-  height: 6px;
+.component-partite .fm-progress {
+  /* dimensione “spessa” come in Home */
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+
+  /* larghezza NON a tutta card (stile Home) */
+  max-width: 400px;         /* puoi alzare a 260/280 se in Home è più larga */
+  width: 100%;
+
+  /* look & feel Home */
+  background: rgba(255,255,255,0.28);
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.25),
+    0 0 0 1px rgba(255,255,255,0.20);
+}
+
+@media (max-width: 576px) {
+  .component-partite .fm-progress {
+    max-width: 100%; /* su mobile la lasciamo fluida */
+  }
+}
+
+.component-partite .fm-progress-bar {
+  height: 100%;
+  transition: width .25s ease;
+  /* i colori restano quelli Bootstrap (bg-success / bg-warning / bg-danger) */
+}
+
+/* opzionale: allinea i contenuti della colonna sinistra in cima
+   così la barra non “galleggia” a metà altezza quando i bottoni a destra sono al centro */
+.component-partite .card .card-body {
+  align-items: flex-start;
 }
 
 .component-partite .toast-container {
   z-index: 11000;
 }
 
+.component-partite #modalDettagli .modal-content {
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.25);
+  border: 0;
+}
+
+.component-partite #modalDettagli .modal-header {
+  border-bottom: 0;
+  background: linear-gradient(135deg, rgba(68,128,187,.8), #567cc9);
+  color: #fff;
+  padding-block: .9rem;
+}
+
+.component-partite #modalDettagli .btn-close.btn-close-white {
+  filter: invert(1) grayscale(100%);
+  opacity: .9;
+}
+.component-partite #modalDettagli .btn-close.btn-close-white:hover { opacity: 1; }
+
+.component-partite #modalDettagli .modal-body { padding: 1.25rem 1.25rem .75rem; }
+.component-partite #modalDettagli .modal-footer { border-top: 0; padding: .75rem 1.25rem 1.25rem; gap: .5rem; }
+
+/* Form look & feel */
+.component-partite #modalDettagli .form-label {
+  font-weight: 600;
+  color: #2b2f33;
+}
+.component-partite #modalDettagli .form-control,
+.component-partite #modalDettagli .form-select {
+  border-radius: 10px;
+  border: 1px solid #d7dde3;
+  background-color: #fff;
+}
+.component-partite #modalDettagli .form-control:focus,
+.component-partite #modalDettagli .form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 .2rem rgba(13,110,253,.15);
+  outline: 0;
+}
+
+/* Input group (ruoli) */
+.component-partite #modalDettagli .input-group-text {
+  background-color: #f3f5f7;
+  border: 1px solid #d7dde3;
+  border-right: 0;
+  font-weight: 600;
+}
+.component-partite #modalDettagli .input-group .form-control { border-left: 0; }
+
+/* Disabled fields */
+.component-partite #modalDettagli input[disabled],
+.component-partite #modalDettagli .form-control[disabled],
+.component-partite #modalDettagli .form-select[disabled],
+.component-partite #modalDettagli textarea[disabled] {
+  background-color: #f5f7fa !important;
+  color: #6c757d !important;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+/* Footer: pulsante chiudi in stile cancel */
+.component-partite #modalDettagli .btn-cancel {
+  background-color: #ff4d4d;
+  color: #000 !important;
+  border: none;
+}
+.component-partite #modalDettagli .btn-cancel:hover,
+.component-partite #modalDettagli .btn-cancel:focus {
+  background-color: #e04343;
+  color: #000 !important;
+  box-shadow: none;
+}
+
+/* Layering e responsive (coerenti con altri modali) */
+.component-partite #modalDettagli { z-index: 40000 !important; }
+.component-partite .modal-backdrop { z-index: 39990 !important; }
+
+@media (max-width: 575.98px) {
+  .component-partite #modalDettagli .modal-dialog { margin: .75rem; }
+  .component-partite #modalDettagli .input-group-text { font-size: .9rem; }
+}
+
+/* -------------------------------------------------- PartiteSection.vue — Bottone "Dettagli" -------------------------------------------------- */
+
+.component-partite .btn-join {
+  --join-grad-a: rgba(68,128,187,0.95);
+  --join-grad-b: #567cc9;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.component-partite .btn-join:hover,
+.component-partite .btn-join:focus {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transform: translateY(-1px);
+}
+
+.component-partite .btn-join:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+.component-partite .btn-join:focus-visible {
+  outline: 3px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+
+.component-partite .btn-join.btn-sm {
+  padding: .35rem .85rem;   /* tuning per la versione small */
+}
+
+/* Variante disabilitata */
+.component-partite .btn-join:disabled,
+.component-partite .btn-join[aria-disabled="true"] {
+  opacity: .65;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------- PartiteSection.vue — Bottone "Abbandona" -------------------------------------------------- */
+
+.component-partite .btn-leave {
+  --join-grad-a: rgba(223, 135, 135, 0.95);
+  --join-grad-b: red;
+  background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
+  color: #fff !important;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.component-partite .btn-leave:hover,
+.component-partite .btn-leave:focus {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3);
+  transform: translateY(-1px);
+}
+
+.component-partite .btn-leave:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+.component-partite .btn-leave:focus-visible {
+  outline: 3px solid rgba(255,255,255,.9);
+  outline-offset: 2px;
+}
+
+.component-partite .btn-leave.btn-sm {
+  padding: .35rem .85rem;   /* tuning per la versione small */
+}
+
+/* Variante disabilitata */
+.component-partite .btn-leave:disabled,
+.component-partite .btn-leave[aria-disabled="true"] {
+  opacity: .65;
+  box-shadow: none;
+  cursor: not-allowed;
+}

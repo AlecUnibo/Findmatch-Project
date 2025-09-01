@@ -9,15 +9,16 @@
           <button
             v-if="hasUnread"
             @click="markAllAsRead"
-            class="btn btn-sm btn-outline-primary"
+            class="btn btn-pill-action btn-mark-read"
             :disabled="actionInProgress"
           >
             Segna tutte come lette
           </button>
+
           <button
             v-if="(notifiche?.length || 0) > 0"
             @click="deleteAllNotifications"
-            class="btn btn-sm btn-outline-danger"
+            class="btn btn-pill-action btn-delete-all"
             :disabled="actionInProgress"
           >
             Elimina tutte
@@ -28,7 +29,8 @@
       <hr class="mb-3" />
 
       <!-- Nav Tab -->
-      <ul class="nav nav-tabs justify-content-center mb-4">
+      <!-- Nav Tab -->
+      <ul class="nav nav-pills justify-content-center mb-4 custom-pills">
         <li class="nav-item" v-for="tab in tabs" :key="tab.value">
           <button
             class="nav-link"
