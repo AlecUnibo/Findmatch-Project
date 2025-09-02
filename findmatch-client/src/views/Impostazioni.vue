@@ -125,12 +125,26 @@
         </section>
       </div>
     </div>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        ref="toastEl"
+        class="toast align-items-center border-0 fade"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <div :class="['toast-body', 'rounded-3', 'shadow-lg', toastVariantClass]">
+          <strong class="me-2">{{ toastIcon }}</strong> {{ toastMessage }}
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
+import * as bootstrap from 'bootstrap'
 
 const userId = localStorage.getItem('userId')
 const username = localStorage.getItem('userName')
@@ -143,7 +157,7 @@ const confirmPassword = ref('')
 
 const cambiaPassword = async () => {
   if (newPassword.value !== confirmPassword.value) {
-    alert('❌ Le password non corrispondono.')
+    showToast('Le nuove password non corrispondono.', 'warning')
     return
   }
 
@@ -153,12 +167,13 @@ const cambiaPassword = async () => {
       currentPassword: oldPassword.value,
       newPassword: newPassword.value
     })
-    alert('Password aggiornata con successo.')
+    showToast('Password aggiornata con successo.', 'success')
     oldPassword.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
   } catch (err) {
-    alert('❌ Errore durante il cambio password.')
+    const errorMsg = err.response?.data?.error || 'Errore durante il cambio password.'
+    showToast(errorMsg, 'danger')
     console.error(err)
   }
 }
@@ -172,11 +187,11 @@ const confermaEliminazione = ref(false)
 const eliminaAccount = async () => {
   try {
     await axios.delete(`http://localhost:3000/api/users/${userId}`)
-    alert('Account eliminato.')
+    // Non mostriamo il toast qui perché la pagina verrà ricaricata
     localStorage.clear()
     window.location.href = '/'
   } catch (err) {
-    alert('❌ Errore durante l\'eliminazione account.')
+    showToast('Errore durante l\'eliminazione dell\'account.', 'danger')
     console.error(err)
   }
 }
@@ -189,4 +204,28 @@ onMounted(async () => {
     console.error('Errore nel recupero email:', err)
   }
 })
+
+// --- LOGICA TOAST ---
+const toastEl = ref(null)
+const toastMessage = ref('')
+const toastVariant = ref('success')
+
+const toastIcon = computed(() => ({
+  success: '✅',
+  danger: '🛑',
+  warning: '⚠️'
+}[toastVariant.value] || 'ℹ️'))
+
+const toastVariantClass = computed(() => ({
+  success: 'bg-success text-white',
+  danger: 'bg-danger text-white',
+  warning: 'bg-warning text-dark'
+}[toastVariant.value] || 'bg-info text-white'))
+
+function showToast(message, variant = 'success', delayMs = 5000) {
+  toastMessage.value = message
+  toastVariant.value = variant
+  const toast = new bootstrap.Toast(toastEl.value, { autohide: true, delay: delayMs })
+  toast.show()
+}
 </script>
