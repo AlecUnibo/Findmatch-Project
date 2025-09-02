@@ -104,7 +104,6 @@
   padding: .35rem .6rem;
   box-shadow: none;
   transition: box-shadow .15s ease, background .15s ease;
-  min-width: 150px; 
 }
 .home-search-card .form-control:focus,
 .home-search-card .form-select:focus {
@@ -337,6 +336,10 @@
   user-select: none;                  
   -webkit-user-select: none;
   -moz-user-select: none;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .home-search-card .fm-select-trigger:focus,

@@ -4,7 +4,7 @@
       <div class="row align-items-center g-2 justify-content-center home-search-row">
 
         <!-- Luogo -->
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg">
           <label for="autocomplete-luogo" class="visually-hidden">Luogo</label>
           <div class="fm-field glass">
             <img src="/images/map.svg" alt="" width="16" height="16" aria-hidden="true" />
@@ -23,7 +23,7 @@
         </div>
 
         <!-- Sport -->
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-6 col-lg">
           <label for="select-sport-trigger" class="visually-hidden">Sport</label>
 
           <div class="fm-field glass is-select" ref="sportBox">
@@ -44,7 +44,7 @@
               @keydown.esc.prevent="closeSport()"
             >
               <span v-if="sport && sport.trim()">{{ sport }}</span>
-              <span v-else class="fm-placeholder">Seleziona uno sport</span>
+              <span v-else class="fm-placeholder">Sport</span>
             </button>
 
             <span class="chevron" aria-hidden="true">▾</span>
@@ -80,7 +80,7 @@
 
 
         <!-- Data -->
-        <div class="col-6 col-lg-2">
+        <div class="col-6 col-lg">
           <label for="date-field" class="visually-hidden">Data</label>
           <div class="fm-field glass">
             <input
@@ -96,7 +96,7 @@
         </div>
 
         <!-- Ora -->
-        <div class="col-6 col-lg-2">
+        <div class="col-6 col-lg">
           <label for="time-field" class="visually-hidden">Ora</label>
           <div class="fm-field glass">
             <input
