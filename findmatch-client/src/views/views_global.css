@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
 
-/* ---------- Classifica.vue ---------- */
+/* ============================================================================================================================ */
+/* ======================================================= Classifica.vue ======================================================= */
+/* ============================================================================================================================ */
 
 .component-leaderboard {
   max-width: 400px;
@@ -62,9 +64,142 @@
 .component-leaderboard .second { background: #e5e5e5; }
 .component-leaderboard .third { background: #f9e0c7; }
 
-/* ========================================================================== */
-/* ------------------------------- HomePage.vue ----------------------------- */
-/* ========================================================================== */
+
+/* ============================================================================================================================ */
+/* ====================================================== CreaPartita.vue ===================================================== */
+/* ============================================================================================================================ */
+
+.fm-card {
+  background: #fff;
+  border-radius: 1.25rem;
+}
+
+.fm-header {
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
+  position: relative;
+}
+
+.fm-header .fm-badge {
+  font-size: .9rem;
+  padding: .35rem .75rem;
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 999px;
+}
+
+/* Input e select */
+.component-crea-partita .fm-control {
+  border-radius: .8rem;
+  border-color: #e7e7e9;
+  background: #fafafa;
+}
+.component-crea-partita .fm-control:focus {
+  border-color: #b9d0ff;
+  box-shadow: 0 0 0 .25rem rgba(13,110,253,.15);
+  background: #fff;
+}
+
+/* Progress ruoli */
+.component-crea-partita .fm-progress {
+  height: 12px;
+}
+.component-crea-partita .fm-progress .progress-bar {
+  font-size: .75rem;
+  line-height: 12px;
+}
+
+/* Lista ruoli */
+.component-crea-partita .fm-roles .list-group-item {
+  background: #ffffff;
+  transition: transform .1s ease, box-shadow .1s ease;
+}
+.component-crea-partita .fm-roles .list-group-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 .35rem 1rem rgba(0,0,0,.06);
+}
+.component-crea-partita .fm-role-badge {
+  background: #f1f4ff;
+  border: 1px solid #dbe3ff;
+  color: #3654ff;
+  padding: .35rem .55rem;
+  border-radius: .6rem;
+  font-size: .9rem;
+}
+
+/* Counter + bottoni +/- */
+.component-crea-partita .fm-qty {
+  width: 36px;
+  height: 36px;
+  border-radius: .7rem !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.component-crea-partita .fm-count {
+  min-width: 52px;
+  text-align: center;
+  border-radius: .7rem;
+  background: #f7f7f9;
+  border: 1px solid #ececf1;
+  padding: .4rem .75rem;
+  font-weight: 600;
+}
+
+/* CTA */
+.component-crea-partita .fm-header {
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
+}
+
+/* override del bottone */
+.component-crea-partita .fm-submit.btn {
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.95), #567cc9) !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 700;
+  letter-spacing: .2px;
+  border-radius: 999px;
+  padding: .6rem 1.35rem;
+  box-shadow: 0 .5rem 1.25rem rgba(68, 128, 187, 0.45);
+  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.component-crea-partita .fm-submit.btn:hover,
+.component-crea-partita .fm-submit.btn:focus {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow: 0 .7rem 1.5rem rgba(68, 128, 187, 0.55);
+}
+
+.component-crea-partita .fm-submit.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 .35rem 1rem rgba(68, 128, 187, 0.35);
+}
+
+/* focus accessibile */
+.component-crea-partita .fm-submit.btn:focus-visible {
+  outline: 3px solid rgba(255,255,255,.85);
+  outline-offset: 2px;
+}
+
+/* Role label width */
+.component-crea-partita .role-label { min-width: 160px; }
+
+/* Count width */
+.component-crea-partita .role-count {
+  min-width: 48px;
+  text-align: center;
+}
+
+/* Toast in CreaPartita */
+.component-crea-partita .toast-container { z-index: 11000; }
+.component-crea-partita .toast-container .toast { --bs-toast-max-width: 520px; }
+.component-crea-partita .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
+.component-crea-partita .toast.fade { transition: opacity .6s ease; }
+
+
+/* ============================================================================================================================ */
+/* ======================================================= HomePage.vue ======================================================= */
+/* ============================================================================================================================ */
 
 /* Sfondo sfumato per le card sport */
 .component-home .card[class*='card-sport-']::before {
@@ -104,7 +239,7 @@
   max-height: 260px;
   overflow-y: auto;
 }
-/* wrapper dedicato */
+
 .role-dropdown { position: static; }
 /* rimuove eventuali regole globali più deboli che danno fastidio */
 .card .dropdown-menu { z-index: auto; }
@@ -118,6 +253,7 @@
 }
 
 /* Toast */
+.component-home .toast-container { z-index: 11000; }
 .component-home .toast-container .toast { --bs-toast-max-width: 520px; }
 .component-home .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
 .component-home .toast.fade { transition: opacity .6s ease; }
@@ -139,7 +275,7 @@
   to { transform: translateY(110vh); opacity: 0; }
 }
 
-/* ======================= Modali (Modifica + Dettagli) ======================= */
+/* ------------------------------------------------------ Modali (Modifica + Dettagli) ------------------------------------------------------ */
 .component-home #modalModifica .modal-content,
 .component-home #modalDettagli .modal-content {
   border-radius: 16px;
@@ -239,6 +375,11 @@
   box-shadow: none;
 }
 
+/* Rendere cliccabili e keyboard-accessible le voci dei risultati ricerca utenti (Dettagli) */
+.component-home #modalDettagli .list-group-item.list-group-item-action {
+  cursor: pointer;
+}
+
 /* Responsivo */
 @media (max-width: 575.98px) {
   .component-home #modalModifica .modal-dialog,
@@ -267,7 +408,7 @@
 
 /* Pill tabs custom (Home) */
 .custom-pills .nav-link {
-  border-radius: 999px; /* pill shape */
+  border-radius: 999px;
   padding: 0.45rem 1.2rem;
   font-weight: 600;
   color: #2b2f33;
@@ -286,20 +427,18 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-/* ========================================================================== */
-/* ------------------------ Join Banner: “Ci vediamo in campo” -------------- */
-/* ========================================================================== */
+/* ------------------------------------------------------ Banner: “Ci vediamo in campo” ------------------------------------------------------ */
 
 .component-home .join-banner {
   position: fixed;
   left: 50%;
   top: 18%;
   transform: translateX(-50%);
-  z-index: 45000; /* sopra i modal (40000) */
+  z-index: 45000; 
   font-family: 'Bangers', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   font-size: clamp(28px, 5vw, 64px);
   letter-spacing: 1px;
-  color: rgba(68,128,187,.9);
+  color: #ffa500;
   text-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 6px 18px rgba(0,0,0,0.45);
   -webkit-text-stroke: 1px rgba(0,0,0,0.3);
   pointer-events: none;
@@ -338,7 +477,6 @@
   }
 }
 
-/* Riduci animazioni per utenti con preferenza ridotta */
 @media (prefers-reduced-motion: reduce) {
   .component-home .join-banner.is-animating {
     animation: fadeHold 1.2s ease both;
@@ -351,9 +489,13 @@
   }
 }
 
-/* ---------- Impostazioni.vue ---------- */
 
-/* ===== Settings Page Polishing ===== */
+
+/* ============================================================================================================================ */
+/* ===================================================== Impostazioni.vue ===================================================== */
+/* ============================================================================================================================ */
+
+/* Settings Page Polishing */
 .component-settings .card h5 { font-weight: 600; }
 
 /* Header */
@@ -405,7 +547,7 @@
   box-shadow: 0 0 0 .2rem rgba(90, 141, 240, .15);
 }
 
-/* Primary gradient button */
+/* gradiente pulsante */
 .component-settings .btn-gradient-primary {
   background: linear-gradient(135deg, #4f7fe0, #6b9af6);
   border: none;
@@ -413,206 +555,46 @@
   border-radius: 999px;
   box-shadow: 0 8px 20px rgba(90,141,240,.25);
 }
-.component-sett
 
+/* confirm panel (Impostazioni) */
+.component-settings .confirm-panel {
+  border: 1px solid #f1d1d1;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff6f6;
+}
+.component-settings .confirm-header {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.component-settings .confirm-actions .btn {
+  min-width: 140px;
+}
 
-/* ---------- LoginPage.vue ---------- */
+/* ============================================================================================================================ */
+/* ======================================================= LoginPage.vue ====================================================== */
+/* ============================================================================================================================ */
+
 .component-login .login-logo {
   width: 150px;
   height: auto;
   margin-bottom: 1rem;
 }
 
-/* ---------- PartiteList.vue ---------- */
-.component-partite .nav-tabs .nav-link {
-  color: black;
-}
-
-.component-partite .nav-tabs .nav-link.active {
-  color: #0d6efd !important;
-  font-weight: bold;
-}
-
-/* ---------- Profilo.vue ---------- */
-.component-profilo img.rounded-circle {
-  object-fit: cover;
-  border: 2px solid #ddd;
-}
-
-.btn-pill {
-  border-radius: 999px;
-  font-weight: 600;
-  padding: 0.4rem 1.2rem;
-  transition: all 0.2s ease;
-}
-
-.bg-details {
-  background: linear-gradient(135deg, rgba(68,128,187,0.85), #567cc9);
-  color: #fff !important;
-  border: none;
-}
-
-.bg-details:hover,
-.bg-details:focus {
-  background: linear-gradient(135deg, rgba(68,128,187,1), #476bb3);
-  color: #fff !important;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-}
-
-.component-profilo .bio-text {
-  white-space: pre-wrap;
-}
-
-.component-profilo .nav-tabs .nav-link {
-  color: black;
-}
-
-.component-profilo .nav-tabs .nav-link.active {
-  color: #0d6efd !important;
-  font-weight: bold;
-}
-
-.clickable {
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-.clickable:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+/* estratto dallo style inline: larghezza card login */
+.component-login .login-card {
+  width: 400px;
+  max-width: calc(100% - 2rem);
+  margin: 0 auto;
 }
 
 
-/* ---------- CreaPartita.vue ---------- */
-.fm-card {
-  background: #fff;
-  border-radius: 1.25rem;
-}
 
-.fm-header {
-  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
-  position: relative;
-}
+/* ============================================================================================================================ */
+/* ======================================================= Notifiche.vue ====================================================== */
+/* ============================================================================================================================ */
 
-.fm-header .fm-badge {
-  font-size: .9rem;
-  padding: .35rem .75rem;
-  border: 1px solid rgba(255,255,255,.45);
-  border-radius: 999px;
-}
-
-/* Input e select più "soft" */
-.component-crea-partita .fm-control {
-  border-radius: .8rem;
-  border-color: #e7e7e9;
-  background: #fafafa;
-}
-.component-crea-partita .fm-control:focus {
-  border-color: #b9d0ff;
-  box-shadow: 0 0 0 .25rem rgba(13,110,253,.15);
-  background: #fff;
-}
-
-/* Progress ruoli */
-.component-crea-partita .fm-progress {
-  height: 12px;
-}
-.component-crea-partita .fm-progress .progress-bar {
-  font-size: .75rem;
-  line-height: 12px;
-}
-
-/* Lista ruoli */
-.component-crea-partita .fm-roles .list-group-item {
-  background: #ffffff;
-  transition: transform .1s ease, box-shadow .1s ease;
-}
-.component-crea-partita .fm-roles .list-group-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 .35rem 1rem rgba(0,0,0,.06);
-}
-.component-crea-partita .fm-role-badge {
-  background: #f1f4ff;
-  border: 1px solid #dbe3ff;
-  color: #3654ff;
-  padding: .35rem .55rem;
-  border-radius: .6rem;
-  font-size: .9rem;
-}
-
-/* Counter + bottoni +/- */
-.component-crea-partita .fm-qty {
-  width: 36px;
-  height: 36px;
-  border-radius: .7rem !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
-.component-crea-partita .fm-count {
-  min-width: 52px;
-  text-align: center;
-  border-radius: .7rem;
-  background: #f7f7f9;
-  border: 1px solid #ececf1;
-  padding: .4rem .75rem;
-  font-weight: 600;
-}
-
-/* CTA */
-.component-crea-partita .fm-header {
-  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
-}
-
-/* override del bottone */
-.component-crea-partita .fm-submit.btn {
-  background: linear-gradient(135deg, rgba(68, 128, 187, 0.95), #567cc9) !important;
-  border: none !important;
-  color: #fff !important;
-  font-weight: 700;
-  letter-spacing: .2px;
-  border-radius: 999px;
-  padding: .6rem 1.35rem;
-  box-shadow: 0 .5rem 1.25rem rgba(68, 128, 187, 0.45);
-  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
-}
-
-.component-crea-partita .fm-submit.btn:hover,
-.component-crea-partita .fm-submit.btn:focus {
-  filter: brightness(1.03);
-  transform: translateY(-1px);
-  box-shadow: 0 .7rem 1.5rem rgba(68, 128, 187, 0.55);
-}
-
-.component-crea-partita .fm-submit.btn:active {
-  transform: translateY(0);
-  box-shadow: 0 .35rem 1rem rgba(68, 128, 187, 0.35);
-}
-
-/* focus accessibile */
-.component-crea-partita .fm-submit.btn:focus-visible {
-  outline: 3px solid rgba(255,255,255,.85);
-  outline-offset: 2px;
-}
-
-
-/* Role label width */
-.component-crea-partita .role-label { min-width: 160px; }
-
-/* Count width */
-.component-crea-partita .role-count {
-  min-width: 48px;
-  text-align: center;
-}
-
-/* Toast in CreaPartita*/
-.component-crea-partita .toast-container .toast { --bs-toast-max-width: 520px; }
-.component-crea-partita .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
-.component-crea-partita .toast.fade { transition: opacity .6s ease; }
-
-/* ---------- Notifiche.vue ---------- */
-
-/* Bottoni pill dedicati alla pagina Notifiche */
+/* Bottoni pill per Notifiche */
 .btn-pill-action {
   border-radius: 999px;   
   font-weight: 600;
@@ -656,10 +638,11 @@
   text-decoration: none;
 }
 
-/* Stile per le notifiche GIA' LETTE */
+/* Stile per le notifiche GIA' LETTE (prefissato) */
 .component-notifiche .notification-read {
   background-color: #f0f2f5;
   border-left: 4px solid #ced4da;
+  opacity: 0.7;
 }
 
 /* Stili per far apparire i pulsanti solo al passaggio del mouse */
@@ -678,6 +661,23 @@
   margin-left: auto;
 }
 
+/* piccole regole per il pulsante circolare di azione (estratto dall'inline style) */
+.component-notifiche .notif-action-circle {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border-radius: 50%;
+  font-weight: 600;
+}
+
+/* Toast container z-index (estratto dallo inline) */
+.component-notifiche .toast-container { z-index: 11000; }
+
+/* future chat placeholder */
 .future-chat {
   border: 2px dashed #dee2e6;
   border-radius: 1rem;
@@ -696,13 +696,7 @@
 .component-notifiche .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
 .component-notifiche .toast.fade { transition: opacity .6s ease; }
 
-/* Notifica letta */
-.notification-read {
-  opacity: 0.7;
-  background-color: #f8f9fa;
-}
-
-/* --- MODALE DI CONFERMA --- */
+/* Modale di conferma */
 .component-notifiche .modal-content {
   border-radius: 1rem;
 }
@@ -712,4 +706,86 @@
 }
 .component-notifiche .modal-footer {
   border-top: 0;
+}
+
+/* ============================================================================================================================ */
+/* ====================================================== PartiteList.vue ===================================================== */
+/* ============================================================================================================================ */
+
+.component-partite .nav-tabs .nav-link {
+  color: black;
+}
+
+.component-partite .nav-tabs .nav-link.active {
+  color: #0d6efd !important;
+  font-weight: bold;
+}
+
+
+/* ======================================================================================================================= */
+/* ======================================================= Profilo.vue ===================================================== */
+/* ======================================================================================================================= */
+
+.component-profilo img.rounded-circle {
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+/* applicato alle avatar list (estratto dall'inline style) */
+.component-profilo .list-group-item img.rounded-circle {
+  object-fit: cover;
+}
+
+/* pill button già presente: */
+.btn-pill {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.4rem 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.bg-details {
+  background: linear-gradient(135deg, rgba(68,128,187,0.85), #567cc9);
+  color: #fff !important;
+  border: none;
+}
+
+.bg-details:hover,
+.bg-details:focus {
+  background: linear-gradient(135deg, rgba(68,128,187,1), #476bb3);
+  color: #fff !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+.component-profilo .bio-text {
+  white-space: pre-wrap;
+}
+
+.component-profilo .nav-tabs .nav-link {
+  color: black;
+}
+
+.component-profilo .nav-tabs .nav-link.active {
+  color: #0d6efd !important;
+  font-weight: bold;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ======================================================================================================================= */
+/* ===================================================== RegisterPage.vue ================================================== */
+/* ======================================================================================================================= */
+
+/* estratta dallo style inline: larghezza card registrazione */
+.register-card {
+  width: 400px;
+  max-width: calc(100% - 2rem);
+  margin: 0 auto;
 }

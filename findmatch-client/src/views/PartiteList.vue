@@ -9,6 +9,7 @@
           class="nav-link"
           :class="{ active: currentTab === tab.value }"
           @click="currentTab = tab.value"
+          :aria-label="`Vai alla tab ${tab.label}`"
         >
           {{ tab.label }}
         </button>

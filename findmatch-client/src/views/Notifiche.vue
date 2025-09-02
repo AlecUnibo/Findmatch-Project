@@ -11,6 +11,7 @@
             @click="markAllAsRead"
             class="btn btn-pill-action btn-mark-read"
             :disabled="actionInProgress"
+            aria-label="Segna tutte le notifiche come lette"
           >
             Segna tutte come lette
           </button>
@@ -20,6 +21,7 @@
             @click="deleteAllNotifications"
             class="btn btn-pill-action btn-delete-all"
             :disabled="actionInProgress"
+            aria-label="Elimina tutte le notifiche"
           >
             Elimina tutte
           </button>
@@ -29,13 +31,13 @@
       <hr class="mb-3" />
 
       <!-- Nav Tab -->
-      <!-- Nav Tab -->
       <ul class="nav nav-pills justify-content-center mb-4 custom-pills">
         <li class="nav-item" v-for="tab in tabs" :key="tab.value">
           <button
             class="nav-link"
             :class="{ active: currentTab === tab.value }"
             @click="currentTab = tab.value"
+            :aria-label="`Vai alla tab ${tab.label}`"
           >
             {{ tab.label }}
           </button>
@@ -45,7 +47,7 @@
       <!-- TAB: NOTIFICHE -->
       <div v-if="currentTab === 'notifiche'">
         <div v-if="loading" class="text-center text-muted mt-5">
-          <div class="spinner-border spinner-border-sm" role="status"></div>
+          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
           <p class="mt-2">Caricamento...</p>
         </div>
 
@@ -53,14 +55,15 @@
           <p>Non ci sono nuove notifiche.</p>
         </div>
 
-        <div v-else class="list-group">
+        <div v-else class="list-group" role="list">
           <div
             v-for="notifica in notifiche"
             :key="notifica.id"
             class="list-group-item list-group-item-action d-flex align-items-center"
             :class="{ 'notification-read': notifica.is_read }"
+            role="listitem"
           >
-            <div class="me-3 fs-4">{{ getIcona(notifica.type) }}</div>
+            <div class="me-3 fs-4" aria-hidden="true">{{ getIcona(notifica.type) }}</div>
 
             <div class="flex-grow-1">
               <p class="mb-0" v-html="formattaMessaggio(notifica)"></p>
@@ -72,12 +75,14 @@
                 <button
                   @click.prevent.stop="uniscitiPartita(notifica.event_id)"
                   class="btn btn-sm btn-success"
+                  :aria-label="`Unisciti alla partita ${notifica.event_id}`"
                 >
                   Unisciti
                 </button>
                 <router-link
                   :to="`/home?open_event=${notifica.event_id}`"
                   class="btn btn-sm btn-outline-secondary"
+                  :aria-label="`Dettagli partita ${notifica.event_id}`"
                 >
                   Dettagli
                 </router-link>
@@ -87,6 +92,7 @@
                 v-else-if="notifica.event_id"
                 :to="`/home?open_event=${notifica.event_id}`"
                 class="btn btn-sm btn-outline-secondary"
+                :aria-label="`Visualizza evento ${notifica.event_id}`"
               >
                 Visualizza
               </router-link>
@@ -96,19 +102,19 @@
               <button
                 v-if="!notifica.is_read"
                 @click.prevent.stop="markOneAsRead(notifica)"
-                class="btn btn-sm btn-outline-success rounded-circle"
+                class="btn btn-sm btn-outline-success rounded-circle notif-action-circle"
                 title="Segna come letto"
-                style="width: 32px; height: 32px;"
                 :disabled="actionInProgress"
+                aria-label="Segna notifica come letta"
               >
                 ✓
               </button>
               <button
                 @click.prevent.stop="deleteNotification(notifica.id)"
-                class="btn btn-sm btn-outline-danger rounded-circle"
+                class="btn btn-sm btn-outline-danger rounded-circle notif-action-circle"
                 title="Elimina notifica"
-                style="width: 32px; height: 32px;"
                 :disabled="actionInProgress"
+                aria-label="Elimina notifica"
               >
                 &times;
               </button>
@@ -128,7 +134,7 @@
     </div>
 
     <!-- TOAST -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <div ref="toastEl" class="toast align-items-center border-0 fade" role="status" aria-live="polite" aria-atomic="true">
         <div :class="['toast-body', 'rounded-3', 'shadow-lg', toastVariantClass]">
           <strong class="me-2">{{ toastIcon }}</strong> {{ toastMessage }}
@@ -143,16 +149,14 @@
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-danger text-white">
         <h5 class="modal-title">{{ confirmTitle }}</h5>
-        <button type="button" class="btn-close" @click="resolveConfirm(false)" aria-label="Close"></button>
+        <button type="button" class="btn-close" @click="resolveConfirm(false)" aria-label="Chiudi"></button>
       </div>
       <div class="modal-body">
         <p class="mb-0">{{ confirmMessage }}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" @click="resolveConfirm(false)">
-          Annulla
-        </button>
-        <button type="button" class="btn" :class="confirmBtnClass" @click="resolveConfirm(true)">
+        <button type="button" class="btn btn-outline-secondary" @click="resolveConfirm(false)" aria-label="Annulla">Annulla</button>
+        <button type="button" class="btn" :class="confirmBtnClass" @click="resolveConfirm(true)" :aria-label="confirmBtnText">
           {{ confirmBtnText }}
         </button>
       </div>
@@ -163,6 +167,7 @@
 </template>
 
 <script setup>
+/* (script unchanged) */
 import { ref, onMounted, computed, watch } from 'vue'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
@@ -314,8 +319,7 @@ const deleteAllNotifications = async () => {
   }
 }
 
-
-// FUNZIONE PER UNIRSI ALLA PARTITA
+ // FUNZIONE PER UNIRSI ALLA PARTITA
 const uniscitiPartita = async (eventId) => {
   if (!userId) {
     showToast('Devi essere loggato per unirti.', 'warning')

@@ -1,4 +1,6 @@
-/* -------------------------------------------------- Footer.vue -------------------------------------------------- */
+/* ============================================================================================================================ */
+/* ======================================================== Footer.vue ======================================================== */
+/* ============================================================================================================================ */
 
 .component-footer img {
   transition: transform 0.2s ease, opacity 0.15s ease;
@@ -70,8 +72,10 @@
   border: 0 !important;
 }
 
+/* ============================================================================================================================ */
+/* ===================================================== HomeSearchBar.vue ==================================================== */
+/* ============================================================================================================================ */
 
-/* -------------------------------------------------- HomeSearchBar.vue -------------------------------------------------- */
 .home-search-card {
   background: linear-gradient(135deg, rgba(68,128,187,0.8), #567cc9);
   border: none;
@@ -100,7 +104,7 @@
   padding: .35rem .6rem;
   box-shadow: none;
   transition: box-shadow .15s ease, background .15s ease;
-  min-width: 150px; /* evita che diventino troppo stretti su desktop/tablet */
+  min-width: 150px; 
 }
 .home-search-card .form-control:focus,
 .home-search-card .form-select:focus {
@@ -157,7 +161,7 @@
   outline-offset: 2px;
 }
 
-/* Bottone "Pulisci" rosso gradient (come Elimina di PartiteCard) */
+/* Bottone "Pulisci" rosso gradient */
 .home-search-card .btn-delete {
   --join-grad-a: rgba(223, 135, 135, 0.95);
   --join-grad-b: red;
@@ -186,9 +190,9 @@
   outline-offset: 2px;
 }
 
+/* Responsive tweaks */
 
 
-/* ---------- Responsive tweaks ---------- */
 @media (max-width: 576px) {
   /* campi full-width su mobile */
   .home-search-card .form-control,
@@ -199,34 +203,29 @@
     font-size: .9rem;
   }
 
-  /* la colonna bottoni diventa a tutta larghezza,
-     così i bottoni scendono sotto i campi senza uscire dalla card */
+  /* la colonna bottoni diventa a tutta larghezza, così i bottoni scendono sotto i campi senza uscire dalla card */
   .home-search-card .col-auto {
     width: 100%;
   }
 
-  /* bottoni fluidi su mobile */
   .home-search-card .btn {
     width: 100%;
     padding: .35rem .8rem;
     font-size: .9rem;
   }
 
-  /* se i due bottoni sono affiancati, permetti il wrap con spazio */
   .home-search-card .d-flex {
     flex-wrap: wrap;
     gap: .5rem;
   }
 }
 
-/* breakpoint intermedio: consentire comunque il wrap se serve */
 @media (max-width: 991.98px) {
   .home-search-card .row {
     flex-wrap: wrap !important;
   }
 }
 
-/* (resto file invariato) */
 .user-modal-card {
   width: 100%;
   max-width: 640px;
@@ -261,14 +260,14 @@
   overflow: hidden;
 }
 
-/* =============================== Search Bar – Glass UI (clean) =============================== */
+/* ------------------------------------------------------ Search Bar – Glass UI (clean) ------------------------------------------------------ */
 
 /* Parametri rapidi (regola qui l’opacità) */
 .home-search-card {
   --glass-bg:    0.38;   /* trasparenza standard dei campi */
   --glass-bg-f:  0.58;   /* trasparenza quando il campo è in focus */
   --glass-brd:   0.55;   /* opacità del bordo glass */
-  --ring-color:  rgba(68,128,187,.9);   /* colore ring (palette navbar) */
+  --ring-color:  rgba(68,128,187,.9);   /* colore ring */
   --ring-shadow: rgba(68,128,187,.22);  /* alone ring */
 }
 
@@ -295,8 +294,8 @@
 .home-search-card .fm-field .form-select {
   background: transparent;
   border: none;
-  height: 38px;       /* coerente con il tuo layout */
-  padding: 0;         /* padding gestito dal wrapper */
+  height: 38px;       
+  padding: 0;       
   box-shadow: none;
   color: #0f172a;
 }
@@ -316,11 +315,10 @@
   opacity: .8;
 }
 
-/* =============================== Custom Select (trigger + popover) =============================== */
+/* ------------------------------------------------------ Custom Select (trigger + popover) ------------------------------------------------------ */
 
 .home-search-card .is-select { position: relative; }
 
-/* Trigger: è un <button> → togli highlight/grigio, tap highlight, ecc. */
 .home-search-card .fm-select-trigger {
   background: transparent !important;
   box-shadow: none !important;
@@ -334,10 +332,9 @@
   padding: 0;
   height: 38px;
   line-height: 38px;
-  -webkit-tap-highlight-color: transparent; /* niente highlight su mobile */
+  -webkit-tap-highlight-color: transparent; 
 
-  /* FIX highlight testo */
-  user-select: none;                  /* disabilita selezione testo */
+  user-select: none;                  
   -webkit-user-select: none;
   -moz-user-select: none;
 }
@@ -351,7 +348,6 @@
 
 .home-search-card .fm-select-trigger .placeholder { color: rgba(15,23,42,.55); }
 
-/* Chevron custom (freccia a destra) */
 .home-search-card .fm-field .chevron {
   font-size: 12px;
   margin-right: 2px;
@@ -411,7 +407,6 @@
   background: rgba(0,0,0,.06);
 }
 
-/* Fade inferiore per suggerire scroll */
 .home-search-card .select-popover .edge-fade {
   pointer-events: none;
   position: sticky;
@@ -422,15 +417,16 @@
   border-bottom-right-radius: 10px;
 }
 
-/* Transizione pop (riusa anche altrove) */
 .pop-enter-from, .pop-leave-to { opacity: 0; transform: translateY(-6px) scale(0.98); }
 .pop-enter-active, .pop-leave-active { transition: opacity .14s ease, transform .18s cubic-bezier(.2,.8,.2,1); }
 
-/* Mobile density */
 @media (max-width: 576px) {
   .home-search-card .fm-field { padding: 6px 10px; }
 }
-/* -------------------------------------------------- Navbar.vue -------------------------------------------------- */
+
+/* ========================================================================================================================== */
+/* ======================================================= Navbar.vue ======================================================= */
+/* ========================================================================================================================== */
 
 .component-navbar.custom-navbar {
   background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
@@ -538,7 +534,7 @@
   right: 0;
   bottom: 0.15rem;
   height: 3px;
-  background: #FF7A18;
+  background: white;
   border-radius: 2px;
   display: block;
   width: 100%;
@@ -651,13 +647,13 @@
   }
 }
 
-/* ---------- POP transition (menu & search) ---------- */
+/* ------------------------------------------------------ POP transition (menu & search) ------------------------------------------------------ */
 .pop-enter-from,
 .pop-leave-to { opacity: 0; transform: translateY(-6px) scale(0.98); }
 .pop-enter-active,
 .pop-leave-active { transition: opacity .14s ease, transform .18s cubic-bezier(.2,.8,.2,1); }
 
-/* ---------- Glass utility ---------- */
+/* Glass utility */
 .glass {
   background: rgba(255,255,255,0.80);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
@@ -666,7 +662,7 @@
   border-radius: 14px;
 }
 
-/* ---------- SEARCH POPOVER ---------- */
+/* SEARCH POPOVER */
 .component-navbar .search-popover {
   position: absolute;
   right: 0;
@@ -760,7 +756,7 @@
   border-bottom-right-radius: 10px;
 }
 
-/* ---------- PROFILE MENU (dropdown-panel) ---------- */
+/* ------------------------------------------------------ PROFILE MENU (dropdown-panel) ------------------------------------------------------ */
 .component-navbar .dropdown-panel {
   position: absolute;
   right: 0;
@@ -824,7 +820,6 @@
 }
 .component-navbar .dropdown-item-modern.danger { color: #9b1c1c; }
 
-/* ---------- Piccole rifiniture esistenti ---------- */
 .component-navbar .btn-icon { border-radius: 10px; }
 .component-navbar .btn-icon:hover,
 .component-navbar .btn-icon:focus-visible {
@@ -847,7 +842,9 @@
   box-shadow: none;
 }
 
-/* -------------------------------------------------- PartiteCard.vue -------------------------------------------------- */
+/* ============================================================================================================================ */
+/* ====================================================== PartiteCard.vue ===================================================== */
+/* ============================================================================================================================ */
 
 .component-partite .progress--thin {
   height: 6px;
@@ -884,9 +881,8 @@
 
 .component-partita-card .fm-progress-bar {
   height: 100%;
-  transition: width .25s ease; /* colori: bg-success / bg-warning / bg-danger */
+  transition: width .25s ease;
 }
-
 
 .component-partite .posti-liberi-badge {
   backdrop-filter: blur(2px);
@@ -916,7 +912,7 @@
   word-break: break-word;
 }
 
-/* -------------------------------------------------- PartiteCard.vue — Bottone "Dettagli" -------------------------------------------------- */
+/* -------------------------------------------------- Bottone "Dettagli" -------------------------------------------------- */
 
 .component-partita-card .btn-details {
   --join-grad-a: rgba(68,128,187,0.95);
@@ -956,7 +952,6 @@
   cursor: not-allowed;
 }
 
-/* Migliore usabilità su mobile */
 @media (max-width: 576px) {
   .component-partita-card .btn-join { padding: .4rem .9rem; }
   .component-partita-card .dropdown-menu.join-menu { min-width: 210px; }
@@ -965,7 +960,7 @@
 /* Sicurezza layer rispetto ad altri elementi */
 .component-partita-card .dropdown-menu.join-menu { z-index: 30001; }
 
-/* -------------------------------------------------- PartiteCard.vue — Bottone "Modifica" -------------------------------------------------- */
+/* -------------------------------------------------- Bottone "Modifica" -------------------------------------------------- */
 
 .component-partita-card .btn-edit {
   --join-grad-a: rgba(170, 169, 127, 0.95);
@@ -1005,16 +1000,14 @@
   cursor: not-allowed;
 }
 
-/* Migliore usabilità su mobile */
 @media (max-width: 576px) {
   .component-partita-card .btn-join { padding: .4rem .9rem; }
   .component-partita-card .dropdown-menu.join-menu { min-width: 210px; }
 }
 
-/* Sicurezza layer rispetto ad altri elementi */
 .component-partita-card .dropdown-menu.join-menu { z-index: 30001; }
 
-/* -------------------------------------------------- PartiteCard.vue — Bottone "Elimina" -------------------------------------------------- */
+/* -------------------------------------------------- Bottone "Elimina" -------------------------------------------------- */
 
 .component-partita-card .btn-delete {
   --join-grad-a: rgba(223, 135, 135, 0.95);
@@ -1054,16 +1047,14 @@
   cursor: not-allowed;
 }
 
-/* Migliore usabilità su mobile */
 @media (max-width: 576px) {
   .component-partita-card .btn-join { padding: .4rem .9rem; }
   .component-partita-card .dropdown-menu.join-menu { min-width: 210px; }
 }
 
-/* Sicurezza layer rispetto ad altri elementi */
 .component-partita-card .dropdown-menu.join-menu { z-index: 30001; }
 
-/* -------------------------------------------------- PartiteCard.vue — Bottone "Unisciti" & Dropdown -------------------------------------------------- */
+/* -------------------------------------------------- Bottone "Unisciti" & Dropdown -------------------------------------------------- */
 
 .component-partita-card .btn-join {
   --join-grad-a: rgba(170, 189, 165, 0.95);
@@ -1138,7 +1129,7 @@
   border-radius: 10px;
   padding: .55rem .65rem;
   font-weight: 600;
-  color: #1f2937; /* slate-800 */
+  color: #1f2937;
   transition: background-color .12s ease, transform .06s ease;
 }
 
@@ -1159,8 +1150,8 @@
 
 /* Badge numero ruoli disponibili */
 .component-partita-card .join-menu .role-badge {
-  background: #e5e7eb;         /* gray-200 */
-  color: #111827;              /* gray-900 */
+  background: #e5e7eb;        
+  color: #111827;           
   font-weight: 700;
   border-radius: 999px;
   min-width: 30px;
@@ -1170,17 +1161,16 @@
 /* Allineamento visivo label+badge */
 .component-partita-card .join-menu .item-label { flex: 1 1 auto; }
 
-/* Migliore usabilità su mobile */
 @media (max-width: 576px) {
   .component-partita-card .btn-join { padding: .4rem .9rem; }
   .component-partita-card .dropdown-menu.join-menu { min-width: 210px; }
 }
 
-/* Sicurezza layer rispetto ad altri elementi */
 .component-partita-card .dropdown-menu.join-menu { z-index: 30001; }
 
-
-/* -------------------------------------------------- PartiteListSection.vue -------------------------------------------------- */
+/* ============================================================================================================================ */
+/* ================================================== PartiteListSection.vue ================================================== */
+/* ============================================================================================================================ */
 
 
 .component-partite-list .pagination .page-link:focus-visible {
@@ -1194,8 +1184,9 @@
   opacity: 0.6;
 }
 
-
-/* -------------------------------------------------- PartiteSection.vue -------------------------------------------------- */
+/* ============================================================================================================================ */
+/* ==================================================== PartiteSection.vue ==================================================== */
+/* ============================================================================================================================ */
 
 .component-partite .card[class*='card-sport-'] {
   position: relative;
@@ -1231,16 +1222,11 @@
 .component-partite .toast.fade { transition: opacity .6s ease; }
 
 .component-partite .fm-progress {
-  /* dimensione “spessa” come in Home */
   height: 12px;
   border-radius: 999px;
   overflow: hidden;
-
-  /* larghezza NON a tutta card (stile Home) */
-  max-width: 400px;         /* puoi alzare a 260/280 se in Home è più larga */
+  max-width: 400px;       
   width: 100%;
-
-  /* look & feel Home */
   background: rgba(255,255,255,0.28);
   box-shadow:
     inset 0 1px 2px rgba(0,0,0,0.25),
@@ -1249,17 +1235,16 @@
 
 @media (max-width: 576px) {
   .component-partite .fm-progress {
-    max-width: 100%; /* su mobile la lasciamo fluida */
+    max-width: 100%; 
   }
 }
 
 .component-partite .fm-progress-bar {
   height: 100%;
   transition: width .25s ease;
-  /* i colori restano quelli Bootstrap (bg-success / bg-warning / bg-danger) */
 }
 
-/* opzionale: allinea i contenuti della colonna sinistra in cima
+/* allinea i contenuti della colonna sinistra in cima
    così la barra non “galleggia” a metà altezza quando i bottoni a destra sono al centro */
 .component-partite .card .card-body {
   align-items: flex-start;
@@ -1291,7 +1276,6 @@
 .component-partite #modalDettagli .modal-body { padding: 1.25rem 1.25rem .75rem; }
 .component-partite #modalDettagli .modal-footer { border-top: 0; padding: .75rem 1.25rem 1.25rem; gap: .5rem; }
 
-/* Form look & feel */
 .component-partite #modalDettagli .form-label {
   font-weight: 600;
   color: #2b2f33;
@@ -1318,7 +1302,7 @@
 }
 .component-partite #modalDettagli .input-group .form-control { border-left: 0; }
 
-/* Disabled fields */
+/* Campo disabilitato */
 .component-partite #modalDettagli input[disabled],
 .component-partite #modalDettagli .form-control[disabled],
 .component-partite #modalDettagli .form-select[disabled],
@@ -1329,7 +1313,7 @@
   opacity: 1;
 }
 
-/* Footer: pulsante chiudi in stile cancel */
+/* Footer: pulsante chiudi */
 .component-partite #modalDettagli .btn-cancel {
   background-color: #ff4d4d;
   color: #000 !important;
@@ -1374,7 +1358,6 @@
   padding: 12px;
 }
 
-/* Scrollbar più elegante */
 .storico-body::-webkit-scrollbar {
   width: 8px;
 }
@@ -1386,7 +1369,7 @@
   background: rgba(0,0,0,0.35);
 }
 
-/* -------------------------------------------------- PartiteSection.vue — Bottone "Dettagli" -------------------------------------------------- */
+/* -------------------------------------------------- Bottone "Dettagli" -------------------------------------------------- */
 
 .component-partite .btn-join {
   --join-grad-a: rgba(68,128,187,0.95);
@@ -1420,7 +1403,7 @@
 }
 
 .component-partite .btn-join.btn-sm {
-  padding: .35rem .85rem;   /* tuning per la versione small */
+  padding: .35rem .85rem;  
 }
 
 /* Variante disabilitata */
@@ -1431,7 +1414,7 @@
   cursor: not-allowed;
 }
 
-/* -------------------------------------------------- PartiteSection.vue — Bottone "Abbandona" -------------------------------------------------- */
+/* -------------------------------------------------- Bottone "Abbandona" -------------------------------------------------- */
 
 .component-partite .btn-leave {
   --join-grad-a: rgba(223, 135, 135, 0.95);
@@ -1465,10 +1448,9 @@
 }
 
 .component-partite .btn-leave.btn-sm {
-  padding: .35rem .85rem;   /* tuning per la versione small */
+  padding: .35rem .85rem;   
 }
 
-/* Variante disabilitata */
 .component-partite .btn-leave:disabled,
 .component-partite .btn-leave[aria-disabled="true"] {
   opacity: .65;

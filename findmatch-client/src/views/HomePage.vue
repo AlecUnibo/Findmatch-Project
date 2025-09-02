@@ -28,6 +28,7 @@
             class="nav-link"
             :class="{ active: tab==='disponibili' }"
             @click="tab='disponibili'"
+            aria-label="Mostra partite disponibili"
           >
             Disponibili
           </button>
@@ -37,6 +38,7 @@
             class="nav-link"
             :class="{ active: tab==='mie' }"
             @click="tab='mie'"
+            aria-label="Mostra partite create da te"
           >
             Create da te
           </button>
@@ -176,12 +178,14 @@
                   @input="searchUsersForInvite"
                   class="form-control"
                   placeholder="Cerca utente da invitare..."
+                  aria-label="Cerca utente da invitare"
                 />
                 <button
                   class="btn text-white border-0 bg-info"
                   type="button"
                   @click="sendInvite"
                   :disabled="!selectedUserToInvite"
+                  aria-label="Invita utente selezionato"
                 >
                   Invita
                 </button>
@@ -192,8 +196,11 @@
                   v-for="user in userSearchResults"
                   :key="user.id"
                   @click="selectUserToInvite(user)"
+                  @keydown.enter="selectUserToInvite(user)"
                   class="list-group-item list-group-item-action"
-                  style="cursor: pointer;"
+                  role="button"
+                  tabindex="0"
+                  :aria-label="`Seleziona ${user.username} per invito`"
                 >
                   {{ user.username }}
                 </li>
@@ -220,10 +227,10 @@
             </div>
             <div class="modal-footer">
               <!-- CANCEL: ora sfondo rosso e testo nero -->
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="confirmBusy">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" :disabled="confirmBusy" aria-label="Annulla conferma">
                 Annulla
               </button>
-              <button type="button" class="btn" :class="confirmCtaClass" @click="doConfirm" :disabled="confirmBusy">
+              <button type="button" class="btn" :class="confirmCtaClass" @click="doConfirm" :disabled="confirmBusy" :aria-label="confirmCtaText">
                 <span v-if="confirmBusy" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 {{ confirmCtaText }}
               </button>
@@ -333,9 +340,9 @@
             </div>
 
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-              <button type="submit" class="btn btn-success" :disabled="savingEdit">
-                <span v-if="savingEdit" class="spinner-border spinner-border-sm me-2"></span>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Annulla modifica">Annulla</button>
+              <button type="submit" class="btn btn-success" :disabled="savingEdit" aria-label="Salva modifiche">
+                <span v-if="savingEdit" class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
                 Salva modifiche
               </button>
             </div>
@@ -345,7 +352,7 @@
     </div>
 
       <!-- TOAST -->
-      <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+      <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div
           ref="toastEl"
           class="toast align-items-center border-0 fade"
@@ -363,17 +370,18 @@
     <div class="emoji-rain-container" ref="emojiContainer"></div>
     
     <div
-    class="join-banner"
-    v-show="showJoinBanner"
-    :class="{ 'is-animating': joinBannerAnimating }"
-    aria-hidden="true"
-      >
+      class="join-banner"
+      v-show="showJoinBanner"
+      :class="{ 'is-animating': joinBannerAnimating }"
+      aria-hidden="true"
+    >
       Ci vediamo in campo
-      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
+/* (script unchanged) */
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as bootstrap from 'bootstrap'

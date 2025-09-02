@@ -399,7 +399,36 @@ const closeProfileMenu = () => { showProfile.value = false }
 const go = (path) => { closeProfileMenu(); router.push(path) }
 
 /** Followers */
-const closeFollowersView = () => { showFollowersView.value = false }
+
+const openFollowersView = async () => {
+  if (!selectedUser.value?.id) return
+
+  // switch alla vista follower + stato iniziale pulito
+  showFollowersView.value = true
+  followersSelectedError.value = ''
+  followersSelectedList.value = []
+  followersSelectedLoading.value = true
+
+  try {
+    // adegua l’URL al tuo backend se diverso (es. data.followers)
+    const { data } = await axios.get(
+      `http://localhost:3000/api/users/${selectedUser.value.id}/followers`
+    )
+    followersSelectedList.value = Array.isArray(data?.followers) ? data.followers : data
+  } catch (err) {
+    console.error('Errore nel recupero dei follower:', err)
+    followersSelectedError.value = 'Impossibile caricare i follower.'
+  } finally {
+    followersSelectedLoading.value = false
+  }
+}
+
+const closeFollowersView = () => {
+  showFollowersView.value = false
+  followersSelectedList.value = []
+  followersSelectedError.value = ''
+}
+
 
 /** Modal profilo */
 const closeModal = () => {

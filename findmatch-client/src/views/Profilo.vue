@@ -16,6 +16,7 @@
           <button
             class="btn text-white border-0 bg-details btn-pill mt-2"
             @click="apriModaleModifica"
+            aria-label="Modifica profilo"
           >
             Modifica
           </button>
@@ -33,13 +34,25 @@
           </div>
         </div>
          <div class="col-6 col-md-4">
-          <div class="card shadow-sm p-3 clickable" @click="apriModaleFollower">
+          <div
+            class="card shadow-sm p-3 clickable"
+            @click="apriModaleFollower"
+            role="button"
+            tabindex="0"
+            aria-label="Mostra follower"
+          >
             <div class="small text-muted">Follower</div>
             <div class="fs-4 fw-bold">{{ followersCount }}</div>
           </div>
         </div>
         <div class="col-6 col-md-4">
-          <div class="card shadow-sm p-3 clickable" @click="apriModaleSeguiti">
+          <div
+            class="card shadow-sm p-3 clickable"
+            @click="apriModaleSeguiti"
+            role="button"
+            tabindex="0"
+            aria-label="Mostra seguiti"
+          >
             <div class="small text-muted">Seguiti</div>
             <div class="fs-4 fw-bold">{{ followingCount }}</div>
           </div>
@@ -66,6 +79,7 @@
             class="nav-link"
             :class="{ active: currentTab === tab.value }"
             @click="currentTab = tab.value"
+            :aria-label="`Vai alla tab ${tab.label}`"
           >
             {{ tab.label }}
           </button>
@@ -110,7 +124,7 @@
                 ></textarea>
               </div>
               <div class="text-end">
-                <button type="submit" class="btn btn-primary">Salva</button>
+                <button type="submit" class="btn btn-primary" aria-label="Salva biografia">Salva</button>
               </div>
             </form>
           </div>
@@ -134,7 +148,7 @@
           </div>
           <div class="modal-body">
             <div v-if="loadingFollowing" class="text-center py-2">
-              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+              <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
               Caricamento...
             </div>
 
@@ -147,11 +161,10 @@
                 >
                   <img
                     src="/images/immagine_profilo.jpg"
-                    alt="pfp"
+                    :alt="`${u.username} avatar`"
                     width="36"
                     height="36"
                     class="rounded-circle me-2"
-                    style="object-fit: cover;"
                   />
                   <div class="flex-grow-1">
                     <div class="fw-semibold">{{ u.username }}</div>
@@ -186,7 +199,7 @@
 
           <div class="modal-body">
             <div v-if="loadingFollowers" class="text-center py-2">
-              <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+              <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
               Caricamento...
             </div>
 
@@ -199,11 +212,10 @@
                 >
                   <img
                     src="/images/immagine_profilo.jpg"
-                    alt="pfp"
+                    :alt="`${u.username} avatar`"
                     width="36"
                     height="36"
                     class="rounded-circle me-2"
-                    style="object-fit: cover;"
                   />
                   <div class="flex-grow-1">
                     <div class="fw-semibold">{{ u.username }}</div>
@@ -224,6 +236,7 @@
 </template>
 
 <script setup>
+/* (script unchanged) */
 import { ref, onMounted, watch, nextTick } from 'vue'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'

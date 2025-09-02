@@ -40,7 +40,7 @@
             <h5 class="mb-0">Cambia password</h5>
           </div>
 
-          <form @submit.prevent="cambiaPassword" class="row g-3">
+          <form @submit.prevent="cambiaPassword" class="row g-3" aria-label="Cambia password">
             <div class="col-12 col-md-4">
               <div class="form-floating">
                 <input v-model="oldPassword" type="password" class="form-control fm-control" id="oldPwd" placeholder="Password attuale" required />
@@ -62,7 +62,7 @@
 
             <div class="col-12">
               <div class="d-flex align-items-center gap-3">
-                <button type="submit" class="btn btn-gradient-primary px-4">
+                <button type="submit" class="btn btn-gradient-primary px-4" aria-label="Aggiorna password">
                   Aggiorna password
                 </button>
                 <small class="text-muted">
@@ -83,7 +83,7 @@
 
           <div class="card border-0 shadow-sm rounded-3 p-3">
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" v-model="emailNotifiche" id="notificheEmail">
+              <input class="form-check-input" type="checkbox" v-model="emailNotifiche" id="notificheEmail" aria-label="Attiva notifiche via email">
               <label class="form-check-label" for="notificheEmail">
                 Ricevi notifiche via email - FUTURA IMPLEMENTAZIONE
               </label>
@@ -99,7 +99,7 @@
         <!-- Eliminazione account -->
         <section class="setting-section">
           <div class="section-title mb-3">
-            <span class="section-icon">⚠️</span>
+            <span class="section-icon" aria-hidden="true">⚠️</span>
             <h5 class="mb-0 text-danger">Elimina account</h5>
           </div>
 
@@ -109,17 +109,17 @@
             </div>
           </div>
 
-          <button class="btn btn-outline-danger btn-pill" @click="confermaEliminazione = true">
+          <button class="btn btn-outline-danger btn-pill" @click="confermaEliminazione = true" aria-label="Avvia eliminazione account">
             Elimina account
           </button>
 
-          <div v-if="confermaEliminazione" class="confirm-panel mt-3">
+          <div v-if="confermaEliminazione" class="confirm-panel mt-3" role="region" aria-label="Conferma eliminazione account">
             <div class="confirm-header">
               <span>Sei sicuro? Questa azione è permanente.</span>
             </div>
             <div class="confirm-actions">
-              <button class="btn btn-danger me-2" @click="eliminaAccount">Conferma eliminazione</button>
-              <button class="btn btn-secondary" @click="confermaEliminazione = false">Annulla</button>
+              <button class="btn btn-danger me-2" @click="eliminaAccount" aria-label="Conferma eliminazione account">Conferma eliminazione</button>
+              <button class="btn btn-secondary" @click="confermaEliminazione = false" aria-label="Annulla eliminazione account">Annulla</button>
             </div>
           </div>
         </section>

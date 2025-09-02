@@ -84,7 +84,7 @@
                   :disabled="roles[role.key] === 0"
                 >−</button>
 
-                <div class="role-count fm-count">
+                <div class="role-count fm-count" aria-live="polite" aria-atomic="true">
                   {{ roles[role.key] }}
                 </div>
 
@@ -110,7 +110,7 @@
           <div class="col-md-7">
             <label class="form-label fw-semibold">Luogo</label>
             <div class="input-group">
-              <span class="input-group-text">📍</span>
+              <span class="input-group-text" aria-hidden="true">📍</span>
               <input id="autocomplete" type="text" class="form-control fm-control" placeholder="Inserisci luogo" v-model="form.location" required />
             </div>
           </div>
@@ -118,7 +118,7 @@
           <div class="col-md-5">
             <label class="form-label fw-semibold">Data e ora</label>
             <div class="input-group">
-              <span class="input-group-text">🗓️</span>
+              <span class="input-group-text" aria-hidden="true">🗓️</span>
               <input type="datetime-local" v-model="form.date_time" :min="minDateTime" class="form-control fm-control" required />
             </div>
           </div>
@@ -132,15 +132,15 @@
 
         <!-- CTA -->
         <div class="text-end">
-          <button type="submit" class="btn btn-primary btn-lg px-4 rounded-pill fm-submit">
-            <span class="me-1"><img src="/images/plus.svg" alt="Segui" width="18" height="18"/></span> Crea partita
+          <button type="submit" class="btn btn-primary btn-lg px-4 rounded-pill fm-submit" aria-label="Crea partita">
+            <span class="me-1"><img src="/images/plus.svg" alt="Icona aggiungi partita" width="18" height="18" aria-hidden="true"/></span> Crea partita
           </button>
         </div>
       </div>
     </form>
 
     <!-- TOAST -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <div
         ref="toastEl"
         class="toast align-items-center border-0 fade"
@@ -175,7 +175,7 @@ const messaggio = ref('')
 const now = new Date()
 const pad = (n) => n.toString().padStart(2, '0')
 
-// Ruoli: includiamo tutte le possibili chiavi (calcio a 11 e calcio a 5)
+ // Ruoli: includiamo tutte le possibili chiavi (calcio a 11 e calcio a 5)
 const roles = ref({
   portiere: 0,
   difensore: 0,

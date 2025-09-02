@@ -4,13 +4,13 @@
     <h5>FUTURA IMPLEMENTAZIONE</h5>
     <ul>
       <li v-for="(player, index) in players" :key="player.username" :class="rankClass(index)">
-        <div class="rank">#{{ index + 1 }}</div>
-        <img :src="player.avatar" alt="avatar" class="avatar" />
+        <div class="rank" :aria-label="`Posizione ${index + 1}`">#{{ index + 1 }}</div>
+        <img :src="player.avatar" :alt="`Avatar di ${player.username}`" class="avatar" />
         <div class="info">
           <span class="username">{{ player.username }}</span>
           <span class="points">{{ player.points }} pt</span>
         </div>
-        <div class="medal" v-if="index < 3">{{ medalEmoji(index) }}</div>
+        <div class="medal" v-if="index < 3" :aria-label="`Medaglia ${index + 1} posto`">{{ medalEmoji(index) }}</div>
       </li>
     </ul>
   </div>
