@@ -93,9 +93,24 @@ router.post('/', async (req, res) => {
       roles_needed     // per calcio 11/5: es. { portiere:1, difensore:2, ... }
     } = req.body;
 
-    // Validazioni base
+   // Validazioni base
     if (!sport || !location || !date_time || !description || !organizer_id) {
       return res.status(400).json({ error: 'Campi obbligatori mancanti' });
+    }
+
+    await pool.query('BEGIN');
+
+    // Controllo: verifica partite esistenti a meno di 2 ore di distanza
+    const timeConflictCheck = await pool.query(
+      `SELECT id, date_time FROM events
+       WHERE organizer_id = $1
+       AND date_time BETWEEN $2::timestamp - interval '2 hours' AND $2::timestamp + interval '2 hours'`,
+      [organizer_id, date_time]
+    );
+
+    if (timeConflictCheck.rows.length > 0) {
+      await pool.query('ROLLBACK');
+      return res.status(409).json({ error: 'Hai già creato un\'altra partita a meno di 2 ore di distanza da questo orario.' });
     }
 
     const isCalcio = (sport === 'Calcio a 11' || sport === 'Calcio a 5');
