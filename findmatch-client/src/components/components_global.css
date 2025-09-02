@@ -261,7 +261,175 @@
   overflow: hidden;
 }
 
+/* =============================== Search Bar – Glass UI (clean) =============================== */
 
+/* Parametri rapidi (regola qui l’opacità) */
+.home-search-card {
+  --glass-bg:    0.38;   /* trasparenza standard dei campi */
+  --glass-bg-f:  0.58;   /* trasparenza quando il campo è in focus */
+  --glass-brd:   0.55;   /* opacità del bordo glass */
+  --ring-color:  rgba(68,128,187,.9);   /* colore ring (palette navbar) */
+  --ring-shadow: rgba(68,128,187,.22);  /* alone ring */
+}
+
+/* Wrapper field in stile glass */
+.home-search-card .fm-field {
+  background: rgba(255,255,255,var(--glass-bg));
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255,255,255,var(--glass-brd));
+  border-radius: 12px;
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+}
+.home-search-card .fm-field:hover { box-shadow: 0 8px 18px rgba(0,0,0,.18); }
+.home-search-card .fm-field > img { opacity: .85; }
+
+/* Input/select interni: sfondo trasparente, niente bordo */
+.home-search-card .fm-field .form-control,
+.home-search-card .fm-field .form-select {
+  background: transparent;
+  border: none;
+  height: 38px;       /* coerente con il tuo layout */
+  padding: 0;         /* padding gestito dal wrapper */
+  box-shadow: none;
+  color: #0f172a;
+}
+.home-search-card .fm-field .form-control::placeholder { color: rgba(15,23,42,.55); }
+
+/* Focus ring coerente con navbar */
+.home-search-card .fm-field:focus-within {
+  border-color: var(--ring-color);
+  box-shadow: 0 0 0 3px var(--ring-shadow), 0 8px 20px rgba(0,0,0,.18);
+  background: rgba(255,255,255,var(--glass-bg-f));
+}
+
+/* Icone dei picker più “clickable” */
+.home-search-card .fm-field input[type="date"]::-webkit-calendar-picker-indicator,
+.home-search-card .fm-field input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: .8;
+}
+
+/* =============================== Custom Select (trigger + popover) =============================== */
+
+.home-search-card .is-select { position: relative; }
+
+/* Trigger: è un <button> → togli highlight/grigio, tap highlight, ecc. */
+.home-search-card .fm-select-trigger {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none;
+  border: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+  width: 100%;
+  color: #0f172a;
+  padding: 0;
+  height: 38px;
+  line-height: 38px;
+  -webkit-tap-highlight-color: transparent; /* niente highlight su mobile */
+
+  /* FIX highlight testo */
+  user-select: none;                  /* disabilita selezione testo */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
+.home-search-card .fm-select-trigger:focus,
+.home-search-card .fm-select-trigger:active {
+  background: transparent !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.home-search-card .fm-select-trigger .placeholder { color: rgba(15,23,42,.55); }
+
+/* Chevron custom (freccia a destra) */
+.home-search-card .fm-field .chevron {
+  font-size: 12px;
+  margin-right: 2px;
+  opacity: .7;
+}
+
+/* porta in alto tutta la search-card */
+.home-search-card {
+  position: relative;
+  z-index: 1000;
+}
+
+/* Popover opzioni (glass) */
+.home-search-card .select-popover {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(100% + 8px);
+  padding: 6px;
+  border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.22);
+  background: rgba(255,255,255,0.80);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255,255,255,var(--glass-brd));
+  max-height: 260px;
+  overflow: auto;
+}
+.home-search-card .select-popover:hover,
+.home-search-card .select-popover:focus,
+.home-search-card .select-popover:focus-visible {
+  background: rgba(255,255,255,0.95);
+}
+
+/* Opzioni */
+.home-search-card .select-option {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  text-align: left;
+  color: #0f172a;
+  cursor: pointer;
+  outline: none;
+}
+.home-search-card .select-option .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(15,23,42,.70);
+}
+.home-search-card .select-option[aria-selected="true"],
+.home-search-card .select-option:hover,
+.home-search-card .select-option:focus-visible {
+  background: rgba(0,0,0,.06);
+}
+
+/* Fade inferiore per suggerire scroll */
+.home-search-card .select-popover .edge-fade {
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 22px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.7));
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Transizione pop (riusa anche altrove) */
+.pop-enter-from, .pop-leave-to { opacity: 0; transform: translateY(-6px) scale(0.98); }
+.pop-enter-active, .pop-leave-active { transition: opacity .14s ease, transform .18s cubic-bezier(.2,.8,.2,1); }
+
+/* Mobile density */
+@media (max-width: 576px) {
+  .home-search-card .fm-field { padding: 6px 10px; }
+}
 /* -------------------------------------------------- Navbar.vue -------------------------------------------------- */
 
 .component-navbar.custom-navbar {
@@ -481,6 +649,202 @@
     padding-left: 0.25rem;
     padding-right: 0.25rem;
   }
+}
+
+/* ---------- POP transition (menu & search) ---------- */
+.pop-enter-from,
+.pop-leave-to { opacity: 0; transform: translateY(-6px) scale(0.98); }
+.pop-enter-active,
+.pop-leave-active { transition: opacity .14s ease, transform .18s cubic-bezier(.2,.8,.2,1); }
+
+/* ---------- Glass utility ---------- */
+.glass {
+  background: rgba(255,255,255,0.80);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 14px;
+}
+
+/* ---------- SEARCH POPOVER ---------- */
+.component-navbar .search-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: min(560px, 92vw);
+  padding: 10px;
+  z-index: 1000;
+  box-shadow: 0 12px 34px rgba(0,0,0,.22);
+}
+
+.component-navbar .search-input-row {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.45);
+  background: rgba(255,255,255,.35);
+}
+
+.component-navbar .search-input-row img { filter: invert(0); opacity: .8; }
+.component-navbar .search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: #0f172a;
+  font-size: 15px;
+}
+.component-navbar .search-input::placeholder { color: rgba(15,23,42,.55); }
+
+.component-navbar .btn-clear {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px 6px;
+  opacity: .8;
+  cursor: pointer;
+}
+.component-navbar .btn-clear:hover { opacity: 1; }
+
+.component-navbar .search-results {
+  margin-top: 8px;
+  max-height: 300px;
+  overflow: auto;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.45);
+  border-radius: 10px;
+  padding: 6px;
+}
+
+.component-navbar .result-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.component-navbar .result-row:hover,
+.component-navbar .result-row:focus-visible {
+  background: rgba(0,0,0,.06);
+  outline: 0;
+}
+.component-navbar .result-text { color: #0f172a; font-size: 14px; }
+
+.component-navbar .avatar-sm {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.component-navbar .hint,
+.component-navbar .empty-state {
+  padding: 10px;
+  color: rgba(15,23,42,.7);
+  font-size: 14px;
+}
+
+.component-navbar .edge-fade {
+  pointer-events: none;
+  position: absolute;
+  left: 10px; right: 10px; bottom: 10px; height: 26px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.7));
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* ---------- PROFILE MENU (dropdown-panel) ---------- */
+.component-navbar .dropdown-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 220px;
+  padding: 8px;
+  z-index: 1000;
+  box-shadow: 0 12px 34px rgba(0,0,0,.22);
+}
+
+.component-navbar .dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px 10px;
+}
+
+.component-navbar .dropdown-header .label {
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: rgba(15,23,42,.7);
+}
+.component-navbar .dropdown-header .sub {
+  font-size: 13px;
+  color: #0f172a;
+  opacity: .9;
+}
+
+.component-navbar .avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,.55);
+}
+
+.component-navbar .dropdown-sep {
+  margin: 6px 4px 8px;
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, rgba(15,23,42,.15), rgba(15,23,42,.05));
+}
+
+.component-navbar .dropdown-item-modern {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+}
+.component-navbar .dropdown-item-modern:hover,
+.component-navbar .dropdown-item-modern:focus-visible {
+  background: rgba(0,0,0,.06);
+  outline: 0;
+}
+.component-navbar .dropdown-item-modern.danger { color: #9b1c1c; }
+
+/* ---------- Piccole rifiniture esistenti ---------- */
+.component-navbar .btn-icon { border-radius: 10px; }
+.component-navbar .btn-icon:hover,
+.component-navbar .btn-icon:focus-visible {
+  background: rgba(255,255,255,.12);
+}
+
+@media (max-width: 576px) {
+  .component-navbar .search-popover { width: 92vw; }
+}
+
+.btn-cancel {
+  background-color: white;
+  color: #000 !important;
+  border-color: grey;
+}
+.btn-cancel:hover,
+.btn-cancel:focus {
+  background-color: grey;
+  color: #000 !important;
+  box-shadow: none;
 }
 
 /* -------------------------------------------------- PartiteCard.vue -------------------------------------------------- */
@@ -854,13 +1218,13 @@
 .component-partite .progress-bar { transition: width .25s ease; }
 .component-partite .badge.bg-light.text-dark { backdrop-filter: blur(2px); }
 
-.component-partite .card-sport-tennis::before { background-image: url('/public/images/tennis-mask.png'); }
-.component-partite .card-sport-paddle::before { background-image: url('/public/images/paddle-mask.png'); }
-.component-partite .card-sport-racchettoni::before { background-image: url('/public/images/racchettoni-mask.png'); }
-.component-partite .card-sport-calcio::before { background-image: url('/public/images/calcio-mask.png'); }
-.component-partite .card-sport-basket::before { background-image: url('/public/images/basket-mask.png'); }
-.component-partite .card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
-.component-partite .card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
+.component-partite .card-sport-tennis::before { background-image: url('images/tennis-mask.png'); }
+.component-partite .card-sport-paddle::before { background-image: url('images/paddle-mask.png'); }
+.component-partite .card-sport-racchettoni::before { background-image: url('images/racchettoni-mask.png'); }
+.component-partite .card-sport-calcio::before { background-image: url('images/calcio-mask.png'); }
+.component-partite .card-sport-basket::before { background-image: url('images/basket-mask.png'); }
+.component-partite .card-sport-volley::before { background-image: url('images/pallavolo-mask.png'); }
+.component-partite .card-sport-beach::before { background-image: url('images/beach-mask.png'); }
 
 .component-partite .toast-container .toast { --bs-toast-max-width: 520px; }
 .component-partite .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
@@ -985,6 +1349,41 @@
 @media (max-width: 575.98px) {
   .component-partite #modalDettagli .modal-dialog { margin: .75rem; }
   .component-partite #modalDettagli .input-group-text { font-size: .9rem; }
+}
+
+/* Contenitore "card" per ogni sezione storico */
+.storico-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.storico-header {
+  font-weight: 600;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9); 
+  color: #fff;
+}
+
+.storico-body {
+  position: relative;
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+/* Scrollbar più elegante */
+.storico-body::-webkit-scrollbar {
+  width: 8px;
+}
+.storico-body::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+.storico-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.35);
 }
 
 /* -------------------------------------------------- PartiteSection.vue — Bottone "Dettagli" -------------------------------------------------- */

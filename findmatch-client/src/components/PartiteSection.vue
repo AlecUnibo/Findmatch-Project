@@ -65,71 +65,77 @@
     <!-- STORICO PARTECIPAZIONI: due sottosezioni -->
     <template v-else>
       <div v-if="storicoPartecipate.length || storicoCreateDaTe.length">
+
         <!-- Partecipate -->
-        <h5 class="mb-3">Partecipate</h5>
-        <div v-if="storicoPartecipate.length">
-          <div
-            v-for="partita in storicoPartecipate"
-            :key="`p-${partita.id}`"
-            class="card mb-3 text-white"
-            :class="getCardClass(partita.sport)"
-          >
-            <div class="card-body d-flex justify-content-between align-items-center">
-              <div class="me-3 flex-grow-1">
-                <h5 class="card-title mb-1">
-                  {{ getSportIcon(partita.sport) }} {{ partita.sport }}
-                </h5>
-                <p class="card-text mb-0">
-                  <strong>Data:</strong> {{ formatData(partita.date_time) }} –
-                  <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
-                  <strong>Luogo:</strong> {{ partita.location }}
-                </p>
-              </div>
-
-              <div class="d-flex align-items-center">
-                <button class="btn btn-join btn-sm" @click="mostraDettagli(partita)">
-                  Dettagli
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-else class="text-muted mb-4">Nessuna partita partecipata.</div>
-
-        <!-- Create da te (passate) -->
-        <h5 class="mt-4 mb-3">Create da te</h5>
-        <div v-if="storicoCreateDaTe.length">
-          <div
-            v-for="partita in storicoCreateDaTe"
-            :key="`m-${partita.id}`"
-            class="card mb-3 text-white"
-            :class="getCardClass(partita.sport)"
-          >
-            <div class="card-body d-flex justify-content-between align-items-center">
-              <div class="me-3 flex-grow-1">
-                <h5 class="card-title mb-1">
-                  {{ getSportIcon(partita.sport) }} {{ partita.sport }}
-                </h5>
-                <p class="card-text mb-0">
-                  <strong>Data:</strong> {{ formatData(partita.date_time) }} –
-                  <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
-                  <strong>Luogo:</strong> {{ partita.location }}
-                </p>
-              </div>
-
-              <div class="d-flex align-items-center">
-                <button class="btn btn-join btn-sm" @click="mostraDettagli(partita)">
-                  Dettagli
-                </button>
+        <div class="storico-card mb-4">
+          <div class="storico-header">Partecipate</div>
+          <div v-if="storicoPartecipate.length" class="storico-body scrollable-section">
+            <div
+              v-for="partita in storicoPartecipate"
+              :key="`p-${partita.id}`"
+              class="card mb-3 text-white"
+              :class="getCardClass(partita.sport)"
+            >
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="me-3 flex-grow-1">
+                  <h5 class="card-title mb-1">
+                    {{ getSportIcon(partita.sport) }} {{ partita.sport }}
+                  </h5>
+                  <p class="card-text mb-0">
+                    <strong>Data:</strong> {{ formatData(partita.date_time) }} –
+                    <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
+                    <strong>Luogo:</strong> {{ partita.location }}
+                  </p>
+                </div>
+                <div class="d-flex align-items-center">
+                  <button class="btn btn-join btn-sm" @click="mostraDettagli(partita)">
+                    Dettagli
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+          <div v-else class="text-muted p-3">Nessuna partita partecipata.</div>
         </div>
-        <div v-else class="text-muted">Nessuna partita passata creata da te.</div>
+
+        <!-- Create da te -->
+        <div class="storico-card mb-4">
+          <div class="storico-header">Create da te</div>
+          <div v-if="storicoCreateDaTe.length" class="storico-body scrollable-section">
+            <div
+              v-for="partita in storicoCreateDaTe"
+              :key="`m-${partita.id}`"
+              class="card mb-3 text-white"
+              :class="getCardClass(partita.sport)"
+            >
+              <div class="card-body d-flex justify-content-between align-items-center">
+                <div class="me-3 flex-grow-1">
+                  <h5 class="card-title mb-1">
+                    {{ getSportIcon(partita.sport) }} {{ partita.sport }}
+                  </h5>
+                  <p class="card-text mb-0">
+                    <strong>Data:</strong> {{ formatData(partita.date_time) }} –
+                    <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –
+                    <strong>Luogo:</strong> {{ partita.location }}
+                  </p>
+                </div>
+                <div class="d-flex align-items-center">
+                  <button class="btn btn-join btn-sm" @click="mostraDettagli(partita)">
+                    Dettagli
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="text-muted p-3">Nessuna partita passata creata da te.</div>
+        </div>
+
       </div>
 
       <div v-else class="text-muted">Nessuna partita nello storico.</div>
     </template>
+
+
 
     <!-- MODALI & TOAST -->
     <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">

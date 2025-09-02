@@ -48,7 +48,7 @@
       <!-- Partite disponibili -->
       <div class="mb-5" v-if="tab==='disponibili'">
         <PartiteListSection
-          titolo="📅 Partite disponibili"
+          titolo="Partite disponibili"
           :partite="partiteDisponibili"
           :perPage="8"
           :showJoin="true"
@@ -72,7 +72,7 @@
       <!-- Create da te -->
       <div class="mb-5" v-else>
         <PartiteListSection
-          titolo="🛠️ Create da te"
+          titolo='Create da te'
           :partite="partiteCreate"
           :perPage="8"
           :showJoin="false"
@@ -361,6 +361,15 @@
     </div>
 
     <div class="emoji-rain-container" ref="emojiContainer"></div>
+    
+    <div
+    class="join-banner"
+    v-show="showJoinBanner"
+    :class="{ 'is-animating': joinBannerAnimating }"
+    aria-hidden="true"
+      >
+      Ci vediamo in campo
+      </div>
   </div>
 </template>
 
@@ -638,6 +647,7 @@ const unisciti = async (eventId, organizerId, sport) => {
     await addParticipationDetails(eventId)
     await cercaPartite()
     lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉')
+    playJoinBanner()
     showToast('Ti sei unito con successo!', 'success', 5000)
   } catch (err) {
     showToast(err.response?.status === 409 ? 'Sei già iscritto a questa partita.' : 'Errore durante la registrazione.', 'danger')
@@ -652,6 +662,7 @@ const uniscitiCalcio = async (eventId, organizerId, sport, roleKey) => {
     await addParticipationDetails(eventId)
     await cercaPartite()
     lanciaPioggia(sportEmojis[sport.toLowerCase()] || '🎉')
+    playJoinBanner()
     showToast(`Iscritto! Ruolo: ${ruoloLabel(data.role) || 'assegnato'}`, 'success', 5000)
   } catch (err) {
     const msg = err.response?.data?.error || 'Errore durante la registrazione.'
@@ -870,6 +881,32 @@ function lanciaPioggia(emoji) {
   }
 }
 
+// --- Banner "Ci vediamo in campo"
+const showJoinBanner = ref(false)
+const joinBannerAnimating = ref(false)
+let joinBannerTimeout = null
+
+function playJoinBanner() {
+  // Mostra il banner e riavvia l'animazione (forza reflow)
+  showJoinBanner.value = true
+  joinBannerAnimating.value = false
+  // force reflow per ri-triggerare la CSS animation
+  requestAnimationFrame(() => {
+    // piccolo delay per garantire il toggle della classe
+    requestAnimationFrame(() => {
+      joinBannerAnimating.value = true
+    })
+  })
+
+  // Durata totale dell'animazione = deve combaciare con @keyframes (vedi CSS)
+  clearTimeout(joinBannerTimeout)
+  joinBannerTimeout = setTimeout(() => {
+    joinBannerAnimating.value = false
+    showJoinBanner.value = false
+  }, 2200) // 2.2s come negli styles
+}
+
+
 // Formattazioni/Icone
 function formatData(datetime) {
   const date = new Date(datetime)
@@ -935,60 +972,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-
-<style scoped>
-/* piccolo styling per le emoji (se già presenti nel progetto, ignora) */
-.emoji-fall {
-  position: fixed;
-  top: -2rem;
-  font-size: 1.2rem;
-  pointer-events: none;
-  z-index: 12000;
-  animation-name: fall;
-  animation-timing-function: linear;
-}
-@keyframes fall {
-  to {
-    transform: translateY(110vh);
-    opacity: 0;
-  }
-}
-
-/* stile btn-cancel solo all'interno del componente (scoped) */
-.btn-cancel {
-  background-color: #ff4d4d;
-  color: #000 !important;
-  border: none;
-}
-.btn-cancel:hover,
-.btn-cancel:focus {
-  background-color: #e04343;
-  color: #000 !important;
-  box-shadow: none;
-}
-</style>
-
-<!-- Regole globali per forzare i modal in primo piano rispetto a card/dropdown -->
-<style>
-/* Metti i modal davanti a tutto (sovrascrive Bootstrap se necessario) */
-.modal,
-.modal.show {
-  z-index: 20000 !important;
-}
-
-/* backdrop appena sotto il modal, ma sopra il contenuto della pagina */
-.modal-backdrop {
-  z-index: 19990 !important;
-}
-
-/* caso specifico: il dialog può anche avere z-index sul dialog */
-.modal-dialog {
-  z-index: 20001 !important;
-}
-
-/* assicurati che lo scrollbar non interferisca */
-body.modal-open {
-  overflow: hidden;
-}
-</style>

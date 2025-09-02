@@ -46,7 +46,7 @@
         </router-link>
       </li>
 
-      <!-- Cerca utenti -->
+      <!-- Cerca utenti — popover moderno -->
       <li class="nav-item position-relative" ref="searchBox" role="none">
         <button
           type="button"
@@ -59,37 +59,52 @@
           <img src="/images/search.svg" alt="Cerca utenti" width="24" height="24" class="icon-invert" />
         </button>
 
-        <div
-          v-if="showSearch"
-          id="nav-search"
-          class="position-absolute end-0 mt-2 bg-white p-2 rounded shadow search-box"
-          role="region"
-          aria-label="Risultati ricerca utenti"
-        >
-          <input
-            type="text"
-            v-model="searchQuery"
-            class="form-control form-control-sm"
-            placeholder="Cerca utenti..."
-            @input="searchUsers"
-            aria-label="Campo ricerca utenti"
-          />
-          <ul class="list-group mt-2" v-if="searchResults.length" role="listbox" aria-label="Risultati della ricerca">
-            <li
-              v-for="user in searchResults"
-              :key="user.id"
-              class="list-group-item py-1 px-2 list-group-item-action cursor-pointer"
-              role="option"
-              tabindex="0"
-              @click="openUserModal(user.id)"
-              @keydown.enter.prevent="openUserModal(user.id)"
-              :aria-label="`Apri profilo di ${user.username}`"
-            >
-              {{ user.username }}
-            </li>
-          </ul>
-          <div v-else-if="searchQuery" class="small text-muted mt-2 px-1">Nessun utente trovato</div>
-        </div>
+        <transition name="pop">
+          <div
+            v-if="showSearch"
+            id="nav-search"
+            class="search-popover glass shadow-lg"
+            role="region"
+            aria-label="Risultati ricerca utenti"
+          >
+            <div class="search-input-row">
+              <img src="/images/search.svg" alt="" width="18" height="18" aria-hidden="true" />
+              <input
+                type="text"
+                v-model="searchQuery"
+                class="search-input"
+                placeholder="Cerca utenti per username…"
+                @input="searchUsers"
+                @keydown.esc.stop.prevent="closeSearch"
+                aria-label="Campo ricerca utenti"
+              />
+              <button class="btn-clear" @click="closeSearch" aria-label="Chiudi ricerca">✕</button>
+            </div>
+
+            <div class="search-results" role="listbox" aria-label="Risultati della ricerca">
+              <template v-if="searchResults.length">
+                <button
+                  v-for="user in searchResults"
+                  :key="user.id"
+                  class="result-row"
+                  role="option"
+                  tabindex="0"
+                  @click="openUserModal(user.id)"
+                  @keydown.enter.prevent="openUserModal(user.id)"
+                  :aria-label="`Apri profilo di ${user.username}`"
+                >
+                  <img src="/images/immagine_profilo.jpg" :alt="`Foto profilo di ${user.username}`" width="28" height="28" class="avatar-sm" />
+                  <span class="result-text">{{ user.username }}</span>
+                </button>
+              </template>
+
+              <div v-else-if="searchQuery" class="empty-state">Nessun utente trovato</div>
+              <div v-else class="hint">Digita per cercare…</div>
+            </div>
+
+            <div class="edge-fade" aria-hidden="true"></div>
+          </div>
+        </transition>
       </li>
 
       <li class="nav-item position-relative" role="none">
@@ -102,27 +117,63 @@
         </router-link>
       </li>
 
-      <!-- menu dropdown con icona profilo -->
-      <li class="nav-item dropdown" role="none">
+      <!-- Menu profilo — popover moderno -->
+      <li class="nav-item position-relative" ref="profileMenu" role="none">
         <button
-          class="nav-link dropdown-toggle d-flex align-items-center btn-icon"
+          class="nav-link d-flex align-items-center btn-icon"
           type="button"
-          data-bs-toggle="dropdown"
+          @click="toggleProfileMenu"
+          :aria-expanded="String(showProfile)"
           aria-haspopup="true"
-          aria-expanded="false"
+          aria-controls="profile-menu"
           aria-label="Apri menu profilo"
         >
-          <img src="/images/person.svg" alt="Apri menu profilo" width="24" height="24" class="icon-invert" />
+          <img src="/images/person.svg" alt="" width="24" height="24" class="icon-invert" aria-hidden="true" />
         </button>
-        <ul class="dropdown-menu dropdown-menu-end" role="menu" aria-label="Menu profilo">
-          <li role="none"><router-link class="dropdown-item" to="/profilo" role="menuitem">Profilo</router-link></li>
-          <li role="none"><router-link class="dropdown-item" to="/impostazioni" role="menuitem">Impostazioni</router-link></li>
-          <li role="none"><a class="dropdown-item" href="#" @click.prevent="logout" role="menuitem">Esci</a></li>
-        </ul>
+
+        <transition name="pop">
+          <div
+            v-if="showProfile"
+            id="profile-menu"
+            class="dropdown-panel glass shadow-lg"
+            role="menu"
+            @keydown.esc.stop.prevent="closeProfileMenu"
+          >
+            <div class="dropdown-header">
+              <img src="/images/immagine_profilo.jpg" alt="Avatar" width="36" height="36" class="avatar" />
+              <div class="me-auto">
+                <div class="label">Profilo</div>
+                <div class="sub">{{ displayName }}</div>
+              </div>
+            </div>
+
+            <hr class="dropdown-sep" />
+
+            <button class="dropdown-item-modern" role="menuitem" @click="go('/profilo')">
+              <img src="/images/person.svg" alt="" width="18" height="18" aria-hidden="true" />
+              <span>Profilo</span>
+            </button>
+            <button class="dropdown-item-modern" role="menuitem" @click="go('/impostazioni')">
+              <img src="/images/settings.svg" alt="" width="18" height="18" aria-hidden="true" />
+              <span>Impostazioni</span>
+            </button>
+
+            <button
+              class="dropdown-item-modern danger"
+              role="menuitem"
+              data-bs-toggle="modal"
+              data-bs-target="#modalLogout"
+            >
+              <img src="/images/exit.svg" alt="" width="18" height="18" aria-hidden="true" />
+              <span>Esci</span>
+            </button>
+          </div>
+        </transition>
       </li>
     </ul>
 
-    <!-- MODALE PROFILO UTENTE (teleported) -->
+
+    <!-- MODALE PROFILO UTENTE -->
     <teleport to="body">
       <div v-if="showModal" class="overlay-backdrop d-flex align-items-center justify-content-center" @click.self="closeModal">
         <div class="modal-content user-modal-card" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
@@ -137,7 +188,6 @@
           </div>
 
           <div v-else-if="selectedUser" class="user-card p-3 shadow-sm border-0 bg-white text-dark rounded">
-            <!-- VISTA PROFILO (default) -->
             <template v-if="!showFollowersView">
               <div class="d-flex align-items-center mb-3">
                 <img
@@ -192,7 +242,6 @@
               </div>
             </template>
 
-            <!-- VISTA FOLLOWER (lista) -->
             <template v-else>
               <div class="d-flex align-items-center mb-3">
                 <button class="btn btn-sm btn-outline-secondary me-2" @click="closeFollowersView" aria-label="Torna indietro">← Indietro</button>
@@ -221,6 +270,30 @@
         </div>
       </div>
     </teleport>
+
+    <!-- MODALE CONFERMA LOGOUT -->
+    <teleport to="body">
+      <div class="modal fade" id="modalLogout" tabindex="-1" aria-labelledby="modalLogoutLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+              <h5 class="modal-title" id="modalLogoutLabel">Conferma logout</h5>
+            </div>
+            <div class="modal-body">
+              <p class="mb-2">Sei sicuro di voler uscire?</p>
+              <small class="text-muted">Dovrai effettuare di nuovo l’accesso per continuare.</small>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Annulla</button>
+              <button type="button" class="btn btn-danger" @click="confirmLogout" data-bs-dismiss="modal">
+                <span v-if="logoutBusy" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Sì, esci
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </nav>
 </template>
 
@@ -228,115 +301,107 @@
 import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
-import * as bootstrap from 'bootstrap'
 
 const router = useRouter()
 const route = useRoute()
 
+/** LocalStorage safe */
+const ls = typeof window !== 'undefined' ? window.localStorage : null
+const displayName = ref(ls?.getItem('userName') || 'Utente')
+const currentUserId = ls?.getItem('userId') || null
+
+/** State */
 const searchQuery = ref('')
 const searchResults = ref([])
 const showSearch = ref(false)
 const searchBox = ref(null)
+
 const selectedUser = ref(null)
 const showModal = ref(false)
 const loadingUser = ref(false)
-const currentUserId = localStorage.getItem('userId')
 const unreadNotifications = ref(0)
-const loadingFollowersSelected = ref(false)
+
 const showFollowersView = ref(false)
 const followersSelectedList = ref([])
 const followersSelectedLoading = ref(false)
 const followersSelectedError = ref('')
 
+const showProfile = ref(false)
+const profileMenu = ref(null)
+
+/* NEW: stato conferma logout */
+const showLogoutConfirm = ref(false)
+
 let notificationInterval = null
 
-const fetchUnreadCount = async () => {
-  if (!currentUserId) return;
+const logoutBusy = ref(false)
+
+const confirmLogout = async () => {
   try {
-    const { data } = await axios.get(`http://localhost:3000/api/notifiche/unread-count/${currentUserId}`);
-    unreadNotifications.value = data.count;
-  } catch (err) {
-    console.error('Errore nel recupero del conteggio notifiche:', err);
+    logoutBusy.value = true
+    ls?.removeItem('token')
+    ls?.removeItem('userName')
+    ls?.removeItem('userId')
+    displayName.value = 'Utente'
+    router.push('/')
+  } finally {
+    logoutBusy.value = false
   }
-};
+}
+
+/** Helpers (ricerca, profilo, ecc.) — invariati **/
+const fetchUnreadCount = async () => {
+  if (!currentUserId) return
+  try {
+    const { data } = await axios.get(`http://localhost:3000/api/notifiche/unread-count/${currentUserId}`)
+    unreadNotifications.value = data.count
+  } catch (err) { console.error('Errore nel recupero del conteggio notifiche:', err) }
+}
 
 const handleClickOutside = (event) => {
-  if (searchBox.value && !searchBox.value.contains(event.target)) {
-    showSearch.value = false
-    searchQuery.value = ''
-    searchResults.value = []
-  }
+  if (searchBox.value && !searchBox.value.contains(event.target)) closeSearch()
+  if (profileMenu.value && !profileMenu.value.contains(event.target)) showProfile.value = false
 }
 
 const toggleSearch = () => {
   showSearch.value = !showSearch.value
-  searchQuery.value = ''
-  searchResults.value = []
   if (showSearch.value) {
-    setTimeout(() => {
-      const el = document.querySelector('#nav-search input')
-      if (el) el.focus()
-    }, 0)
+    showProfile.value = false
+    searchQuery.value = ''
+    searchResults.value = []
+    requestAnimationFrame(() => {
+      const el = document.querySelector('#nav-search .search-input'); if (el) el.focus()
+    })
   }
 }
+const closeSearch = () => { showSearch.value = false; searchQuery.value = ''; searchResults.value = [] }
 
 const searchUsers = async () => {
-  if (searchQuery.value.trim() === '') {
-    searchResults.value = []
-    return
-  }
+  if (searchQuery.value.trim() === '') { searchResults.value = []; return }
   try {
-    const { data } = await axios.get(
-      `http://localhost:3000/api/users/search?query=${encodeURIComponent(searchQuery.value)}`
-    )
+    const { data } = await axios.get(`http://localhost:3000/api/users/search?query=${encodeURIComponent(searchQuery.value)}`)
     searchResults.value = data
-  } catch (err) {
-    console.error('Errore nella ricerca utenti:', err)
-    searchResults.value = []
-  }
+  } catch (err) { console.error('Errore nella ricerca utenti:', err); searchResults.value = [] }
 }
 
 const openUserModal = async (userId) => {
   try {
-    loadingUser.value = true
-    showModal.value = true
-    showSearch.value = false
-
-    const res = await axios.get(
-      `http://localhost:3000/api/users/${userId}?viewerId=${encodeURIComponent(currentUserId)}`
-    )
+    loadingUser.value = true; showModal.value = true; closeSearch(); showProfile.value = false
+    const res = await axios.get(`http://localhost:3000/api/users/${userId}?viewerId=${encodeURIComponent(currentUserId)}`)
     selectedUser.value = res.data
-  } catch (err) {
-    console.error('Errore nel recupero utente:', err)
-  } finally {
-    loadingUser.value = false
-  }
+  } catch (err) { console.error('Errore nel recupero utente:', err) }
+  finally { loadingUser.value = false }
 }
 
-const openFollowersView = async () => {
-  if (!selectedUser.value?.id) return
-  followersSelectedError.value = ''
-  followersSelectedLoading.value = true
-  showFollowersView.value = true
+/** Menu profilo */
+const toggleProfileMenu = () => { showProfile.value = !showProfile.value; if (showProfile.value) closeSearch() }
+const closeProfileMenu = () => { showProfile.value = false }
+const go = (path) => { closeProfileMenu(); router.push(path) }
 
-  try {
-    const { data } = await axios.get(
-      `http://localhost:3000/api/users/${selectedUser.value.id}/followers`
-    )
-    followersSelectedList.value = data || []
-  } catch (err) {
-    console.error('Errore nel recupero follower utente selezionato:', err)
-    followersSelectedError.value = 'Impossibile caricare la lista dei follower.'
-    followersSelectedList.value = []
-  } finally {
-    followersSelectedLoading.value = false
-  }
-}
+/** Followers */
+const closeFollowersView = () => { showFollowersView.value = false }
 
-const closeFollowersView = () => {
-  showFollowersView.value = false
-}
-
+/** Modal profilo */
 const closeModal = () => {
   showModal.value = false
   selectedUser.value = null
@@ -345,82 +410,94 @@ const closeModal = () => {
   followersSelectedError.value = ''
 }
 
+/** Follow / Unfollow — invariati */
 const seguiUtente = async (targetUserId) => {
-  if (!currentUserId) return alert('Devi essere loggato');
-  if (String(targetUserId) === String(currentUserId)) return;
-  if (selectedUser.value?.is_following) return;
-
-  const prev = {
-    followers_count: selectedUser.value.followers_count,
-    is_following: selectedUser.value.is_following
-  };
-  selectedUser.value.followers_count = (selectedUser.value.followers_count ?? 0) + 1;
-  selectedUser.value.is_following = true;
-
+  if (!currentUserId) return alert('Devi essere loggato')
+  if (String(targetUserId) === String(currentUserId)) return
+  if (selectedUser.value?.is_following) return
+  const prev = { followers_count: selectedUser.value.followers_count, is_following: selectedUser.value.is_following }
+  selectedUser.value.followers_count = (selectedUser.value.followers_count ?? 0) + 1
+  selectedUser.value.is_following = true
   try {
-    const { data } = await axios.post(
-      `http://localhost:3000/api/users/${targetUserId}/follow`,
-      { followerId: currentUserId }
-    );
-    selectedUser.value.followers_count = data.followers_count ?? selectedUser.value.followers_count;
+    const { data } = await axios.post(`http://localhost:3000/api/users/${targetUserId}/follow`, { followerId: currentUserId })
+    selectedUser.value.followers_count = data.followers_count ?? selectedUser.value.followers_count
   } catch (err) {
-    console.error('Errore follow:', err);
-    selectedUser.value.followers_count = prev.followers_count;
-    selectedUser.value.is_following = prev.is_following;
-    alert('❌ Errore durante il follow.');
+    console.error('Errore follow:', err)
+    selectedUser.value.followers_count = prev.followers_count
+    selectedUser.value.is_following = prev.is_following
+    alert('❌ Errore durante il follow.')
   }
-};
-
+}
 const smettiDiSeguire = async (targetUserId) => {
-  if (!currentUserId) return;
-  if (!selectedUser.value?.is_following) return;
-
-  const prev = {
-    followers_count: selectedUser.value.followers_count,
-    is_following: selectedUser.value.is_following
-  };
-  selectedUser.value.followers_count = Math.max(0, (selectedUser.value.followers_count ?? 0) - 1);
-  selectedUser.value.is_following = false;
-
+  if (!currentUserId) return
+  if (!selectedUser.value?.is_following) return
+  const prev = { followers_count: selectedUser.value.followers_count, is_following: selectedUser.value.is_following }
+  selectedUser.value.followers_count = Math.max(0, (selectedUser.value.followers_count ?? 0) - 1)
+  selectedUser.value.is_following = false
   try {
-    const { data } = await axios.delete(
-      `http://localhost:3000/api/users/${targetUserId}/follow`,
-      { data: { followerId: currentUserId } }
-    );
-    selectedUser.value.followers_count = data.followers_count ?? selectedUser.value.followers_count;
+    const { data } = await axios.delete(`http://localhost:3000/api/users/${targetUserId}/follow`, { data: { followerId: currentUserId } })
+    selectedUser.value.followers_count = data.followers_count ?? selectedUser.value.followers_count
   } catch (err) {
-    console.error('Errore unfollow:', err);
-    selectedUser.value.followers_count = prev.followers_count;
-    selectedUser.value.is_following = prev.is_following;
+    console.error('Errore unfollow:', err)
+    selectedUser.value.followers_count = prev.followers_count
+    selectedUser.value.is_following = prev.is_following
   }
-};
+}
 
+/** NEW: flusso conferma logout */
+const openLogoutConfirm = () => {
+  closeProfileMenu()
+  showLogoutConfirm.value = true
+  // porta il focus al bottone 'Annulla' appena il dialog appare
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.confirm-card .btn-outline-secondary'); if (el) el.focus()
+  })
+}
+const cancelLogout = () => { showLogoutConfirm.value = false }
+/** Logout reale (invariato + aggiorna displayName) */
 const logout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('userName')
-  localStorage.removeItem('userId')
+  ls?.removeItem('token')
+  ls?.removeItem('userName')
+  ls?.removeItem('userId')
+  displayName.value = 'Utente'
   router.push('/')
 }
 
+/** Routing helpers */
 const normalizePath = (p) => (p || '').replace(/\/+$/, '') || '/'
 const isActive = (pathStart) => {
   try {
     const current = normalizePath(route.path)
     const target = normalizePath(pathStart)
     return current === target || current.startsWith(target + '/') || current.startsWith(target)
-  } catch {
-    return false
-  }
+  } catch { return false }
 }
 
+/** Lifecycle */
+let onStorage, onKey
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
-  fetchUnreadCount();
-  notificationInterval = setInterval(fetchUnreadCount, 15000); // Poll ogni 15 secondi
-});
+  document.addEventListener('click', handleClickOutside)
+
+  onKey = (e) => {
+    if (e.key === 'Escape') {
+      if (showSearch.value) closeSearch()
+      if (showProfile.value) closeProfileMenu()
+      if (showLogoutConfirm.value) cancelLogout() // NEW: ESC chiude dialog
+    }
+  }
+  document.addEventListener('keydown', onKey, { passive: true })
+
+  onStorage = (e) => { if (e.key === 'userName') displayName.value = e.newValue || 'Utente' }
+  if (typeof window !== 'undefined') window.addEventListener('storage', onStorage)
+
+  fetchUnreadCount()
+  notificationInterval = setInterval(fetchUnreadCount, 15000)
+})
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClickOutside);
-  clearInterval(notificationInterval);
-});
+  document.removeEventListener('click', handleClickOutside)
+  if (onKey) document.removeEventListener('keydown', onKey)
+  if (typeof window !== 'undefined' && onStorage) window.removeEventListener('storage', onStorage)
+  clearInterval(notificationInterval)
+})
 </script>

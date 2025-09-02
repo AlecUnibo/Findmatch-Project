@@ -4,7 +4,7 @@
       
       <!-- LOGO -->
       <div class="d-flex justify-content-center mb-3">
-        <img src="/images/logo_login.png" alt="Logo Findmatch" class="login-logo" />
+        <img src="/images/logo_login.png" alt="Logo Findmatch" class="login-logo" style="width: 150px;" />
       </div>
 
       <h3 class="mb-4">Accedi</h3>

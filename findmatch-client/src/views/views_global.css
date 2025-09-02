@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
 /* ---------- Classifica.vue ---------- */
 
 .component-leaderboard {
@@ -60,8 +62,11 @@
 .component-leaderboard .second { background: #e5e5e5; }
 .component-leaderboard .third { background: #f9e0c7; }
 
-/* ---------- HomePage.vue ---------- */
+/* ========================================================================== */
+/* ------------------------------- HomePage.vue ----------------------------- */
+/* ========================================================================== */
 
+/* Sfondo sfumato per le card sport */
 .component-home .card[class*='card-sport-']::before {
   content: '';
   position: absolute;
@@ -72,29 +77,15 @@
   background-blend-mode: normal;
   z-index: 0;
 }
+.component-home .card-sport-tennis::before      { background-image: url('images/tennis-mask.png'); }
+.component-home .card-sport-paddle::before      { background-image: url('images/paddle-mask.png'); }
+.component-home .card-sport-racchettoni::before { background-image: url('images/racchettoni-mask.png'); }
+.component-home .card-sport-calcio::before      { background-image: url('images/calcio-mask.png'); }
+.component-home .card-sport-basket::before      { background-image: url('images/basket-mask.png'); }
+.component-home .card-sport-volley::before      { background-image: url('images/pallavolo-mask.png'); }
+.component-home .card-sport-beach::before       { background-image: url('images/beach-mask.png'); }
 
-/* Sfondo sfumato per card */
-.component-home .card-sport-tennis::before { background-image: url('/public/images/tennis-mask.png'); }
-.component-home .card-sport-paddle::before { background-image: url('/public/images/paddle-mask.png'); }
-.component-home .card-sport-racchettoni::before { background-image: url('/public/images/racchettoni-mask.png'); }
-.component-home .card-sport-calcio::before { background-image: url('/public/images/calcio-mask.png'); }
-.component-home .card-sport-basket::before { background-image: url('/public/images/basket-mask.png'); }
-.component-home .card-sport-volley::before { background-image: url('/public/images/pallavolo-mask.png'); }
-.component-home .card-sport-beach::before { background-image: url('/public/images/beach-mask.png'); }
-
-/* menu drop down Unisciti */
-.role-dropdown { position: static; }         
-.role-dropdown .dropdown-menu {
-  z-index: 2000;                              
-  max-height: 260px;                          
-  overflow-y: auto;
-}
-
-/* Toast */
-.component-home .toast-container .toast { --bs-toast-max-width: 520px; }
-.component-home .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
-.component-home .toast.fade { transition: opacity .6s ease; }
-
+/* Card + dropdown layering */
 .component-home .card[class*='card-sport-'] {
   position: relative;
   overflow: visible;
@@ -106,7 +97,7 @@
   z-index: auto;
 }
 .component-home .card:has(.dropdown-menu.show) { z-index: 30000; }
-/* il menu sopra alla sua card e a tutto il resto */
+/* menu sopra alla sua card e a tutto il resto */
 .component-home .card .dropdown-menu {
   position: absolute !important;
   z-index: 30001;
@@ -116,28 +107,45 @@
 /* wrapper dedicato */
 .role-dropdown { position: static; }
 /* rimuove eventuali regole globali più deboli che danno fastidio */
-.card .dropdown-menu { z-index: auto; } 
+.card .dropdown-menu { z-index: auto; }
 
-/* Emoji rain */
+/* Menu drop down Unisciti */
+.role-dropdown { position: static; }
+.role-dropdown .dropdown-menu {
+  z-index: 2000;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+/* Toast */
+.component-home .toast-container .toast { --bs-toast-max-width: 520px; }
+.component-home .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
+.component-home .toast.fade { transition: opacity .6s ease; }
+
+/* Emoji rain (container fullscreen + elementi) */
 .component-home .emoji-rain-container {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   pointer-events: none; overflow: hidden; z-index: 9999;
 }
 .component-home .emoji-fall {
-  position: absolute; top: -2rem; font-size: 2rem;
-  animation-name: fall; animation-timing-function: linear; animation-fill-mode: forwards;
+  position: absolute;
+  top: -2rem;
+  font-size: 2rem;
+  animation-name: fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
 }
-@keyframes fall { to { transform: translateY(110vh); opacity: 0; } }
+@keyframes fall {
+  to { transform: translateY(110vh); opacity: 0; }
+}
 
-/* ============================= Modale Modifica + Dettagli ============================= */
-
+/* ======================= Modali (Modifica + Dettagli) ======================= */
 .component-home #modalModifica .modal-content,
 .component-home #modalDettagli .modal-content {
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0,0,0,.25);
   border: 0;
 }
-
 .component-home #modalModifica .modal-header,
 .component-home #modalDettagli .modal-header {
   border-bottom: 0;
@@ -145,7 +153,6 @@
   color: #fff;
   padding-block: 0.9rem;
 }
-
 .component-home #modalModifica .btn-close.btn-close-white,
 .component-home #modalDettagli .btn-close.btn-close-white {
   filter: invert(1) grayscale(100%);
@@ -155,12 +162,10 @@
 .component-home #modalDettagli .btn-close.btn-close-white:hover {
   opacity: 1;
 }
-
 .component-home #modalModifica .modal-body,
 .component-home #modalDettagli .modal-body {
   padding: 1.25rem 1.25rem 0.75rem;
 }
-
 .component-home #modalModifica .modal-footer,
 .component-home #modalDettagli .modal-footer {
   border-top: 0;
@@ -215,9 +220,10 @@
   opacity: 1;
 }
 
-/* Pulsanti footer */
+/* Pulsanti footer: cancel coerente */
 .component-home #modalModifica .btn-cancel,
-.component-home #modalDettagli .btn-cancel {
+.component-home #modalDettagli .btn-cancel,
+.component-home .btn-cancel {
   background-color: #ff4d4d;
   color: #000 !important;
   border: none;
@@ -225,7 +231,9 @@
 .component-home #modalModifica .btn-cancel:hover,
 .component-home #modalModifica .btn-cancel:focus,
 .component-home #modalDettagli .btn-cancel:hover,
-.component-home #modalDettagli .btn-cancel:focus {
+.component-home #modalDettagli .btn-cancel:focus,
+.component-home .btn-cancel:hover,
+.component-home .btn-cancel:focus {
   background-color: #e04343;
   color: #000 !important;
   box-shadow: none;
@@ -239,47 +247,108 @@
   .component-home #modalDettagli .input-group-text { font-size: .9rem; }
 }
 
-/* Backdrop e layering */
+/* Backdrop e layering modali: Home */
 .component-home .modal-backdrop.show {
   background-color: rgba(0, 0, 0, 0.55);
 }
 .component-home #modalModifica,
-.component-home #modalDettagli { z-index: 40000 !important; }
+.component-home #modalDettagli,
+.component-home #modalConferma { z-index: 40000 !important; }
 .component-home .modal-backdrop { z-index: 39990 !important; }
 
-/* (Opzionale) Bottone "Invita" coerente col tema header */
+/* Bottone "Invita" coerente col tema header (Dettagli) */
 .component-home #modalDettagli .modal-footer .btn,
 .component-home #modalDettagli .btn.bg-info {
   background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
   color: #fff;
   border: none;
 }
-
 .component-home #modalDettagli .btn.bg-info:hover { filter: brightness(0.95); }
 
-/* Stile custom per i tab senza card */
+/* Pill tabs custom (Home) */
 .custom-pills .nav-link {
   border-radius: 999px; /* pill shape */
   padding: 0.45rem 1.2rem;
   font-weight: 600;
   color: #2b2f33;
-  background-color: rgba(68,128,187,0.1); /* blu chiaro trasparente */
+  background-color: rgba(68,128,187,0.1);
   transition: all 0.2s ease;
   margin: 0 0.25rem;
 }
-
-/* Hover e focus */
 .custom-pills .nav-link:hover,
 .custom-pills .nav-link:focus {
   background-color: rgba(68,128,187,0.25);
   color: #2b2f33;
 }
-
-/* Stato attivo */
 .custom-pills .nav-link.active {
   background: linear-gradient(135deg, rgba(68,128,187,0.8), #567cc9);
   color: #fff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* ========================================================================== */
+/* ------------------------ Join Banner: “Ci vediamo in campo” -------------- */
+/* ========================================================================== */
+
+.component-home .join-banner {
+  position: fixed;
+  left: 50%;
+  top: 18%;
+  transform: translateX(-50%);
+  z-index: 45000; /* sopra i modal (40000) */
+  font-family: 'Bangers', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-size: clamp(28px, 5vw, 64px);
+  letter-spacing: 1px;
+  color: rgba(68,128,187,.9);
+  text-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 6px 18px rgba(0,0,0,0.45);
+  -webkit-text-stroke: 1px rgba(0,0,0,0.3);
+  pointer-events: none;
+  opacity: 0; 
+  white-space: nowrap;
+}
+.component-home .join-banner.is-animating {
+  animation: driveInOut 2.2s cubic-bezier(.22,.61,.36,1) both;
+}
+
+/* Keyframes del banner */
+@keyframes driveInOut {
+  0% {
+    transform: translate(-120vw, 0) skewX(-8deg);
+    filter: blur(2px);
+    opacity: 0;
+  }
+  35% {
+    transform: translate(-52%, 0) skewX(-2deg) scale(1.02);
+    opacity: 1;
+    filter: blur(0.5px);
+  }
+  50% {
+    transform: translate(-50%, 0) skewX(0deg) scale(1);
+    opacity: 1; 
+    filter: blur(0);
+  }
+  65% {
+    transform: translate(-48%, 0) skewX(1deg) scale(1.01);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(120vw, 0) skewX(8deg) scale(1.02);
+    opacity: 0;
+    filter: blur(2px);
+  }
+}
+
+/* Riduci animazioni per utenti con preferenza ridotta */
+@media (prefers-reduced-motion: reduce) {
+  .component-home .join-banner.is-animating {
+    animation: fadeHold 1.2s ease both;
+  }
+  @keyframes fadeHold {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+  }
 }
 
 /* ---------- Impostazioni.vue ---------- */
