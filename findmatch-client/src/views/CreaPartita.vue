@@ -15,7 +15,7 @@
         <!-- SPORT -->
         <div class="mb-4">
           <label class="form-label fw-semibold">Sport</label>
-          <select v-model="form.sport" class="form-select form-select-lg fm-control" required>
+          <select v-model="form.sport" class="form-select form-select-lg fm-control">
             <option value="">Seleziona uno sport</option>
             <option>Calcio a 11</option>
             <option>Calcio a 5</option>
@@ -37,7 +37,6 @@
             type="number"
             v-model.number="form.max_players"
             class="form-control fm-control"
-            required
             min="1"
             :max="maxSlots"
           />
@@ -120,7 +119,7 @@
             <label class="form-label fw-semibold">Luogo</label>
             <div class="input-group">
               <span class="input-group-text" aria-hidden="true">📍</span>
-              <input id="autocomplete" type="text" class="form-control fm-control" placeholder="Inserisci luogo" v-model="form.location" required />
+              <input id="autocomplete" type="text" class="form-control fm-control" placeholder="Inserisci luogo" v-model="form.location" />
             </div>
           </div>
 
@@ -128,7 +127,7 @@
             <label class="form-label fw-semibold">Data e ora</label>
             <div class="input-group">
               <span class="input-group-text" aria-hidden="true">🗓️</span>
-              <input type="datetime-local" v-model="form.date_time" :min="minDateTime" class="form-control fm-control" required />
+              <input type="datetime-local" v-model="form.date_time" :min="minDateTime" class="form-control fm-control" />
             </div>
           </div>
         </div>
@@ -290,6 +289,34 @@ watch(() => form.value.sport, (nv, ov) => {
 })
 
 const creaPartita = async () => {
+  // --- VALIDAZIONE UNIFICATA ---
+  if (!form.value.sport) {
+    showToast('Devi selezionare uno sport.', 'warning');
+    return;
+  }
+  const isCalcio = form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5';
+  if (!isCalcio && (!form.value.max_players || form.value.max_players <= 0)) {
+    showToast('Specifica il numero di giocatori.', 'warning');
+    return;
+  }
+  if (isCalcio && sumRoles.value === 0) {
+    showToast('Seleziona almeno un ruolo per il calcio.', 'warning');
+    return;
+  }
+  if (!form.value.location.trim()) {
+    showToast('Inserisci un luogo per la partita.', 'warning');
+    return;
+  }
+  if (!form.value.date_time) {
+    showToast('Specifica data e ora della partita.', 'warning');
+    return;
+  }
+  if (!form.value.description.trim()) {
+    showToast('Inserisci qualche informazione extra.', 'warning');
+    return;
+  }
+  // --- FINE VALIDAZIONE ---
+
   try {
     const organizer_id = localStorage.getItem('userId')
     if (!organizer_id) {
