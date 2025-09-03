@@ -34,6 +34,7 @@
               class="social-link"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Seguici su Instagram (si apre in una nuova scheda)"
             >
               <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png"
                    alt=""
@@ -48,6 +49,7 @@
               class="social-link"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Seguici su LinkedIn (si apre in una nuova scheda)"
             >
               <img src="https://cdn-icons-png.flaticon.com/512/145/145807.png"
                    alt=""
