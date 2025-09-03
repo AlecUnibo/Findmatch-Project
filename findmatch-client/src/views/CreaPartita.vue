@@ -24,7 +24,7 @@
             <option>Pallavolo</option>
             <option>Racchettoni</option>
             <option>Tennis</option>
-            <option>Paddle</option>
+            <option>Padel</option>
           </select>
         </div>
 

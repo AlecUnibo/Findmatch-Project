@@ -1286,7 +1286,7 @@
 .component-partite .badge.bg-light.text-dark { backdrop-filter: blur(2px); }
 
 .component-partite .card-sport-tennis::before { background-image: url('images/tennis-mask.png'); }
-.component-partite .card-sport-paddle::before { background-image: url('images/paddle-mask.png'); }
+.component-partite .card-sport-padel::before { background-image: url('images/padel-mask.png'); }
 .component-partite .card-sport-racchettoni::before { background-image: url('images/racchettoni-mask.png'); }
 .component-partite .card-sport-calcio::before { background-image: url('images/calcio-mask.png'); }
 .component-partite .card-sport-basket::before { background-image: url('images/basket-mask.png'); }

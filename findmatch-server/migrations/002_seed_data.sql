@@ -39,7 +39,7 @@ COPY public.events (id, sport, location, date_time, max_players, description, or
 28	Beach Volley	47035 Gambettola FC, Italia	2025-08-11 20:00:00	1	Campo Comunale Sabbione - Via T. Battelli 53	4	2025-08-04 14:40:00.748475
 29	Basket	Cesena FC, Italia	2025-08-07 21:00:00	2	Palaippo Cesena, campo delle scuole - Casacca nera	3	2025-08-04 14:45:12.012355
 30	Tennis	Forlì FC, Italia	2025-08-09 14:00:00	1	Polisportiva Forlì - Singolo veloce - Costo €5 per il campo	3	2025-08-04 14:45:59.446765
-31	Paddle	47522 Martorano FC, Italia	2025-08-07 15:00:00	2	Campo di fronte al Toys Center, Martorano - €5 per campo	3	2025-08-04 15:27:03.329953
+31	Padel	47522 Martorano FC, Italia	2025-08-07 15:00:00	2	Campo di fronte al Toys Center, Martorano - €5 per campo	3	2025-08-04 15:27:03.329953
 32	Racchettoni	Cesena FC, Italia	2025-08-12 20:00:00	2	€5 per il campo - Spiaggia 23	3	2025-08-04 17:03:27.350674
 \.
 

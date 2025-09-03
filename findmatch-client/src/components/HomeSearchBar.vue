@@ -259,7 +259,7 @@ const openTime = (ev) => {
 }
 
 /* --- Select Sport (come avevi) --- */
-const sports = ['Calcio a 11','Calcio a 5','Basket','Beach Volley','Pallavolo','Racchettoni','Tennis','Paddle']
+const sports = ['Calcio a 11','Calcio a 5','Basket','Beach Volley','Pallavolo','Racchettoni','Tennis','Padel']
 const sportOpen = ref(false)
 const activeSportIndex = ref(-1)
 const sportBox = ref(null)

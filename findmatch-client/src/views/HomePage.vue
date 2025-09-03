@@ -481,7 +481,7 @@ function normalizeRoles(sport, roles = {}) {
 const sportEmojis = {
   'calcio a 5': '⚽', 'calcio a 11': '⚽', 'basket': '🏀',
   'beach volley': '🏐', 'pallavolo': '🏐', 'racchettoni': '🏓',
-  'tennis': '🎾', 'paddle': '🥎'
+  'tennis': '🎾', 'padel': '🥎'
 }
 
 // --- Helpers posti/progress (SOSTITUISCI QUI IL BLOCCO VECCHIO)
@@ -1019,14 +1019,14 @@ function getSportIcon(sport) {
     case 'pallavolo': return '🏐'
     case 'racchettoni': return '🏓'
     case 'tennis': return '🎾'
-    case 'paddle': return '🥎'
+    case 'padel': return '🥎'
     default: return '🎯'
   }
 }
 function getCardClass(sport) {
   switch ((sport || '').toLowerCase()) {
     case 'tennis': return 'card-sport-tennis'
-    case 'paddle': return 'card-sport-paddle'
+    case 'padel': return 'card-sport-padel'
     case 'racchettoni': return 'card-sport-racchettoni'
     case 'calcio a 5':
     case 'calcio a 11': return 'card-sport-calcio'

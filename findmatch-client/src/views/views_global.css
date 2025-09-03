@@ -383,7 +383,7 @@
   z-index: 0;
 }
 .component-home .card-sport-tennis::before      { background-image: url('images/tennis-mask.png'); }
-.component-home .card-sport-paddle::before      { background-image: url('images/paddle-mask.png'); }
+.component-home .card-sport-padel::before      { background-image: url('images/padel-mask.png'); }
 .component-home .card-sport-racchettoni::before { background-image: url('images/racchettoni-mask.png'); }
 .component-home .card-sport-calcio::before      { background-image: url('images/calcio-mask.png'); }
 .component-home .card-sport-basket::before      { background-image: url('images/basket-mask.png'); }
