@@ -20,7 +20,7 @@ router.get('/:userId', async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error('Errore nel recupero notifiche:', err);
-    res.status(500).json({ error: 'Errore nel recupero delle notifiche' });
+    res.status(500).json({ error: 'Impossibile recuperare le notifiche.' });
   }
 });
 
@@ -35,7 +35,7 @@ router.get('/unread-count/:userId', async (req, res) => {
     res.json({ count: parseInt(rows[0].count, 10) });
   } catch (err) {
     console.error('Errore nel conteggio notifiche non lette:', err);
-    res.status(500).json({ error: 'Errore nel conteggio delle notifiche non lette' });
+    res.status(500).json({ error: 'Impossibile contare le notifiche non lette.' });
   }
 });
 
@@ -50,7 +50,7 @@ router.post('/mark-all-as-read/:userId', async (req, res) => {
     res.json({ message: 'Tutte le notifiche segnate come lette' });
   } catch (err) {
     console.error('Errore nell\'aggiornamento delle notifiche:', err);
-    res.status(500).json({ error: 'Errore nell\'aggiornamento delle notifiche' });
+    res.status(500).json({ error: 'Impossibile segnare tutte le notifiche come lette.' });
   }
 });
 
@@ -64,12 +64,12 @@ router.put('/:notificationId/read', async (req, res) => {
       [notificationId, userId]
     );
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Notifica non trovata o non autorizzato' });
+      return res.status(404).json({ error: 'Notifica non trovata o non sei autorizzato.' });
     }
     res.status(200).json({ message: 'Notifica segnata come letta' });
   } catch (err) {
     console.error('Errore nel segnare notifica come letta:', err);
-    res.status(500).json({ error: 'Errore server' });
+    res.status(500).json({ error: 'Errore del server durante l\'operazione.' });
   }
 });
 
@@ -83,12 +83,12 @@ router.delete('/:notificationId', async (req, res) => {
       [notificationId, userId]
     );
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Notifica non trovata o non autorizzato' });
+      return res.status(404).json({ error: 'Notifica non trovata o non sei autorizzato.' });
     }
     res.status(200).json({ message: 'Notifica eliminata' });
   } catch (err) {
     console.error('Errore eliminazione notifica:', err);
-    res.status(500).json({ error: 'Errore server' });
+    res.status(500).json({ error: 'Errore del server durante l\'eliminazione.' });
   }
 });
 
@@ -103,7 +103,7 @@ router.delete('/delete-all/:userId', async (req, res) => {
     res.status(200).json({ message: 'Tutte le notifiche sono state eliminate con successo' });
   } catch (err) {
     console.error('Errore durante l\'eliminazione di tutte le notifiche:', err);
-    res.status(500).json({ error: 'Errore del server durante l\'eliminazione delle notifiche' });
+    res.status(500).json({ error: 'Errore del server durante l\'eliminazione di tutte le notifiche.' });
   }
 });
 
