@@ -26,7 +26,7 @@
                   {{ postiLiberi(partita) }} posti liberi
                 </span>
               </div>
-              <div class="progress fm-progress rounded-pill mt-2" role="progressbar" 
+              <div class="progress fm-progress rounded-pill mt-2" role="progressbar"
                   :aria-valuenow="Number(partita.partecipanti) || 0"
                   aria-valuemin="0"
                   :aria-valuemax="progressMax(partita)">
@@ -138,7 +138,7 @@
 
 
     <!-- MODALI & TOAST -->
-     <teleport to="body">
+    <teleport to="body">
     <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
@@ -174,7 +174,7 @@
 
               <!-- Non calcio: posti -->
               <div class="col-12" v-if="!isCalcio(partitaSelezionata)">
-                <label class="form-label">Posti rimanenti</label>
+                <label class="form-label">Posti liberi</label>
                 <input
                   type="text"
                   class="form-control"
@@ -185,7 +185,7 @@
 
               <!-- Calcio: ruoli -->
               <div class="col-12" v-else>
-                <label class="form-label">Ruoli mancanti</label>
+                <label class="form-label">Posti liberi</label>
                 <div class="row g-2">
                   <div class="col-md-3" v-for="(v, k) in extractRolesNeeded(partitaSelezionata)" :key="k" v-if="Number(v) > 0">
                     <div class="input-group">
@@ -195,7 +195,7 @@
                   </div>
                 </div>
                 <small class="text-muted d-block mt-1">
-                  Totale ruoli richiesti: {{ sumRolesNeeded(partitaSelezionata) }}
+                  Totale posti liberi: {{ sumRolesNeeded(partitaSelezionata) }}
                 </small>
               </div>
 
@@ -209,6 +209,41 @@
                 ></textarea>
               </div>
             </div>
+
+            <hr class="my-4" />
+
+            <h6 class="mb-2">Invita un utente</h6>
+            <div class="input-group">
+              <input
+                type="text"
+                v-model="searchUserQuery"
+                @input="searchUsersForInvite"
+                class="form-control"
+                placeholder="Cerca utente da invitare..."
+                aria-label="Cerca utente da invitare"
+              />
+              <button
+                class="btn text-white border-0 bg-info"
+                type="button"
+                @click="sendInvite"
+                :disabled="!selectedUserToInvite"
+                aria-label="Invita utente selezionato"
+              >
+                Invita
+              </button>
+            </div>
+
+            <ul v-if="userSearchResults.length" class="list-group mt-2">
+              <li
+                v-for="user in userSearchResults"
+                :key="user.id"
+                @click="selectUserToInvite(user)"
+                class="list-group-item list-group-item-action"
+                style="cursor: pointer;"
+              >
+                {{ user.username }}
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -216,7 +251,7 @@
     </teleport>
 
     <!-- MODALE CONFERMA ABBANDONO -->
-     <teleport to="body">
+    <teleport to="body">
     <div class="modal fade" id="modalConfermaAbbandono" tabindex="-1" aria-labelledby="modalConfermaAbbandonoLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0">
@@ -270,6 +305,9 @@ const props = defineProps({
 })
 
 const userId = localStorage.getItem('userId')
+const searchUserQuery = ref('')
+const userSearchResults = ref([])
+const selectedUserToInvite = ref(null)
 
 /* ======================= Filtri base ======================= */
 function filterBySection(arr = []) {
@@ -461,6 +499,42 @@ async function confermaAbbandono() {
   } finally {
     abbandonando.value = false
     idDaAbbandonare.value = null
+  }
+}
+
+const searchUsersForInvite = async () => {
+  if (searchUserQuery.value.trim() === '') {
+    userSearchResults.value = []
+    return
+  }
+  try {
+    const { data } = await axios.get(`http://localhost:3000/api/users/search?query=${searchUserQuery.value}`)
+    userSearchResults.value = data.filter(user => user.id.toString() !== userId)
+  } catch (error) {
+    console.error('Errore ricerca utenti per invito:', error)
+  }
+}
+
+const selectUserToInvite = (user) => {
+  selectedUserToInvite.value = user
+  searchUserQuery.value = user.username
+  userSearchResults.value = []
+}
+
+const sendInvite = async () => {
+  if (!selectedUserToInvite.value || !partitaSelezionata.value) return
+
+  try {
+    await axios.post(`http://localhost:3000/api/partite/${partitaSelezionata.value.id}/invite`, {
+      inviterId: userId,
+      inviteeId: selectedUserToInvite.value.id,
+    })
+    showToast(`Invito inviato a ${selectedUserToInvite.value.username}!`, 'success')
+    searchUserQuery.value = ''
+    selectedUserToInvite.value = null
+  } catch (error) {
+    console.error('Errore invio invito:', error)
+    showToast('Errore durante l\'invio dell\'invito.', 'danger')
   }
 }
 
