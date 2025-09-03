@@ -113,7 +113,7 @@ router.get('/', async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error('Errore nel recupero partite:', error);
-    res.status(500).json({ error: 'Errore nel recupero partite' });
+    res.status(500).json({ error: 'Errore del server nel recupero delle partite.' });
   }
 });
 
@@ -135,7 +135,7 @@ router.post('/', async (req, res) => {
 
    // Validazioni base
     if (!sport || !location || !date_time || !description || !organizer_id) {
-      return res.status(400).json({ error: 'Campi obbligatori mancanti' });
+      return res.status(400).json({ error: 'Assicurati di compilare tutti i campi principali (sport, luogo, data, descrizione).' });
     }
 
     await pool.query('BEGIN');
@@ -167,7 +167,8 @@ router.post('/', async (req, res) => {
       });
 
       if (Object.keys(rolesNeededToSave).length === 0) {
-        return res.status(400).json({ error: 'Devi selezionare almeno un ruolo per il calcio.' });
+        await pool.query('ROLLBACK');
+        return res.status(400).json({ error: 'Per il calcio, devi specificare almeno un ruolo mancante.' });
       }
 
       if (USE_NULL_MAX_PLAYERS) {
@@ -179,13 +180,12 @@ router.post('/', async (req, res) => {
     } else {
       const mp = Number(max_players);
       if (!mp || mp <= 0) {
-        return res.status(400).json({ error: 'max_players deve essere > 0 per questo sport.' });
+        await pool.query('ROLLBACK');
+        return res.status(400).json({ error: 'Il numero di giocatori deve essere maggiore di zero.' });
       }
       maxPlayersToSave = mp;
       rolesNeededToSave = {}; // niente ruoli per sport non-calcio
     }
-
-    await pool.query('BEGIN');
 
     const insertSql = `
       INSERT INTO events
@@ -209,10 +209,10 @@ router.post('/', async (req, res) => {
 
     // L'organizzatore partecipa di default
     await pool.query(
-      'INSERT INTO participants (user_id, event_id) VALUES ($1, $2)',
+      'INSERT INTO participants (user_id, event_id) VALUES ($1, $2)', 
       [organizer_id, newEvent.id]
     );
-
+    
     // Notifiche ai follower (best-effort)
     try {
       const orgRes = await pool.query('SELECT username FROM users WHERE id = $1', [organizer_id]);
@@ -243,7 +243,7 @@ router.post('/', async (req, res) => {
   } catch (err) {
     await pool.query('ROLLBACK');
     console.error('Errore nella creazione della partita:', err);
-    res.status(500).json({ error: 'Errore nella creazione della partita' });
+    res.status(500).json({ error: 'Si è verificato un errore inaspettato durante la creazione della partita.' });
   }
 });
 
