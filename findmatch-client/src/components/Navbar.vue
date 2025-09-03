@@ -1,7 +1,7 @@
 <template>
   <nav class="component-navbar navbar navbar-expand-lg navbar-dark px-3 sticky-top custom-navbar" role="navigation" aria-label="Barra di navigazione principale">
-    <router-link class="navbar-brand" to="/home" aria-label="Vai alla home">
-      <img src="/images/logo.png" alt="Logo di FindMatch — vai alla home" class="navbar-logo" />
+    <router-link class="navbar-brand" to="/home" aria-label="Vai alla home di FindMatch">
+      <img src="/images/logo.png" alt="Logo di FindMatch" class="navbar-logo" />
     </router-link>
 
     <ul class="navbar-nav ms-auto d-flex flex-row gap-3" role="menubar" aria-label="Menu principale">
@@ -24,10 +24,10 @@
           class="nav-link d-flex align-items-center"
           :class="{ 'is-active': isActive('/crea') }"
           role="menuitem"
-          aria-label="Vai alla sezione Crea"
+          aria-label="Crea una nuova partita"
           :aria-current="isActive('/crea') ? 'page' : null"
         >
-          <img src="/images/plus.svg" alt="Crea nuova partita" width="18" height="18" class="icon-inline" />
+          <img src="/images/plus.svg" alt="" width="18" height="18" class="icon-inline" aria-hidden="true" />
           <span class="ms-1">Crea</span>
         </router-link>
       </li>
@@ -41,7 +41,7 @@
           aria-label="Vai alla classifica"
           :aria-current="isActive('/classifica') ? 'page' : null"
         >
-          <img src="/images/trophy.svg" alt="Classifica" width="18" height="18" class="icon-inline icon-trophy" />
+          <img src="/images/trophy.svg" alt="" width="18" height="18" class="icon-inline icon-trophy" aria-hidden="true" />
           <span class="ms-1">Classifica</span>
         </router-link>
       </li>
@@ -56,7 +56,7 @@
           aria-controls="nav-search"
           aria-label="Apri ricerca utenti"
         >
-          <img src="/images/search.svg" alt="Cerca utenti" width="24" height="24" class="icon-invert" />
+          <img src="/images/search.svg" alt="" width="24" height="24" class="icon-invert" aria-hidden="true" />
         </button>
 
         <transition name="pop">
@@ -65,7 +65,7 @@
             id="nav-search"
             class="search-popover glass shadow-lg"
             role="region"
-            aria-label="Risultati ricerca utenti"
+            aria-label="Finestra di ricerca utenti"
           >
             <div class="search-input-row">
               <img src="/images/search.svg" alt="" width="18" height="18" aria-hidden="true" />
@@ -76,7 +76,7 @@
                 placeholder="Cerca utenti per username…"
                 @input="searchUsers"
                 @keydown.esc.stop.prevent="closeSearch"
-                aria-label="Campo ricerca utenti"
+                aria-label="Campo di testo per la ricerca di utenti"
               />
               <button class="btn-clear" @click="closeSearch" aria-label="Chiudi ricerca">✕</button>
             </div>
@@ -91,7 +91,7 @@
                   tabindex="0"
                   @click="openUserModal(user.id)"
                   @keydown.enter.prevent="openUserModal(user.id)"
-                  :aria-label="`Apri profilo di ${user.username}`"
+                  :aria-label="`Apri il profilo di ${user.username}`"
                 >
                   <img src="/images/immagine_profilo.jpg" :alt="`Foto profilo di ${user.username}`" width="28" height="28" class="avatar-sm" />
                   <span class="result-text">{{ user.username }}</span>
@@ -109,7 +109,7 @@
 
       <li class="nav-item position-relative" role="none">
         <router-link to="/notifiche" class="nav-link d-flex align-items-center" role="menuitem" aria-label="Vai alle notifiche">
-          <img src="/images/bell.svg" alt="Notifiche" width="24" height="24" class="icon-invert" />
+          <img src="/images/bell.svg" alt="" width="24" height="24" class="icon-invert" aria-hidden="true" />
           <span v-if="unreadNotifications > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" aria-live="polite">
             {{ unreadNotifications }}
             <span class="visually-hidden">notifiche non lette</span>
@@ -126,7 +126,7 @@
           :aria-expanded="String(showProfile)"
           aria-haspopup="true"
           aria-controls="profile-menu"
-          aria-label="Apri menu profilo"
+          aria-label="Apri menu del profilo utente"
         >
           <img src="/images/person.svg" alt="" width="24" height="24" class="icon-invert" aria-hidden="true" />
         </button>
@@ -137,6 +137,7 @@
             id="profile-menu"
             class="dropdown-panel glass shadow-lg"
             role="menu"
+            aria-label="Menu del profilo"
             @keydown.esc.stop.prevent="closeProfileMenu"
           >
             <div class="dropdown-header">
@@ -179,7 +180,7 @@
         <div class="modal-content user-modal-card" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 id="user-modal-title" class="mb-0">Profilo Utente</h5>
-            <button class="btn-close" @click="closeModal" aria-label="Chiudi profilo"></button>
+            <button class="btn-close" @click="closeModal" aria-label="Chiudi finestra profilo utente"></button>
           </div>
 
           <div v-if="loadingUser" class="text-center py-4">
@@ -266,7 +267,7 @@
               <p v-else class="text-muted mb-0">Nessun follower.</p>
               <p v-if="followersSelectedError" class="text-danger small mt-2" role="alert">{{ followersSelectedError }}</p>
             </template>
-          </div>
+            </div>
         </div>
       </div>
     </teleport>
@@ -275,7 +276,7 @@
     <teleport to="body">
       <div class="modal fade" id="modalLogout" tabindex="-1" aria-labelledby="modalLogoutLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border-0 shadow">
+          <div class="modal-content border-0 shadow" role="dialog" aria-modal="true" aria-labelledby="modalLogoutLabel">
             <div class="modal-header bg-danger text-white">
               <h5 class="modal-title" id="modalLogoutLabel">Conferma logout</h5>
             </div>
