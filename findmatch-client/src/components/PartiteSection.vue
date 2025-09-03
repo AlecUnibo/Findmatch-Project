@@ -138,6 +138,7 @@
 
 
     <!-- MODALI & TOAST -->
+     <teleport to="body">
     <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
@@ -212,8 +213,10 @@
         </div>
       </div>
     </div>
+    </teleport>
 
     <!-- MODALE CONFERMA ABBANDONO -->
+     <teleport to="body">
     <div class="modal fade" id="modalConfermaAbbandono" tabindex="-1" aria-labelledby="modalConfermaAbbandonoLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0">
@@ -236,6 +239,7 @@
         </div>
       </div>
     </div>
+    </teleport>
 
     <!-- TOAST -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11000">

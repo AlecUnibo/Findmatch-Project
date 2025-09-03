@@ -33,7 +33,14 @@
           <label class="form-label fw-semibold">
             Numero massimo di giocatori
           </label>
-          <input type="number" v-model.number="form.max_players" class="form-control fm-control" required min="1" />
+          <input
+            type="number"
+            v-model.number="form.max_players"
+            class="form-control fm-control"
+            required
+            min="1"
+            :max="maxSlots"
+          />
           <div class="form-text">
             Nota: il valore inserito rappresenta i posti liberi per altri utenti — il sistema considera l'organizzatore a parte.
           </div>
@@ -71,7 +78,9 @@
                   <span class="badge fm-role-badge me-2">🎯</span>
                   <strong>{{ role.label }}</strong>
                 </div>
-                <small class="text-muted d-none d-md-inline">Puoi inserire 0 o più</small>
+                <small class="text-muted d-none d-md-inline">
+                  Max {{ roleCaps[role.key] || '—' }}
+                </small>
               </div>
 
               <div class="d-flex align-items-center gap-2">
@@ -94,14 +103,14 @@
                   class="btn btn-sm btn-outline-primary fm-qty"
                   :aria-label="`Incrementa ${role.label}`"
                   @click="incrementRole(role.key)"
-                  :disabled="remainingSlots === 0"
+                  :disabled="remainingSlots === 0 || isAtCap(role.key)"
                 >+</button>
               </div>
             </div>
           </div>
 
           <div class="form-text mt-2">
-            La somma totale di tutti i ruoli non può superare <strong>{{ freeMaxSlots }}</strong> (escluso il creatore). I conteggi non possono scendere sotto 0.
+            La somma totale di tutti i ruoli non può superare <strong>{{ freeMaxSlots }}</strong>. I conteggi non possono scendere sotto 0.
           </div>
         </div>
 
@@ -208,12 +217,40 @@ const sumRoles = computed(() => {
   return Object.values(roles.value).reduce((s, v) => s + Number(v || 0), 0)
 })
 
-// maxSlots dinamico: 21 per Calcio a 11, 9 per Calcio a 5
-const maxSlots = computed(() => {
-  if (form.value.sport === 'Calcio a 11') return 22
-  if (form.value.sport === 'Calcio a 5') return 10
-  return 0
+// Limiti massimi per ruolo in base allo sport
+const roleCaps = computed(() => {
+  if (form.value.sport === 'Calcio a 11') {
+    return { portiere: 4, difensore: 10, centrocampista: 8, attaccante: 8, all_around: 0 }
+  }
+  if (form.value.sport === 'Calcio a 5') {
+    return { portiere: 4, difensore: 0, centrocampista: 0, attaccante: 0, all_around: 10 }
+  }
+  // default (nessun limite applicato perché non si mostrano i ruoli)
+  return { portiere: 0, difensore: 0, centrocampista: 0, attaccante: 0, all_around: 0 }
 })
+
+// Utility: il ruolo è al cap?
+function isAtCap(roleKey) {
+  const cap = roleCaps.value[roleKey] || 0
+  if (!cap) return false
+  return Number(roles.value[roleKey] || 0) >= cap
+}
+
+// maxSlots dinamico (TOTALE giocatori, incluso l'organizzatore)
+const maxSlots = computed(() => {
+  switch (form.value.sport) {
+    case 'Calcio a 11':   return 31
+    case 'Calcio a 5':    return 15
+    case 'Basket':        return 12
+    case 'Pallavolo':     return 14
+    case 'Padel':         return 4
+    case 'Tennis':        return 4
+    case 'Beach Volley':  return 4
+    case 'Beach Tennis':  return 4
+    default:              return 0
+  }
+})
+
 
 // freeMaxSlots: il numero di posti liberi che l'organizzatore può chiedere per ALTRI UTENTI
 // esclude l'organizzatore stesso (-1). Usato per la validazione e la UI.
@@ -236,12 +273,15 @@ const remainingSlots = computed(() => {
 function incrementRole(roleKey) {
   if (freeMaxSlots.value === 0) return
   if (remainingSlots.value <= 0) return
+  const cap = roleCaps.value[roleKey] || Infinity
+  if (Number(roles.value[roleKey] || 0) >= cap) return
   roles.value[roleKey] = Number(roles.value[roleKey] || 0) + 1
 }
 
 function decrementRole(roleKey) {
   roles.value[roleKey] = Math.max(0, Number(roles.value[roleKey] || 0) - 1)
 }
+
 
 // RESET: azzera TUTTI i ruoli ogni volta che cambio sport (richiesta)
 watch(() => form.value.sport, (nv, ov) => {
@@ -274,6 +314,23 @@ const creaPartita = async () => {
       nuovaPartita = { ...nuovaPartita, max_players: null, roles_needed: rolesNeededObj }
     } else {
       nuovaPartita.max_players = Number(form.value.max_players) ? Number(form.value.max_players) + 1 : null
+    }
+
+    // Check somma totale come già fai
+    if ((form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') && sumRoles.value > freeMaxSlots.value) {
+      showToast(`La somma dei ruoli non può superare ${freeMaxSlots.value} (escludendo il creatore).`, 'warning', 6000)
+      return
+    }
+
+    // Check per-ruolo (difensivo; il + è già bloccato in UI)
+    if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
+      for (const [k, v] of Object.entries(roles.value)) {
+        const cap = roleCaps.value[k] || Infinity
+        if (v > 0 && v > cap) {
+          showToast(`Hai superato il massimo per ${k.replace('_', ' ')} (${cap}).`, 'warning', 6000)
+          return
+        }
+      }
     }
 
     await axios.post('http://localhost:3000/api/partite', nuovaPartita)

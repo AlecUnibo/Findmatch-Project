@@ -76,11 +76,19 @@
 /* ===================================================== HomeSearchBar.vue ==================================================== */
 /* ============================================================================================================================ */
 
+/* -------------------------------------------- Card contenitore -------------------------------------------- */
 .home-search-card {
   background: linear-gradient(135deg, rgba(68,128,187,0.8), #567cc9);
   border: none;
   border-radius: 1rem;
   color: #fff;
+  position: relative;
+  z-index: 3000; /* la search sta sopra alle sezioni sottostanti */
+}
+
+.home-search-card .card-body {
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 /* di default CONSENTI il wrap per evitare overflow */
@@ -95,6 +103,7 @@
   }
 }
 
+/* -------------------------------------------- Tipografia/controls base -------------------------------------------- */
 .home-search-card .form-control,
 .home-search-card .form-select {
   border: none;
@@ -105,30 +114,205 @@
   box-shadow: none;
   transition: box-shadow .15s ease, background .15s ease;
 }
+
 .home-search-card .form-control:focus,
 .home-search-card .form-select:focus {
   background: #fff;
   box-shadow: 0 0 0 .2rem rgba(255,255,255,.35);
 }
 
-/* Bottoni */
+/* -------------------------------------------- Wrapper dei campi (BOX BIANCO) -------------------------------------------- */
+/* Struttura del box campo con icona a sinistra + input */
+.home-search-card .fm-field {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px 1fr;     /* icona + input */
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  min-height: 54px;                    /* altezza uniforme per TUTTI i campi */
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;           /* bordo chiaro */
+  background: #fff;                    /* <-- BIANCO per tutti i campi */
+  box-shadow: 0 6px 14px rgba(0,0,0,.10);
+}
+
+.home-search-card .fm-field:hover {
+  box-shadow: 0 8px 18px rgba(0,0,0,.14);
+}
+
+/* icona a sinistra dentro al box campo */
+.home-search-card .fm-field > img {
+  opacity: .85;
+  pointer-events: none;  /* non intercetta i click dell’input */
+}
+
+/* Focus ring coerente su tutti i box */
+.home-search-card .fm-field:focus-within {
+  border-color: rgba(68,128,187,.9);
+  box-shadow: 0 0 0 3px rgba(68,128,187,.22), 0 8px 20px rgba(0,0,0,.18);
+}
+
+/* Variante "is-select" (serve terza colonna per la chevron) */
+.home-search-card .fm-field.is-select {
+  grid-template-columns: 18px 1fr auto;
+  overflow: visible;
+}
+
+/* -------------------------------------------- Input interni dentro .fm-field -------------------------------------------- */
+/* Dentro ai box `.fm-field` gli input sono trasparenti: il bianco lo dà il contenitore */
+.home-search-card .fm-field .form-control,
+.home-search-card .fm-field .form-select {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0;
+  min-width: 0;
+  height: 38px;
+  color: #0f172a;
+  box-shadow: none !important;
+  position: relative;
+  z-index: 1;
+}
+
+.home-search-card .fm-field .form-control::placeholder {
+  color: rgba(15,23,42,.55);
+}
+
+/* DATA/ORA: spazio per indicatore nativo e comportamento naturale */
+.home-search-card .fm-field input[type="date"],
+.home-search-card .fm-field input[type="time"] {
+  padding: 0 10px;
+  padding-right: 32px;  /* spazio per l’icona nativa del picker */
+  appearance: auto;
+  -webkit-appearance: auto;
+  cursor: pointer;
+  color: #0f172a;
+}
+
+/* Indicatore del picker (WebKit) più grande e cliccabile */
+.home-search-card .fm-field input[type="date"]::-webkit-calendar-picker-indicator,
+.home-search-card .fm-field input[type="time"]::-webkit-calendar-picker-indicator {
+  width: 22px;
+  height: 22px;
+  margin-right: -4px;
+  opacity: .9;
+  cursor: pointer;
+  background: transparent;
+}
+
+/* -------------------------------------------- Select “Sport” (trigger + popover) -------------------------------------------- */
+.home-search-card .fm-select-trigger {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none;
+  border: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+  width: 100%;
+  color: #0f172a;
+  padding: 0;
+  height: 38px;
+  line-height: 38px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-search-card .fm-select-trigger:focus,
+.home-search-card .fm-select-trigger:active {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.home-search-card .fm-field .chevron {
+  font-size: 12px;
+  margin-right: 2px;
+  opacity: .7;
+  pointer-events: none; /* evita overlay sui click */
+}
+
+/* Popover opzioni: SEMPRE sopra alle card sottostanti (INVARIATO) */
+.home-search-card .select-popover {
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(100% + 8px);
+  padding: 6px;
+  border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.22);
+  background: rgba(255,255,255,0.90);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255,255,255,.55);
+  max-height: 260px;
+  overflow: auto;
+  z-index: 12000; /* sopra tutto */
+}
+
+.home-search-card .select-popover:hover,
+.home-search-card .select-popover:focus,
+.home-search-card .select-popover:focus-visible {
+  background: rgba(255,255,255,0.98);
+}
+
+.home-search-card .select-option {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  text-align: left;
+  color: #0f172a;
+  cursor: pointer;
+  outline: none;
+}
+
+.home-search-card .select-option .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(15,23,42,.70);
+}
+
+.home-search-card .select-option[aria-selected="true"],
+.home-search-card .select-option:hover,
+.home-search-card .select-option:focus-visible {
+  background: rgba(0,0,0,.06);
+}
+
+.home-search-card .select-popover .edge-fade {
+  pointer-events: none;
+  position: sticky;
+  bottom: 0;
+  height: 22px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.7));
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* Animazione popover */
+.pop-enter-from, .pop-leave-to { opacity: 0; transform: translateY(-6px) scale(0.98); }
+.pop-enter-active, .pop-leave-active { transition: opacity .14s ease, transform .18s cubic-bezier(.2,.8,.2,1); }
+
+/* -------------------------------------------- Bottoni -------------------------------------------- */
 .home-search-card .btn {
   border-radius: 999px;
   padding: .45rem 1rem;
   font-weight: 600;
   white-space: nowrap;
 }
+
 .home-search-card .btn-outline-light {
   border: 2px solid rgba(255,255,255,.85);
   color: #fff;
 }
+
 .home-search-card .btn-outline-light:hover {
   background: rgba(255,255,255,.18);
-}
-
-.home-search-card .card-body {
-  padding-left: 1rem;
-  padding-right: 1rem;
 }
 
 /* Bottone "Cerca" verde gradient */
@@ -145,16 +329,19 @@
   box-shadow: 0 6px 14px rgba(0,0,0,.25);
   transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
 }
+
 .home-search-card .btn-search:hover,
 .home-search-card .btn-search:focus {
   filter: brightness(1.05);
   box-shadow: 0 8px 18px rgba(0,0,0,.3);
   transform: translateY(-1px);
 }
+
 .home-search-card .btn-search:active {
   transform: translateY(0);
   box-shadow: 0 4px 10px rgba(0,0,0,.2);
 }
+
 .home-search-card .btn-search:focus-visible {
   outline: 3px solid rgba(255,255,255,.9);
   outline-offset: 2px;
@@ -174,24 +361,61 @@
   box-shadow: 0 6px 14px rgba(0,0,0,.25);
   transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
 }
+
 .home-search-card .btn-delete:hover,
 .home-search-card .btn-delete:focus {
   filter: brightness(1.05);
   box-shadow: 0 8px 18px rgba(0,0,0,.3);
   transform: translateY(-1px);
 }
+
 .home-search-card .btn-delete:active {
   transform: translateY(0);
   box-shadow: 0 4px 10px rgba(0,0,0,.2);
 }
+
 .home-search-card .btn-delete:focus-visible {
   outline: 3px solid rgba(255,255,255,.9);
   outline-offset: 2px;
 }
 
-/* Responsive tweaks */
+/* Freccina/area clic sulla destra dei campi con picker */
+/* Nasconde l’indicatore nativo del date/time: si usa SOLO la freccia */
+.home-search-card .fm-field.has-picker input[type="date"]::-webkit-calendar-picker-indicator,
+.home-search-card .fm-field.has-picker input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
 
+/* Con la colonna freccia, non serve padding destro extra */
+.home-search-card .fm-field.has-picker input[type="date"],
+.home-search-card .fm-field.has-picker input[type="time"] {
+  padding-right: 10px;
+}
 
+/* Struttura a 3 colonne (icona | input | freccia) */
+.home-search-card .fm-field.has-picker {
+  grid-template-columns: 18px 1fr 32px;
+}
+
+/* Stile della freccia cliccabile (come prima) */
+.home-search-card .picker-affordance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  transition: box-shadow .15s ease, transform .05s ease, background .15s ease, border-color .15s ease;
+}
+.home-search-card .picker-affordance:hover { background: #f1f5f9; border-color: #d1d5db; }
+.home-search-card .picker-affordance:active { transform: translateY(1px); }
+.home-search-card .picker-affordance:focus-visible { outline: 3px solid rgba(68,128,187,.35); outline-offset: 2px; }
+.home-search-card .picker-affordance > span { font-size: 12px; line-height: 1; transform: translateY(-1px); }
+/* -------------------------------------------- Responsive tweaks -------------------------------------------- */
 @media (max-width: 576px) {
   /* campi full-width su mobile */
   .home-search-card .form-control,
@@ -202,7 +426,7 @@
     font-size: .9rem;
   }
 
-  /* la colonna bottoni diventa a tutta larghezza, così i bottoni scendono sotto i campi senza uscire dalla card */
+  /* la colonna bottoni diventa a tutta larghezza */
   .home-search-card .col-auto {
     width: 100%;
   }
@@ -217,14 +441,17 @@
     flex-wrap: wrap;
     gap: .5rem;
   }
+
+  .home-search-card .fm-field { padding: 6px 10px; }
 }
 
-@media (max-width: 991.98px) {
-  .home-search-card .row {
-    flex-wrap: wrap !important;
-  }
+/* -------------------------------------------- Altri componenti collegati -------------------------------------------- */
+.component-partite, .component-home {
+  position: relative;
+  z-index: 1;
 }
 
+/* Modale/varie (tue classi esistenti) */
 .user-modal-card {
   width: 100%;
   max-width: 640px;
@@ -259,172 +486,11 @@
   overflow: hidden;
 }
 
-/* ------------------------------------------------------ Search Bar – Glass UI (clean) ------------------------------------------------------ */
+.btn-tap { transition: transform 0.08s ease, box-shadow 0.12s ease; }
+.btn-tap:active { transform: translateY(1px) scale(0.99); }
 
-/* Parametri rapidi (regola qui l’opacità) */
-.home-search-card {
-  --glass-bg:    0.38;   /* trasparenza standard dei campi */
-  --glass-bg-f:  0.58;   /* trasparenza quando il campo è in focus */
-  --glass-brd:   0.55;   /* opacità del bordo glass */
-  --ring-color:  rgba(68,128,187,.9);   /* colore ring */
-  --ring-shadow: rgba(68,128,187,.22);  /* alone ring */
-}
-
-/* Wrapper field in stile glass */
-.home-search-card .fm-field {
-  background: rgba(255,255,255,var(--glass-bg));
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255,255,255,var(--glass-brd));
-  border-radius: 12px;
-  padding: 8px 12px;
-  display: grid;
-  grid-template-columns: 18px 1fr auto;
-  align-items: center;
-  gap: 10px;
-  transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
-  box-shadow: 0 6px 14px rgba(0,0,0,.12);
-}
-.home-search-card .fm-field:hover { box-shadow: 0 8px 18px rgba(0,0,0,.18); }
-.home-search-card .fm-field > img { opacity: .85; }
-
-/* Input/select interni: sfondo trasparente, niente bordo */
-.home-search-card .fm-field .form-control,
-.home-search-card .fm-field .form-select {
-  background: transparent;
-  border: none;
-  height: 38px;       
-  padding: 0;       
-  box-shadow: none;
-  color: #0f172a;
-}
-.home-search-card .fm-field .form-control::placeholder { color: rgba(15,23,42,.55); }
-
-/* Focus ring coerente con navbar */
-.home-search-card .fm-field:focus-within {
-  border-color: var(--ring-color);
-  box-shadow: 0 0 0 3px var(--ring-shadow), 0 8px 20px rgba(0,0,0,.18);
-  background: rgba(255,255,255,var(--glass-bg-f));
-}
-
-/* Icone dei picker più “clickable” */
-.home-search-card .fm-field input[type="date"]::-webkit-calendar-picker-indicator,
-.home-search-card .fm-field input[type="time"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: .8;
-}
-
-/* ------------------------------------------------------ Custom Select (trigger + popover) ------------------------------------------------------ */
-
-.home-search-card .is-select { position: relative; }
-
-.home-search-card .fm-select-trigger {
-  background: transparent !important;
-  box-shadow: none !important;
-  outline: none;
-  border: 0;
-  -webkit-appearance: none;
-  appearance: none;
-  text-align: left;
-  width: 100%;
-  color: #0f172a;
-  padding: 0;
-  height: 38px;
-  line-height: 38px;
-  -webkit-tap-highlight-color: transparent; 
-
-  user-select: none;                  
-  -webkit-user-select: none;
-  -moz-user-select: none;
-
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.home-search-card .fm-select-trigger:focus,
-.home-search-card .fm-select-trigger:active {
-  background: transparent !important;
-  outline: none;
-  box-shadow: none;
-}
-
-.home-search-card .fm-select-trigger .placeholder { color: rgba(15,23,42,.55); }
-
-.home-search-card .fm-field .chevron {
-  font-size: 12px;
-  margin-right: 2px;
-  opacity: .7;
-}
-
-/* porta in alto tutta la search-card */
-.home-search-card {
-  position: relative;
-  z-index: 1000;
-}
-
-/* Popover opzioni (glass) */
-.home-search-card .select-popover {
-  position: absolute;
-  left: 0; right: 0;
-  top: calc(100% + 8px);
-  padding: 6px;
-  border-radius: 12px;
-  box-shadow: 0 12px 34px rgba(0,0,0,.22);
-  background: rgba(255,255,255,0.80);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255,255,255,var(--glass-brd));
-  max-height: 260px;
-  overflow: auto;
-}
-.home-search-card .select-popover:hover,
-.home-search-card .select-popover:focus,
-.home-search-card .select-popover:focus-visible {
-  background: rgba(255,255,255,0.95);
-}
-
-/* Opzioni */
-.home-search-card .select-option {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 8px 1fr;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 8px;
-  background: transparent;
-  border: none;
-  border-radius: 10px;
-  text-align: left;
-  color: #0f172a;
-  cursor: pointer;
-  outline: none;
-}
-.home-search-card .select-option .dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(15,23,42,.70);
-}
-.home-search-card .select-option[aria-selected="true"],
-.home-search-card .select-option:hover,
-.home-search-card .select-option:focus-visible {
-  background: rgba(0,0,0,.06);
-}
-
-.home-search-card .select-popover .edge-fade {
-  pointer-events: none;
-  position: sticky;
-  bottom: 0;
-  height: 22px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,.7));
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.pop-enter-from, .pop-leave-to { opacity: 0; transform: translateY(-6px) scale(0.98); }
-.pop-enter-active, .pop-leave-active { transition: opacity .14s ease, transform .18s cubic-bezier(.2,.8,.2,1); }
-
-@media (max-width: 576px) {
-  .home-search-card .fm-field { padding: 6px 10px; }
+@media (prefers-reduced-motion: reduce) {
+  .btn-tap { transition: none !important; }
 }
 
 /* ========================================================================================================================== */

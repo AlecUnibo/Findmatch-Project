@@ -87,16 +87,20 @@
       </ul>
 
 
-      <!-- Contenuto tab -->
-      <PartiteSection
-        v-if="currentTab === 'storico'"
-        :partite="playedMatches"
-        sezione="storico"
-      />
+      <!-- Contenuto tab con micro-transizione -->
+      <Transition name="fade-blur" mode="out-in">
+        <div :key="currentTab">
+          <PartiteSection
+            v-if="currentTab === 'storico'"
+            :partite="playedMatches"
+            sezione="storico"
+          />
 
-      <div v-else-if="currentTab === 'stats'" class="text-center text-muted py-4">
-        Futura implementazione
-      </div>
+          <div v-else class="text-center text-muted py-4">
+            Futura implementazione
+          </div>
+        </div>
+      </Transition>
     </div>
 
     <!-- MODALE MODIFICA PROFILO -->

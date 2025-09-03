@@ -6,31 +6,49 @@ const register = async (req, res) => {
   const { name, surname, username, email, password } = req.body
 
   try {
-    // Verifica se email o username esistono
-    const existing = await pool.query(
-      'SELECT * FROM users WHERE email = $1 OR username = $2',
-      [email, username]
-    )
-
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ error: 'Email o nome utente già in uso' })
+    // Validazione base
+    if (!name || !username || !email || !password) {
+      return res.status(400).json({ message: 'Campi mancanti.' })
     }
 
-    const hashed = await bcrypt.hash(password, 10)
+    const normEmail = String(email).trim().toLowerCase()
+    const normUsername = String(username).trim().toLowerCase()
+    const fullName = [String(name).trim(), String(surname || '').trim()]
+      .filter(Boolean)
+      .join(' ')
+      .trim()
 
-    // Inserimento (name = nome + cognome)
-    await pool.query(
-      'INSERT INTO users (name, username, email, password_hash) VALUES ($1, $2, $3, $4)',
-      [$,{name}, $,{surname}, username, email, hashed]
+    // Verifica unicità (case-insensitive)
+    const { rows: existing } = await pool.query(
+      `SELECT id, email, username
+       FROM users
+       WHERE LOWER(email) = $1 OR LOWER(username) = $2`,
+      [normEmail, normUsername]
     )
 
-    res.status(201).json({ message: 'Utente registrato con successo' })
+    if (existing.length > 0) {
+      const emailTaken = existing.some(u => u.email?.toLowerCase() === normEmail)
+      const userTaken  = existing.some(u => u.username?.toLowerCase() === normUsername)
+      const msg = emailTaken ? 'Email già registrata.' : 'Username già in uso.'
+      return res.status(409).json({ message: msg })
+    }
+
+    // Hash password
+    const hashed = await bcrypt.hash(password, 10)
+
+    // Insert (name = "nome cognome")
+    await pool.query(
+      `INSERT INTO users (name, username, email, password_hash)
+       VALUES ($1, $2, $3, $4)`,
+      [fullName || name, username, normEmail, hashed]
+    )
+
+    return res.status(201).json({ message: 'Utente registrato con successo' })
   } catch (err) {
     console.error('ERRORE REGISTRAZIONE:', err)
-    res.status(500).json({ error: 'Errore registrazione' })
+    return res.status(500).json({ message: 'Errore registrazione' })
   }
 }
-
 
 const login = async (req, res) => {
   const { identifier, password } = req.body

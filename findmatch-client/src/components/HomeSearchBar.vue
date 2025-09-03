@@ -26,28 +26,38 @@
         <div class="col-12 col-sm-6 col-lg">
           <label for="select-sport-trigger" class="visually-hidden">Sport</label>
 
-          <div class="fm-field glass is-select" ref="sportBox">
+          <div class="fm-field is-select has-picker" ref="sportBox">
             <img src="/images/sport.svg" alt="" width="16" height="16" aria-hidden="true" />
 
-            <!-- Trigger -->
+            <!-- display non interattivo (solo testo) -->
             <button
               id="select-sport-trigger"
               type="button"
               class="fm-input fm-select-trigger"
-              :aria-expanded="String(sportOpen)"
-              aria-haspopup="listbox"
-              aria-controls="sport-listbox"
-              @click="toggleSport()"
+              tabindex="-1"
+              aria-disabled="true"
+            >
+              <span v-if="sport && sport.trim()">{{ sport }}</span>
+              <span v-else class="fm-placeholder">Seleziona uno sport</span>
+            </button>
+
+            <!-- freccia -->
+            <button
+              type="button"
+              class="picker-affordance"
+              @mousedown.prevent
+              @click.stop="toggleSport()"
               @keydown.down.prevent="openAndMove(1)"
               @keydown.up.prevent="openAndMove(-1)"
               @keydown.enter.prevent="confirmActiveSport()"
               @keydown.esc.prevent="closeSport()"
+              :aria-expanded="String(sportOpen)"
+              aria-haspopup="listbox"
+              aria-controls="sport-listbox"
+              aria-label="Apri elenco sport"
             >
-              <span v-if="sport && sport.trim()">{{ sport }}</span>
-              <span v-else class="fm-placeholder">Sport</span>
+              <span aria-hidden="true">▾</span>
             </button>
-
-            <span class="chevron" aria-hidden="true">▾</span>
 
             <!-- Popover -->
             <transition name="pop">
@@ -79,35 +89,63 @@
         </div>
 
 
+
         <!-- Data -->
-        <div class="col-6 col-lg">
+        <div class="col-12 col-sm-6 col-lg">
           <label for="date-field" class="visually-hidden">Data</label>
-          <div class="fm-field glass">
+          <div class="fm-field solid has-picker">
+            <img src="/images/calendar.svg" alt="" width="16" height="16" aria-hidden="true" />
             <input
               id="date-field"
+              ref="dateRef"
               name="data"
               type="date"
               class="form-control fm-input"
-              :value="data"
-              @input="$emit('update:data', $event.target.value)"
+              v-model="dataModel"
+              readonly
+              @mousedown.prevent        
+              @keydown.prevent          
               aria-label="Seleziona la data"
             />
+            <button
+              type="button"
+              class="picker-affordance"
+              @mousedown.prevent
+              @click.stop="openDate"
+              aria-label="Apri calendario"
+            >
+              <span aria-hidden="true">▾</span>
+            </button>
           </div>
         </div>
 
         <!-- Ora -->
-        <div class="col-6 col-lg">
+        <div class="col-12 col-sm-6 col-lg">
           <label for="time-field" class="visually-hidden">Ora</label>
-          <div class="fm-field glass">
+          <div class="fm-field solid has-picker">
+            <img src="/images/clock.svg" alt="" width="16" height="16" aria-hidden="true" />
             <input
               id="time-field"
+              ref="timeRef"
               name="ora"
               type="time"
               class="form-control fm-input"
-              :value="ora"
-              @input="$emit('update:ora', $event.target.value)"
+              v-model="oraModel"
+              step="60"
+              readonly
+              @mousedown.prevent        
+              @keydown.prevent          
               aria-label="Seleziona l'ora"
             />
+            <button
+              type="button"
+              class="picker-affordance"
+              @mousedown.prevent
+              @click.stop="openTime"
+              aria-label="Apri selettore ora"
+            >
+              <span aria-hidden="true">▾</span>
+            </button>
           </div>
         </div>
 
@@ -115,11 +153,12 @@
         <!-- Bottoni -->
         <div class="col-12 col-lg-auto">
           <div class="d-flex gap-2 flex-wrap justify-content-center justify-content-lg-start">
+
             <button
               type="button"
-              class="btn btn-search d-flex align-items-center gap-2 btn-fluid"
-              @click="$emit('cerca')"
-              aria-label="Cerca partite"
+              class="btn btn-primary btn-search btn-tap d-flex align-items-center gap-2"
+              @click="emit('cerca')"
+              aria-label="Avvia ricerca"
             >
               <img src="/images/search-button.svg" alt="" aria-hidden="true" width="16" height="16" />
               <span>Cerca</span>
@@ -127,15 +166,17 @@
 
             <button
               type="button"
-              class="btn btn-delete d-flex align-items-center gap-2 btn-fluid"
+              class="btn btn-delete btn-tap d-flex align-items-center gap-2 btn-fluid"
               @click="$emit('pulisci')"
               aria-label="Pulisci filtri"
             >
               <img src="/images/trash.svg" alt="" aria-hidden="true" width="16" height="16" />
               <span>Pulisci</span>
             </button>
+
           </div>
         </div>
+
 
       </div>
     </div>
@@ -145,29 +186,86 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
-/* 1) Cattura props & emit (prima non li salvavi in variabili) */
+/* Props & emit */
 const props = defineProps({
   luogo: { type: String, default: '' },
   sport: { type: String, default: '' },
   data:  { type: String, default: '' },
   ora:   { type: String, default: '' },
 })
-const emit = defineEmits([
-  'update:luogo', 'update:sport', 'update:data', 'update:ora', 'cerca', 'pulisci'
-])
+const emit = defineEmits(['cerca', 'pulisci', 'update:luogo', 'update:sport', 'update:data', 'update:ora'])
 
-/* 2) Stato per il custom select "Sport" (popup glass) */
-const sports = [
-  'Calcio a 11','Calcio a 5','Basket','Beach Volley','Pallavolo','Racchettoni','Tennis','Paddle'
-]
+/* v-model proxy */
+const dataModel = computed({
+  get: () => props.data,
+  set: v => emit('update:data', v)
+})
+const oraModel = computed({
+  get: () => props.ora,
+  set: v => emit('update:ora', v)
+})
+
+/* --- Picker wiring --- */
+const dateRef = ref(null)
+const timeRef = ref(null)
+
+const openPicker = (el) => {
+  if (!el) return;
+
+  // se l'input è readonly, rimuovilo temporaneamente
+  const wasAttrReadonly = el.hasAttribute('readonly');
+  const wasPropReadonly = el.readOnly;
+  if (wasAttrReadonly || wasPropReadonly) {
+    el.readOnly = false;
+    if (wasAttrReadonly) el.removeAttribute('readonly');
+  }
+
+  const restoreReadonly = () => {
+    // ripristina allo stato precedente nel microtask successivo
+    Promise.resolve().then(() => {
+      if (wasAttrReadonly) el.setAttribute('readonly', '');
+      el.readOnly = wasPropReadonly;
+    });
+  };
+
+  try {
+    // Chromium (Chrome/Edge/Android)
+    if (typeof el.showPicker === 'function') {
+      el.showPicker();
+      restoreReadonly();
+      return;
+    }
+
+    // Fallback Safari/Firefox: focus + eventi click/mousedown reali
+    el.focus({ preventScroll: true });
+    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+    el.dispatchEvent(new MouseEvent('click',     { bubbles: true, cancelable: true, view: window }));
+  } catch (_) {
+    // ultimo tentativo
+    try { el.focus(); el.click(); } catch {}
+  } finally {
+    restoreReadonly();
+  }
+};
+
+
+const openDate = (ev) => {
+  ev?.preventDefault?.()
+  openPicker(dateRef.value)
+}
+const openTime = (ev) => {
+  ev?.preventDefault?.()
+  openPicker(timeRef.value)
+}
+
+/* --- Select Sport (come avevi) --- */
+const sports = ['Calcio a 11','Calcio a 5','Basket','Beach Volley','Pallavolo','Racchettoni','Tennis','Paddle']
 const sportOpen = ref(false)
 const activeSportIndex = ref(-1)
 const sportBox = ref(null)
-
 const activeSportId = computed(() =>
   activeSportIndex.value >= 0 ? `sport-opt-${activeSportIndex.value}` : null
 )
-
 const openSport = () => {
   sportOpen.value = true
   const idx = sports.findIndex(s => s === props.sport)
@@ -175,7 +273,6 @@ const openSport = () => {
 }
 const closeSport = () => { sportOpen.value = false }
 const toggleSport = () => { sportOpen.value ? closeSport() : openSport() }
-
 const openAndMove = (dir) => {
   if (!sportOpen.value) openSport()
   const len = sports.length
@@ -184,21 +281,11 @@ const openAndMove = (dir) => {
 const confirmActiveSport = () => {
   if (activeSportIndex.value >= 0) chooseSport(sports[activeSportIndex.value])
 }
-const chooseSport = (val) => {
-  emit('update:sport', val)
-  closeSport()
-}
-
-/* 3) Click fuori per chiudere il popover */
-const onClickOutsideSport = (e) => {
-  if (sportBox.value && !sportBox.value.contains(e.target)) closeSport()
-}
+const chooseSport = (val) => { emit('update:sport', val); closeSport() }
+const onClickOutsideSport = (e) => { if (sportBox.value && !sportBox.value.contains(e.target)) closeSport() }
 onMounted(() => document.addEventListener('click', onClickOutsideSport))
 onBeforeUnmount(() => document.removeEventListener('click', onClickOutsideSport))
 
-/* 4) (Opzionale) helper per inoltrare gli altri eventi dal template */
+/* (se ti serve) luogo handler */
 const onLuogo = e => emit('update:luogo', e.target.value)
-const onData  = e => emit('update:data',  e.target.value)
-const onOra   = e => emit('update:ora',   e.target.value)
 </script>
-

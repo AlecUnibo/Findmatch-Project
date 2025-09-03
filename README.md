@@ -33,8 +33,8 @@ npm install node-cron
 Vai nella cartella del progetto relativa al backend -> findmatch_server, e lancia i seguenti comandi:
 
 ```bash
-"C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/001_init_schema.sql
-"C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/002_seed_data.sql
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/001_init_schema.sql
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/002_seed_data.sql
 ```
 
 > Inserisci la password dell’utente postgres quando richiesto.
@@ -66,7 +66,7 @@ CREATE TABLE eventi (
 3. Si potranno applicare le modifiche con:
 
 ```bash
-"C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/003_add_tabella_eventi
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/003_add_tabella_eventi
 ```
 
 # 3. Avviare la web app:

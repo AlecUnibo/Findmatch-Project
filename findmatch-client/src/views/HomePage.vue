@@ -7,7 +7,7 @@
         <p class="text-muted">Trova o unisciti alla tua prossima partita!</p>
       </div>
 
-      <!-- Ricerca (estratta in componente) -->
+      <!-- Ricerca -->
       <HomeSearchBar
         :luogo="luogoFiltro"
         :sport="sportFiltro"
@@ -45,59 +45,63 @@
         </li>
       </ul>
 
+      <!-- Contenuto tab + micro transizione tra set risultati -->
+      <Transition name="fade-blur" mode="out-in">
+        <div :key="tab + '-' + resultsVersion">
+          <!-- Partite disponibili -->
+          <div class="mb-5" v-if="tab==='disponibili'">
+            <PartiteListSection
+              titolo="Partite disponibili"
+              :partite="partiteDisponibili"
+              :perPage="8"
+              :showJoin="true"
+              :getCardClass="getCardClass"
+              :getSportIcon="getSportIcon"
+              :formatData="formatData"
+              :formatOra="formatOra"
+              :postiLiberi="postiLiberi"
+              :progressPercent="progressPercent"
+              :progressBarClass="progressBarClass"
+              :progressMax="progressMax"
+              :isCalcio="isCalcio"
+              :roleEntries="roleEntries"
+              :ruoloLabel="ruoloLabel"
+              @dettagli="apriDettagli"
+              @unisciti="p => chiediUniscitiConControllo(p)"
+              @uniscitiCalcio="({ partita, roleKey }) => chiediUniscitiCalcioConControllo(partita, roleKey)"
+            />
+          </div>
 
-
-      <!-- Partite disponibili -->
-      <div class="mb-5" v-if="tab==='disponibili'">
-        <PartiteListSection
-          titolo="Partite disponibili"
-          :partite="partiteDisponibili"
-          :perPage="8"
-          :showJoin="true"
-          :getCardClass="getCardClass"
-          :getSportIcon="getSportIcon"
-          :formatData="formatData"
-          :formatOra="formatOra"
-          :postiLiberi="postiLiberi"
-          :progressPercent="progressPercent"
-          :progressBarClass="progressBarClass"
-          :progressMax="progressMax"
-          :isCalcio="isCalcio"
-          :roleEntries="roleEntries"
-          :ruoloLabel="ruoloLabel"
-          @dettagli="apriDettagli"
-          @unisciti="p => chiediUniscitiConControllo(p)"
-          @uniscitiCalcio="({ partita, roleKey }) => chiediUniscitiCalcioConControllo(partita, roleKey)"
-        />
-      </div>
-
-      <!-- Create da te -->
-      <div class="mb-5" v-else>
-        <PartiteListSection
-          titolo='Create da te'
-          :partite="partiteCreate"
-          :perPage="8"
-          :showJoin="false"
-          :showManage="true"  
-          :getCardClass="getCardClass"
-          :getSportIcon="getSportIcon"
-          :formatData="formatData"
-          :formatOra="formatOra"
-          :postiLiberi="postiLiberi"
-          :progressPercent="progressPercent"
-          :progressBarClass="progressBarClass"
-          :progressMax="progressMax"
-          :isCalcio="isCalcio"
-          :roleEntries="roleEntries"
-          :ruoloLabel="ruoloLabel"
-          @dettagli="apriDettagli"
-          @modifica="apriModifica"     
-          @elimina="chiediElimina" 
-        />
-      </div>
+          <!-- Create da te -->
+          <div class="mb-5" v-else>
+            <PartiteListSection
+              titolo="Create da te"
+              :partite="partiteCreate"
+              :perPage="8"
+              :showJoin="false"
+              :showManage="true"
+              :getCardClass="getCardClass"
+              :getSportIcon="getSportIcon"
+              :formatData="formatData"
+              :formatOra="formatOra"
+              :postiLiberi="postiLiberi"
+              :progressPercent="progressPercent"
+              :progressBarClass="progressBarClass"
+              :progressMax="progressMax"
+              :isCalcio="isCalcio"
+              :roleEntries="roleEntries"
+              :ruoloLabel="ruoloLabel"
+              @dettagli="apriDettagli"
+              @modifica="apriModifica"
+              @elimina="chiediElimina"
+            />
+          </div>
+        </div>
+      </Transition>
 
       <!-- MODALE DETTAGLI -->
-      <div class="modal fade" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
+      <teleport to="body">
+      <div class="modal fade fm-modal" id="modalDettagli" tabindex="-1" aria-labelledby="modalDettagliLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
           <div class="modal-content border-0 shadow">
             <div class="modal-header bg-info text-white">
@@ -212,9 +216,11 @@
           </div>
         </div>
       </div>
+      </teleport>
 
 
       <!-- Modale conferma -->
+      <teleport to="body">
       <div class="modal fade" id="modalConferma" tabindex="-1" aria-labelledby="modalConfermaLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content border-0 shadow">
@@ -238,9 +244,11 @@
           </div>
         </div>
       </div>
+      </teleport>
 
 <!-- MODALE MODIFICA PARTITA -->
-    <div class="modal fade" id="modalModifica" tabindex="-1" aria-labelledby="modalModificaLabel" aria-hidden="true">
+  <teleport to="body">
+    <div class="modal fade fm-modal" id="modalModifica" tabindex="-1" aria-labelledby="modalModificaLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
           <div class="modal-header bg-info text-white">
@@ -350,6 +358,7 @@
         </div>
       </div>
     </div>
+    </teleport>
 
       <!-- TOAST -->
       <div class="toast-container position-fixed bottom-0 end-0 p-3">
@@ -392,6 +401,8 @@ import PartiteListSection from '@/components/PartiteListSection.vue'
 import { getPartite, getPartitaById } from '../services/partiteService'
 
 const route = useRoute()
+const isSearching = ref(false)
+const resultsVersion = ref(0)
 
 // Stato base
 const nomeUtente = ref('')
@@ -508,6 +519,7 @@ const partiteDisponibili = computed(() =>
 
 // Caricamenti
 const cercaPartite = async () => {
+  isSearching.value = true
   try {
     const data = await getPartite({
       sport: sportFiltro.value,
@@ -521,6 +533,9 @@ const cercaPartite = async () => {
       .sort((a, b) => new Date(a.date_time) - new Date(b.date_time))
   } catch (err) {
     console.error('Errore nel caricamento delle partite:', err)
+  } finally {
+    resultsVersion.value++  
+    isSearching.value = false
   }
 }
 

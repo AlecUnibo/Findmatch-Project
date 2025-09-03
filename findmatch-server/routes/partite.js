@@ -22,6 +22,18 @@ router.get('/', async (req, res) => {
   try {
     const { sport, luogo, data, ora, exclude_user_id } = req.query;
 
+    // Normalizza l’ora: "14" / "14.00" / "14:30" -> "HH:MM"
+    const normalizeTime = (raw) => {
+      if (!raw) return '';
+      let s = String(raw).trim().replace(',', ':').replace('.', ':');
+      const m = s.match(/^(\d{1,2})(?::(\d{1,2}))?$/);
+      if (!m) return '';
+      const hh = String(Math.min(23, parseInt(m[1], 10))).padStart(2, '0');
+      const mm = String(Math.min(59, parseInt(m[2] ?? '0', 10))).padStart(2, '0');
+      return `${hh}:${mm}`;
+    };
+    const oraNorm = normalizeTime(ora);
+
     let query = `
       SELECT
         e.*,
@@ -32,39 +44,66 @@ router.get('/', async (req, res) => {
       LEFT JOIN participants p ON e.id = p.event_id
       WHERE 1=1
     `;
+
     const values = [];
     let i = 1;
+    const push = (v) => { values.push(v); return `$${i++}`; };
 
-    if (sport) {
-      query += ` AND LOWER(e.sport) LIKE $${i}`;
-      values.push(`%${sport.toLowerCase()}%`);
-      i++;
+    // Filtri base (sport/luogo)
+    if (sport && sport.trim()) {
+      query += ` AND LOWER(e.sport) LIKE ${push(`%${sport.toLowerCase().trim()}%`)}`;
     }
-    if (luogo) {
-      query += ` AND LOWER(e.location) LIKE $${i}`;
-      values.push(`%${luogo.toLowerCase()}%`);
-      i++;
-    }
-    if (data) {
-      query += ` AND e.date_time::date = $${i}`;
-      values.push(data);
-      i++;
-    }
-    if (ora) {
-      query += ` AND e.date_time::time >= $${i}`;
-      values.push(ora);
-      i++;
+    if (luogo && luogo.trim()) {
+      query += ` AND LOWER(e.location) LIKE ${push(`%${luogo.toLowerCase().trim()}%`)}`;
     }
 
+    // Logica combinata data/ora
+    if (data && oraNorm) {
+      // FINESTRA 1 ORA: [data+ora, data+ora+1h)
+      const start = `${data} ${oraNorm}:00`; // 'YYYY-MM-DD HH:MM:SS'
+      const p1 = push(start);
+      const p2 = push(start);
+      query += `
+        AND e.date_time >= ${p1}
+        AND e.date_time < (${p2}::timestamp + INTERVAL '1 hour')
+      `;
+
+      // Se e.date_time è TIMESTAMPTZ in UTC e vuoi filtrare in Europe/Rome, usa questa variante al posto di quella sopra:
+      // query += `
+      //   AND (e.date_time AT TIME ZONE 'Europe/Rome') >= ${p1}
+      //   AND (e.date_time AT TIME ZONE 'Europe/Rome') < (${p2}::timestamp + INTERVAL '1 hour')
+      // `;
+
+    } else {
+      if (data) {
+        query += ` AND e.date_time::date = ${push(data)}`;
+      }
+      if (oraNorm) {
+        // Solo fascia oraria (qualsiasi giorno): [HH:MM, HH:MM+1h)
+        const t1 = push(`${oraNorm}`);
+        const t2 = push(`${oraNorm}`);
+        query += `
+          AND (e.date_time::time >= ${t1}::time)
+          AND (e.date_time::time < (${t2}::time + INTERVAL '1 hour'))
+        `;
+
+        // Variante per TIMESTAMPTZ (UTC) con filtro in Europe/Rome:
+        // query += `
+        //   AND ((e.date_time AT TIME ZONE 'Europe/Rome')::time >= ${t1}::time)
+        //   AND ((e.date_time AT TIME ZONE 'Europe/Rome')::time < (${t2}::time + INTERVAL '1 hour'))
+        // `;
+      }
+    }
+
+    // Escludi eventi a cui l'utente è già iscritto (fix: usa 'i' corretto)
     if (exclude_user_id) {
+      const pid = push(exclude_user_id);
       query += ` AND NOT EXISTS (
         SELECT 1 FROM participants px
-        WHERE px.event_id = e.id AND px.user_id = $${counter}
+        WHERE px.event_id = e.id AND px.user_id = ${pid}
       )`;
-      values.push(exclude_user_id);
-      counter++;
     }
-    
+
     query += `
       GROUP BY e.id, u.username
       ORDER BY e.date_time ASC
@@ -77,6 +116,7 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Errore nel recupero partite' });
   }
 });
+
 
 // ---------------------------------------------------------------------------
 // POST /api/partite  - crea evento (con ruoli per Calcio 11/5)

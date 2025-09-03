@@ -45,24 +45,28 @@
       </ul>
 
       <!-- TAB: NOTIFICHE -->
-      <div v-if="currentTab === 'notifiche'">
-        <div v-if="loading" class="text-center text-muted mt-5">
-          <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
-          <p class="mt-2">Caricamento...</p>
-        </div>
+      <Transition name="fade-blur" mode="out-in">
+        <div :key="currentTab">
+          <!-- TAB: NOTIFICHE -->
+          <div v-if="currentTab === 'notifiche'">
+            <div v-if="loading" class="text-center text-muted mt-5">
+              <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+              <p class="mt-2">Caricamento...</p>
+            </div>
 
-        <div v-else-if="(notifiche?.length || 0) === 0" class="text-center text-muted mt-5">
-          <p>Non ci sono nuove notifiche.</p>
-        </div>
+            <div v-else-if="(notifiche?.length || 0) === 0" class="text-center text-muted mt-5">
+              <p>Non ci sono nuove notifiche.</p>
+            </div>
 
-        <div v-else class="list-group" role="list">
-          <div
-            v-for="notifica in notifiche"
-            :key="notifica.id"
-            class="list-group-item list-group-item-action d-flex align-items-center"
-            :class="{ 'notification-read': notifica.is_read }"
-            role="listitem"
-          >
+            <!-- vedi patch 2 sotto per animare la lista -->
+            <div v-else class="list-group" role="list">
+              <div
+                v-for="notifica in notifiche"
+                :key="notifica.id"
+                class="list-group-item list-group-item-action d-flex align-items-center"
+                :class="{ 'notification-read': notifica.is_read }"
+                role="listitem"
+              >
             <div class="me-3 fs-4" aria-hidden="true">{{ getIcona(notifica.type) }}</div>
 
             <div class="flex-grow-1">
@@ -124,15 +128,13 @@
       </div>
 
       <!-- TAB CHAT -->
-      <div v-else-if="currentTab === 'chat'" class="py-4">
-        <h3 class="h5 mb-3">Chat </h3>
-        <p class="text-muted">
-          Futura implementazione.
-        </p>
-
-      </div>
+       <div v-else-if="currentTab === 'chat'" class="py-4">
+      <h3 class="h5 mb-3">Chat</h3>
+      <p class="text-muted">Futura implementazione.</p>
     </div>
-
+  </div>
+</Transition>
+    </div>
     <!-- TOAST -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <div ref="toastEl" class="toast align-items-center border-0 fade" role="status" aria-live="polite" aria-atomic="true">

@@ -18,6 +18,7 @@
 
 
     <!-- Tab Content -->
+    <Transition name="fade-blur" mode="out-in">
     <PartiteSection
       v-if="currentTab === 'iscritto'"
       :partite="iscrittoList"
@@ -31,6 +32,7 @@
       sezione="storico"
       :fetchEventoById="fetchEventoById"
     />
+    </Transition>
   </div>
 </template>
 
