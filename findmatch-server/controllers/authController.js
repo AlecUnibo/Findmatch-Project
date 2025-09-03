@@ -8,7 +8,7 @@ const register = async (req, res) => {
   try {
     // Validazione base
     if (!name || !username || !email || !password) {
-      return res.status(400).json({ message: 'Campi mancanti.' })
+      return res.status(400).json({ message: 'Tutti i campi sono obbligatori.' })
     }
 
     const normEmail = String(email).trim().toLowerCase()
@@ -29,7 +29,7 @@ const register = async (req, res) => {
     if (existing.length > 0) {
       const emailTaken = existing.some(u => u.email?.toLowerCase() === normEmail)
       const userTaken  = existing.some(u => u.username?.toLowerCase() === normUsername)
-      const msg = emailTaken ? 'Email già registrata.' : 'Username già in uso.'
+      const msg = emailTaken ? 'L\'indirizzo email è già stato registrato.' : 'Questo username è già in uso. Scegline un altro.'
       return res.status(409).json({ message: msg })
     }
 
@@ -46,7 +46,7 @@ const register = async (req, res) => {
     return res.status(201).json({ message: 'Utente registrato con successo' })
   } catch (err) {
     console.error('ERRORE REGISTRAZIONE:', err)
-    return res.status(500).json({ message: 'Errore registrazione' })
+    return res.status(500).json({ message: 'Si è verificato un errore interno. Riprova più tardi.' })
   }
 }
 
@@ -56,7 +56,7 @@ const login = async (req, res) => {
   try {
     // Validazione base
     if (!identifier || !password) {
-      return res.status(400).json({ error: 'Identifier e password sono obbligatori' })
+      return res.status(400).json({ error: 'Email/username e password sono obbligatori.' })
     }
 
     const id = String(identifier).trim()
@@ -68,7 +68,7 @@ const login = async (req, res) => {
     )
 
     if (result.rows.length === 0) {
-      return res.status(400).json({ error: 'Credenziali non valide' })
+      return res.status(401).json({ error: 'Credenziali non valide.' })
     }
 
     const user = result.rows[0]
@@ -76,7 +76,7 @@ const login = async (req, res) => {
     // Verifica password
     const match = await bcrypt.compare(password, user.password_hash)
     if (!match) {
-      return res.status(401).json({ error: 'Credenziali non valide' })
+      return res.status(401).json({ error: 'Credenziali non valide.' })
     }
 
     // Genera token
@@ -97,8 +97,8 @@ const login = async (req, res) => {
     })
   } catch (err) {
     console.error('ERRORE LOGIN:', err)
-    res.status(500).json({ error: 'Errore login' })
+    res.status(500).json({ error: 'Si è verificato un errore interno. Riprova più tardi.' })
   }
 }
 
-module.exports = { register, login }
+module.exports = { register, login }
