@@ -199,7 +199,7 @@
                 />
                 <div>
                   <h4 class="mb-0">{{ selectedUser.username }}</h4>
-                  <small class="text-muted">{{ selectedUser.email }}</small>
+                  <small class="user-email">{{ selectedUser.email }}</small>
                 </div>
               </div>
 
@@ -227,9 +227,9 @@
               </div>
 
               <div class="mb-3">
-                <h6 class="mb-1">📝 Biografia</h6>
+                <h6 class="mb-1 bio-title ">📝 Biografia</h6>
                 <p v-if="selectedUser.bio && selectedUser.bio.trim()" class="user-bio">{{ selectedUser.bio }}</p>
-                <p v-else class="text-muted">Nessuna biografia disponibile</p>
+                <p v-else class="user-bio-empty">Nessuna biografia disponibile</p>
               </div>
 
               <div v-if="String(selectedUser.id) !== String(currentUserId)">

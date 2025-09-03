@@ -140,7 +140,7 @@
                   <input
                     type="text"
                     class="form-control"
-                    :value="`${postiLiberi(partitaSelezionata)} / ${(partitaSelezionata.max_players ?? 0)}`"
+                    :value="`${postiLiberi(partitaSelezionata)} / ${sportMaxSlotsFor(partitaSelezionata?.sport)}`"
                     disabled
                   />
                 </div>
@@ -484,20 +484,91 @@ const sportEmojis = {
   'tennis': '🎾', 'paddle': '🥎'
 }
 
-// --- Helpers posti/progress
-const postiLiberi = (p) => (isCalcio(p) ? sumRolesNeeded(p) : Math.max(0, (p.max_players ?? 0) - (p.partecipanti ?? 0)))
-const progressMax = (p) => (isCalcio(p) ? (p.partecipanti ?? 0) + sumRolesNeeded(p) : (p.max_players ?? 0))
-const progressPercent = (p) => {
-  const max = progressMax(p); const cur = p.partecipanti ?? 0
-  if (!max) return 0
-  return Math.min(100, Math.round((cur / max) * 100))
+// --- Helpers posti/progress (SOSTITUISCI QUI IL BLOCCO VECCHIO)
+const sportMaxSlotsFor = (sport) => {
+  switch ((sport || '').toLowerCase()) {
+    case 'calcio a 11':   return 31
+    case 'calcio a 5':    return 15
+    case 'basket':        return 12
+    case 'pallavolo':     return 14
+    case 'padel':         return 4
+    case 'tennis':        return 4
+    case 'beach volley':  return 4
+    case 'beach tennis':  return 4
+    default:              return 0
+  }
 }
+
+// missingSlots: quanti posti mancano *adesso* (usato anche nei dettagli)
+const missingSlots = (p) => {
+  if (!p) return 0
+
+  // calcio: comportamento invariato (somma ruoli richiesti)
+  if (isCalcio(p)) return sumRolesNeeded(p)
+
+  const sportMax = sportMaxSlotsFor(p.sport)
+  const participants = Number(p.partecipanti ?? 0)
+
+  // Caso preferito: backend salva p.max_players come "posti mancanti" (es. 5)
+  // Accettiamo anche stringhe convertendole in Number per robustezza.
+  const mp = (p.max_players !== undefined && p.max_players !== null) ? Number(p.max_players) : undefined
+  if (typeof mp === 'number' && !Number.isNaN(mp) && mp >= 0 && sportMax > 0 && mp <= sportMax) {
+    return Math.max(0, mp)
+  }
+
+  // Fallback: se max non è nel formato desiderato, calcola da sportMax - partecipanti
+  if (sportMax > 0) {
+    return Math.max(0, sportMax - participants)
+  }
+
+  // Ultimo fallback: compatibilità con vecchie entry (max_players usato come cap)
+  return Math.max(0, (mp ?? 0) - participants)
+}
+
+// postiLiberi rimane l'API usata in template: ritorna il numero mancante
+const postiLiberi = (p) => missingSlots(p)
+
+// progressMax: valore massimo usato dall'aria-valuemax della progress bar
+const progressMax = (p) => {
+  if (!p) return 0
+
+  // per calcio preferiamo la mappa sportMaxSlotsFor (capacità reale dello sport)
+  if (isCalcio(p)) {
+    const total = sportMaxSlotsFor(p.sport)
+    if (total > 0) return total
+    // fallback (se per qualche motivo non abbiamo sportMax): partecipanti + ruoli richiesti
+    return (Number(p.partecipanti ?? 0) + sumRolesNeeded(p))
+  }
+
+  // non-calcio: preferiamo sportMaxSlotsFor (es. 14 per pallavolo)
+  const total = sportMaxSlotsFor(p.sport)
+  if (total > 0) return total
+
+  // fallback: usa il campo max_players se è la capacità totale
+  return Number(p.max_players ?? 0)
+}
+
+// progressPercent: percentuale colorata basata su sportMax
+const progressPercent = (p) => {
+  if (!p) return 0
+
+  const total = progressMax(p)
+  if (!total) return 0
+
+  // occupati = total - missing
+  const missing = missingSlots(p)
+  const occupied = Math.max(0, total - missing)
+  return Math.min(100, Math.round((occupied / total) * 100))
+}
+
+// colore della barra (stesso criterio già usato)
 const progressBarClass = (p) => {
   const left = postiLiberi(p)
   if (left === 0) return 'bg-danger'
   if (left <= 2) return 'bg-warning'
   return 'bg-success'
 }
+
 
 // Iscrizioni
 const isIscritto = (eventId) => partecipazioniUtente.value.some(id => String(id) === String(eventId))

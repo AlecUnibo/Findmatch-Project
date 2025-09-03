@@ -499,7 +499,7 @@
 /* Pulsante cancel */
 .fm-modal .btn-cancel,
 .btn-cancel {
-  background-color: #ff4d4d;
+  background-color: #e7d33b;
   color: #000 !important;
   border: none;
 }
@@ -507,7 +507,7 @@
 .fm-modal .btn-cancel:focus,
 .btn-cancel:hover,
 .btn-cancel:focus {
-  background-color: #e04343;
+  background-color: #ddc930;
   color: #000 !important;
   box-shadow: none;
 }

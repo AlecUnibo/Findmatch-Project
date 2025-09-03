@@ -77,10 +77,3 @@
     </section>
   </div>
 </template>
-
-<script setup>
-// Solo presentazione, nessuna logica necessaria
-</script>
-
-<!-- RIMUOVI qualunque <style scoped> qui.
-     Lo stile sta in views_global.css -->

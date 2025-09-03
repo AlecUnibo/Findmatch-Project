@@ -497,6 +497,7 @@
 /* ======================================================= Navbar.vue ======================================================= */
 /* ========================================================================================================================== */
 
+
 .component-navbar.custom-navbar {
   background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
   backdrop-filter: blur(6px);
@@ -911,6 +912,12 @@
   box-shadow: none;
 }
 
+.user-card .bio-title { color: #000; }
+.user-card .user-bio{ color: #000; }
+.user-email{ color:#2c2b2b; }
+.user-card .user-bio-empty { color: #2c2b2b; }
+
+
 /* ============================================================================================================================ */
 /* ====================================================== PartiteCard.vue ===================================================== */
 /* ============================================================================================================================ */
@@ -1032,8 +1039,8 @@
 /* -------------------------------------------------- Bottone "Modifica" -------------------------------------------------- */
 
 .component-partita-card .btn-edit {
-  --join-grad-a: rgba(170, 169, 127, 0.95);
-  --join-grad-b: yellow;
+  --join-grad-a: rgba(224, 206, 69, 0.95);
+  --join-grad-b: rgb(209, 209, 5);
   background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
   color: #fff !important;
   border: none;
@@ -1126,8 +1133,8 @@
 /* -------------------------------------------------- Bottone "Unisciti" & Dropdown -------------------------------------------------- */
 
 .component-partita-card .btn-join {
-  --join-grad-a: rgba(170, 189, 165, 0.95);
-  --join-grad-b: green;
+  --join-grad-a: rgba(41, 203, 1, 0.95);
+  --join-grad-b: rgb(0, 84, 0);
   background: linear-gradient(135deg, var(--join-grad-a), var(--join-grad-b));
   color: #fff !important;
   border: none;

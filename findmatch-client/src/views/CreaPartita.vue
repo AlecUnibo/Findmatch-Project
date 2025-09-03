@@ -313,8 +313,9 @@ const creaPartita = async () => {
       })
       nuovaPartita = { ...nuovaPartita, max_players: null, roles_needed: rolesNeededObj }
     } else {
-      nuovaPartita.max_players = Number(form.value.max_players) ? Number(form.value.max_players) + 1 : null
+      nuovaPartita.max_players = Number(form.value.max_players) ? Number(form.value.max_players) : null
     }
+
 
     // Check somma totale come già fai
     if ((form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') && sumRoles.value > freeMaxSlots.value) {
