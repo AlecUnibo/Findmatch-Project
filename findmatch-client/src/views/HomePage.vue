@@ -514,10 +514,12 @@ const initialSlots = (p) => {
     return fallback > 0 ? fallback : 0
   }
 
-  const mp = (p.max_players !== undefined && p.max_players !== null) ? Number(p.max_players) : NaN
-  if (Number.isFinite(mp) && mp > 0) {
-    return mp
-  }
+    // Ora p.max_players è il TOTALE (organizzatore + altri). Per l'UI vogliamo i posti
+    // effettivamente disponibili per gli altri utenti => mp - 1
+    const mp = (p.max_players !== undefined && p.max_players !== null) ? Number(p.max_players) : NaN
+    if (Number.isFinite(mp) && mp > 0) {
+      return Math.max(0, mp - 1)
+    }
 
   const fallback = sportMaxSlotsFor(p.sport)
   return fallback > 0 ? fallback : 0

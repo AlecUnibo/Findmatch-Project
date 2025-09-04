@@ -352,7 +352,10 @@ const creaPartita = async () => {
       })
       nuovaPartita = { ...nuovaPartita, max_players: null, roles_needed: rolesNeededObj }
     } else {
-      nuovaPartita.max_players = Number(form.value.max_players) ? Number(form.value.max_players) : null
+      // backend si aspetta il numero TOTALE di posti (incluso l'organizzatore).
+      // L'input dell'UI invece chiede "posti liberi per altri", quindi inviamo +1.
+      const uiFree = Number(form.value.max_players) || 0
+      nuovaPartita.max_players = uiFree > 0 ? (uiFree + 1) : null
     }
 
 

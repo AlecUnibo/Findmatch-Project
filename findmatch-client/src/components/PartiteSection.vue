@@ -27,7 +27,7 @@
                 </span>
               </div>
               <div class="progress fm-progress rounded-pill mt-2" role="progressbar"
-                  :aria-valuenow="Number(partita.partecipanti) || 0"
+                  :aria-valuenow="normalizedParticipants(partita)"
                   aria-valuemin="0"
                   :aria-valuemax="progressMax(partita)">
                 <div
@@ -376,26 +376,44 @@ function extractRolesNeeded(p) {
 }
 const sumRolesNeeded = (p) => Object.values(extractRolesNeeded(p)).reduce((a, b) => a + Number(b || 0), 0)
 
+/* helper: normalizza i partecipanti sottraendo 1 (organizzatore) */
+const normalizedParticipants = (p) => {
+  if (!p) return 0
+  const raw = Number(p.partecipanti ?? 0)
+  return Math.max(0, raw - 1) // assume backend include l'organizzatore
+}
+
+/* postiLiberi: ora coerente con HomePage (usa normalizedParticipants) */
 const postiLiberi = (p) => {
   if (isCalcio(p)) return sumRolesNeeded(p)
+   // mp è il totale (incluso organizzatore), p.partecipanti è raw (incluso organizzatore)
+  // posti liberi per altri = mp - raw
   return Math.max(0, (Number(p.max_players) || 0) - (Number(p.partecipanti) || 0))
 }
+
+/* progressMax: per non-calcio è max_players; per calcio -> totale ruoli richiesti */
 const progressMax = (p) => {
-  if (isCalcio(p)) return (Number(p.partecipanti) || 0) + sumRolesNeeded(p)
-  return Number(p.max_players) || 0
+  if (isCalcio(p)) return sumRolesNeeded(p)
+  // il max mostrato nella barra deve essere i posti disponibili per altri => mp - 1
+  return Math.max(0, (Number(p.max_players) || 0) - 1)
 }
+
+/* progressPercent: usa normalizedParticipants per il numeratore */
 const progressPercent = (p) => {
   const max = progressMax(p)
-  const cur = Number(p.partecipanti) || 0
+  const cur = normalizedParticipants(p)
   if (!max) return 0
   return Math.min(100, Math.round((cur / max) * 100))
 }
+
+/* progressBarClass rimane basata sui postiLiberi normalizzati */
 const progressBarClass = (p) => {
   const left = postiLiberi(p)
   if (left === 0) return 'bg-danger'
   if (left <= 2) return 'bg-warning'
   return 'bg-success'
 }
+
 
 /* ======================= Ruoli UI ======================= */
 const ruoloLabel = (key) => ({
