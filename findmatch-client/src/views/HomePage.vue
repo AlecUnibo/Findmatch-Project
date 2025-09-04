@@ -140,7 +140,7 @@
                   <input
                     type="text"
                     class="form-control"
-                    :value="`${postiLiberi(partitaSelezionata)} / ${sportMaxSlotsFor(partitaSelezionata?.sport)}`"
+                    :value="`${postiLiberi(partitaSelezionata)} / ${initialSlots(partitaSelezionata)}`"
                     disabled
                   />
                 </div>
@@ -494,75 +494,98 @@ const sportMaxSlotsFor = (sport) => {
     case 'padel':         return 4
     case 'tennis':        return 4
     case 'beach volley':  return 4
-    case 'racchettoni':  return 4
+    case 'racchettoni':   return 4
     default:              return 0
   }
 }
 
-// missingSlots: quanti posti mancano *adesso* (usato anche nei dettagli)
-const missingSlots = (p) => {
+/**
+ * initialSlots:
+ * - per NON-calcio: preferisce p.max_players (valore impostato alla creazione)
+ * - per calcio: usa la somma dei ruoli richiesti (sumRolesNeeded), fallback a sportMaxSlotsFor
+ */
+const initialSlots = (p) => {
   if (!p) return 0
 
-  // calcio: comportamento invariato (somma ruoli richiesti)
-  if (isCalcio(p)) return sumRolesNeeded(p)
-
-  const sportMax = sportMaxSlotsFor(p.sport)
-  const participants = Number(p.partecipanti ?? 0)
-
-  // Caso preferito: backend salva p.max_players come "posti mancanti" (es. 5)
-  // Accettiamo anche stringhe convertendole in Number per robustezza.
-  const mp = (p.max_players !== undefined && p.max_players !== null) ? Number(p.max_players) : undefined
-  if (typeof mp === 'number' && !Number.isNaN(mp) && mp >= 0 && sportMax > 0 && mp <= sportMax) {
-    return Math.max(0, mp)
-  }
-
-  // Fallback: se max non è nel formato desiderato, calcola da sportMax - partecipanti
-  if (sportMax > 0) {
-    return Math.max(0, sportMax - participants)
-  }
-
-  // Ultimo fallback: compatibilità con vecchie entry (max_players usato come cap)
-  return Math.max(0, (mp ?? 0) - participants)
-}
-
-// postiLiberi rimane l'API usata in template: ritorna il numero mancante
-const postiLiberi = (p) => missingSlots(p)
-
-// progressMax: valore massimo usato dall'aria-valuemax della progress bar
-const progressMax = (p) => {
-  if (!p) return 0
-
-  // per calcio preferiamo la mappa sportMaxSlotsFor (capacità reale dello sport)
   if (isCalcio(p)) {
-    const total = sportMaxSlotsFor(p.sport)
-    if (total > 0) return total
-    // fallback (se per qualche motivo non abbiamo sportMax): partecipanti + ruoli richiesti
-    return (Number(p.partecipanti ?? 0) + sumRolesNeeded(p))
+    const totalRoles = sumRolesNeeded(p)
+    if (totalRoles > 0) return totalRoles
+    const fallback = sportMaxSlotsFor(p.sport)
+    return fallback > 0 ? fallback : 0
   }
 
-  // non-calcio: preferiamo sportMaxSlotsFor (es. 14 per pallavolo)
-  const total = sportMaxSlotsFor(p.sport)
-  if (total > 0) return total
+  const mp = (p.max_players !== undefined && p.max_players !== null) ? Number(p.max_players) : NaN
+  if (Number.isFinite(mp) && mp > 0) {
+    return mp
+  }
 
-  // fallback: usa il campo max_players se è la capacità totale
-  return Number(p.max_players ?? 0)
+  const fallback = sportMaxSlotsFor(p.sport)
+  return fallback > 0 ? fallback : 0
 }
 
-// progressPercent: percentuale colorata basata su sportMax
+/**
+ * participantsForProgress:
+ * - restituisce i partecipanti effettivi da usare per progressi e calcoli UI
+ * - sottrae 1 (organizzatore) per tutti gli sport quando il backend lo include nel conteggio
+ *   (comportamento coerente con ciò che vuoi mostrare nella Home)
+ * - protegge da valori negativi con Math.max(0,...)
+ */
+const participantsForProgress = (p) => {
+  if (!p) return 0
+  const raw = Number(p.partecipanti ?? 0)
+
+  // Se il backend ha un conteggio plausibile, trattiamo raw come "inclusivo" dell'organizzatore
+  // e sottraiamo 1: questo risolve il problema "creator già iscritto" per calcio e non-calcio.
+  //
+  // Nota: se il backend dovesse già restituire partecipanti che ESCLUDONO l'organizzatore,
+  // questa sottrazione porterebbe a un sotto-conteggio. Se in futuro vedi casi del genere
+  // possiamo aggiungere un controllo/flag lato API o una euristica più complessa.
+  return Math.max(0, raw - 1)
+}
+
+
+/**
+ * postiLiberi: quanti posti rimangono *adesso* per gli ALTRI utenti
+ * = max(0, initialSlots - participantsForProgress)
+ */
+const postiLiberi = (p) => {
+  if (!p) return 0
+  const total = initialSlots(p)
+  const participants = participantsForProgress(p)
+  if (!Number.isFinite(total) || total <= 0) return 0
+  return Math.max(0, total - participants)
+}
+
+/**
+ * progressMax: valore massimo per la progress bar -> initialSlots
+ */
+const progressMax = (p) => {
+  return initialSlots(p)
+}
+
+/**
+ * progressPercent: percentuale occupata (participantsForProgress / initialSlots)
+ * se initialSlots = 0 restituisce 0
+ */
 const progressPercent = (p) => {
   if (!p) return 0
-
-  const total = progressMax(p)
+  const total = initialSlots(p)
   if (!total) return 0
-
-  // occupati = total - missing
-  const missing = missingSlots(p)
-  const occupied = Math.max(0, total - missing)
-  return Math.min(100, Math.round((occupied / total) * 100))
+  const participants = participantsForProgress(p)
+  const pct = Math.round((Math.max(0, participants) / total) * 100)
+  return Math.min(100, pct)
 }
 
-// colore della barra (stesso criterio già usato)
+/**
+ * progressBarClass:
+ * - se non ci sono iscritti (participantsForProgress === 0) => ritorna stringa vuota (non colorata)
+ * - altrimenti usa lo stesso criterio di warning/danger/success basato su posti rimanenti
+ */
 const progressBarClass = (p) => {
+  if (!p) return ''
+  const participants = participantsForProgress(p)
+  if (participants === 0) return '' // non colorare se nessuno si è ancora iscritto (escludendo l'organizzatore)
+
   const left = postiLiberi(p)
   if (left === 0) return 'bg-danger'
   if (left <= 2) return 'bg-warning'
