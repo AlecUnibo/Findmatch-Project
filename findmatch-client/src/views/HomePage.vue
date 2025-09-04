@@ -494,7 +494,7 @@ const sportMaxSlotsFor = (sport) => {
     case 'padel':         return 4
     case 'tennis':        return 4
     case 'beach volley':  return 4
-    case 'beach tennis':  return 4
+    case 'racchettoni':  return 4
     default:              return 0
   }
 }

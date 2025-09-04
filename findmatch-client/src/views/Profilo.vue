@@ -303,7 +303,7 @@ const leagueThresholds = [0, 5, 10, 15, 20, 9999]
 
 const userLeague = computed(() => {
   const total = Number(matchesPlayed.value) + Number(matchesCreated.value)
-  if (total >= 1 && total <= 5) return 'Lega 5'
+  if (total >= 0 && total <= 5) return 'Lega 5'
   if (total >= 6 && total <= 10) return 'Lega 4'
   if (total >= 11 && total <= 15) return 'Lega 3'
   if (total >= 16 && total <= 20) return 'Lega 2'
