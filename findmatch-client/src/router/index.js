@@ -89,7 +89,12 @@ const router = createRouter({
 })
 
 // Navigation guard
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, from, next) => {
+  if (from.path === '/notifiche' && to.path !== '/notifiche') {
+    window.location.href = to.fullPath;
+    return;
+  }
+
   const authed = isAuthenticated()
 
   // Blocca l’accesso alle rotte protette se non autenticato
