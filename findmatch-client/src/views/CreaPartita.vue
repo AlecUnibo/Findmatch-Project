@@ -187,6 +187,7 @@
               :aria-valuenow="sumRoles"
               aria-valuemin="0"
               :aria-valuemax="freeMaxSlots"
+              :aria-label="`Ruoli selezionati: ${sumRoles} su ${freeMaxSlots}`"
             >
               {{ sumRoles }} / {{ freeMaxSlots }}
             </div>

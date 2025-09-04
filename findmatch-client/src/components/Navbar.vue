@@ -5,7 +5,7 @@
     </router-link>
 
 <ul class="navbar-nav ms-auto d-flex flex-row gap-3" aria-label="Menu principale">
-      <li class="nav-item" role="none">
+      <li class="nav-item">
         <router-link
           to="/partite"
           class="nav-link"
@@ -18,7 +18,7 @@
         </router-link>
       </li>
 
-      <li class="nav-item" role="none">
+      <li class="nav-item">
         <router-link
           to="/crea"
           class="nav-link d-flex align-items-center"
@@ -32,7 +32,7 @@
         </router-link>
       </li>
 
-      <li class="nav-item" role="none">
+      <li class="nav-item">
         <router-link
           to="/classifica"
           class="nav-link d-flex align-items-center"
@@ -47,7 +47,7 @@
       </li>
 
       <!-- Cerca utenti — popover moderno -->
-      <li class="nav-item position-relative" ref="searchBox" role="none">
+      <li class="nav-item position-relative" ref="searchBox">
         <button
           type="button"
           class="nav-link btn-icon"
@@ -107,7 +107,7 @@
         </transition>
       </li>
 
-      <li class="nav-item position-relative" role="none">
+      <li class="nav-item position-relative">
         <router-link to="/notifiche" class="nav-link d-flex align-items-center" role="menuitem" aria-label="Vai alle notifiche">
           <img src="/images/bell.svg" alt="" width="24" height="24" class="icon-invert" aria-hidden="true" />
           <span v-if="unreadNotifications > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" aria-live="polite">
@@ -118,7 +118,7 @@
       </li>
 
       <!-- Menu profilo — popover moderno -->
-      <li class="nav-item position-relative" ref="profileMenu" role="none">
+      <li class="nav-item position-relative" ref="profileMenu">
         <button
           class="nav-link d-flex align-items-center btn-icon"
           type="button"

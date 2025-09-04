@@ -749,14 +749,33 @@ async function doConfirm() {
 // --- Eliminazione partita ---
 async function eliminaPartita(eventId) {
   try {
-    await axios.delete(`http://localhost:3000/api/partite/${eventId}`)
-    showToast('Partita eliminata con successo.', 'success')
-    await cercaPartite() // ricarica liste
+    await axios.delete(`http://localhost:3000/api/partite/${eventId}`, { data: { user_id: userId } })
+    await new Promise(res => setTimeout(res, 250))
+    let stillExists = null
+    try {
+      stillExists = await getPartitaById(eventId)
+    } catch (e) {
+
+      stillExists = null
+    }
+
+    if (!stillExists || !stillExists.id) {
+      showToast('Partita eliminata con successo.', 'success')
+      await cercaPartite() 
+    } else {
+
+      console.warn('Delete returned OK but event still exists for id', eventId)
+      showToast('Impossibile eliminare la partita. Contatta il supporto.', 'danger')
+
+      await cercaPartite()
+    }
   } catch (err) {
     console.error('Errore eliminazione partita:', err)
     const msg = err.response?.data?.error || 'Errore durante l’eliminazione.'
     showToast(msg, 'danger')
-  }
+
+    await cercaPartite().catch(()=>{})
+  }
 }
 
 /**

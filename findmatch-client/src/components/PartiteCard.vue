@@ -2,8 +2,8 @@
   <div class="card mb-3 text-white component-partita-card" :class="getCardClass(partita.sport)">
     <div class="card-body d-flex justify-content-between align-items-center">
       <div>
-        <h5 class="card-title mb-1">{{ getSportIcon(partita.sport) }} {{ partita.sport }}</h5>
-
+        <div class="h5 card-title mb-1">{{ getSportIcon(partita.sport) }} {{ partita.sport }}</div>
+        
         <p class="card-text mb-0">
           <strong>Data:</strong> {{ formatData(partita.date_time) }} –
           <strong>Ora:</strong> {{ formatOra(partita.date_time) }} –

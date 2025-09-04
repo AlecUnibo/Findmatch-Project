@@ -29,7 +29,8 @@
               <div class="progress fm-progress rounded-pill mt-2" role="progressbar"
                   :aria-valuenow="normalizedParticipants(partita)"
                   aria-valuemin="0"
-                  :aria-valuemax="progressMax(partita)">
+                  :aria-valuemax="progressMax(partita)"
+                  :aria-label="`Progresso partecipazione: ${progressPercent(partita)}%`">
                 <div
                   class="progress-bar fm-progress-bar rounded-pill"
                   :class="progressBarClass(partita)"
