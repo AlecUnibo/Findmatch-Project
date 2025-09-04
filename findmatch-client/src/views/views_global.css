@@ -3,7 +3,6 @@
 /* ======================================================= WelcomePage.vue ======================================================= */
 /* ============================================================================================================================ */
 
-/* ===== HERO (landing) ===== */
 .fm-landing-hero {
   position: relative;
   background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
@@ -21,7 +20,6 @@
   pointer-events: none;
 }
 
-/* ===== LOGO (no crop) ===== */
 .fm-landing-logo {
   height: 64px;
   width: auto;
@@ -34,7 +32,6 @@
   .fm-landing-logo { height: 52px; } /* unificato: niente width fissa */
 }
 
-/* ===== Utility accessibilità ===== */
 .visually-hidden {
   position: absolute !important;
   width: 1px; height: 1px;
@@ -43,7 +40,6 @@
   white-space: nowrap; border: 0;
 }
 
-/* ===== CTA buttons ===== */
 .fm-cta-group {
   display: flex;
   flex-wrap: wrap;
@@ -67,8 +63,7 @@
   }
 }
 
-/* ===== Feature cards (solo in landing) ===== */
-.fm-landing .fm-feature-card {  /* scope per evitare effetti collaterali */
+.fm-landing .fm-feature-card { 
   border: none;
 }
 .fm-landing .fm-feature-card .card-body {
@@ -243,36 +238,81 @@
 /* ====================================================== CreaPartita.vue ===================================================== */
 /* ============================================================================================================================ */
 
+/* VARIABILI & RESET LOCALI -------------------------------------------- */
+.component-crea-partita {
+  --fm-primary: #567cc9;
+  --fm-primary-600: rgba(68, 128, 187, 0.95);
+  --fm-primary-500: rgba(68, 128, 187, 0.8);
+  --fm-bg-card: #fff;
+  --fm-bg-muted: #fafafa;
+  --fm-bg-subtle: #f7f7f9;
+  --fm-border: #e7e7e9;
+  --fm-border-subtle: #ececf1;
+  --fm-focus: #b9d0ff;
+  --fm-radius-xl: 1.25rem;
+  --fm-radius-lg: .8rem;
+  --fm-radius-md: .7rem;
+  --fm-shadow-sm: 0 .35rem 1rem rgba(0, 0, 0, .06);
+  --fm-shadow-md: 0 .5rem 1.25rem rgba(68, 128, 187, 0.45);
+  --fm-shadow-md-hover: 0 .7rem 1.5rem rgba(68, 128, 187, 0.55);
+  --fm-shadow-md-active: 0 .35rem 1rem rgba(68, 128, 187, 0.35);
+  --fm-transition-fast: .1s ease;
+  --fm-transition-med: .15s ease;
+}
+
+/* CARD & HEADER --------------------------------------------------------- */
 .fm-card {
-  background: #fff;
-  border-radius: 1.25rem;
+  background: var(--fm-bg-card);
+  border-radius: var(--fm-radius-xl);
 }
 
 .fm-header {
-  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
+  background: linear-gradient(135deg, var(--fm-primary-500), var(--fm-primary));
   position: relative;
 }
 
 .fm-header .fm-badge {
   font-size: .9rem;
   padding: .35rem .75rem;
-  border: 1px solid rgba(255,255,255,.45);
+  border: 1px solid rgba(255, 255, 255, .45);
   border-radius: 999px;
 }
 
-/* Input e select */
+/* CAMPI DI INPUT (fm-control) ------------------------------------------ */
 .component-crea-partita .fm-control {
-  border-radius: .8rem;
-  border-color: #e7e7e9;
-  background: #fafafa;
+  border-radius: var(--fm-radius-lg);
+  border-color: var(--fm-border);
+  background: var(--fm-bg-muted);
+  transition: border-color var(--fm-transition-med), box-shadow var(--fm-transition-med), background var(--fm-transition-med);
 }
 .component-crea-partita .fm-control:focus {
-  border-color: #b9d0ff;
-  box-shadow: 0 0 0 .25rem rgba(13,110,253,.15);
+  border-color: var(--fm-focus);
+  box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .15);
   background: #fff;
 }
 
-/* Progress ruoli */
+/* DIVIDER & TITOLI SEZIONE (opzionali) --------------------------------- */
+.component-crea-partita .fm-divider-brand{
+   height: 2px;
+  border: 0;
+  margin: 1.25rem 0 1rem;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(86,124,201,1.5),
+    transparent
+  );
+}
+
+.component-crea-partita .fm-section-title {
+  font-size: .95rem;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+  color: #6b7280; /* grigio medio */
+  margin: 0 0 .75rem;
+}
+
+/* PROGRESS RUOLI -------------------------------------------------------- */
 .component-crea-partita .fm-progress {
   height: 12px;
 }
@@ -281,14 +321,14 @@
   line-height: 12px;
 }
 
-/* Lista ruoli */
+/* LISTA RUOLI (ITEM + BADGE) ------------------------------------------- */
 .component-crea-partita .fm-roles .list-group-item {
   background: #ffffff;
-  transition: transform .1s ease, box-shadow .1s ease;
+  transition: transform var(--fm-transition-fast), box-shadow var(--fm-transition-fast);
 }
 .component-crea-partita .fm-roles .list-group-item:hover {
   transform: translateY(-1px);
-  box-shadow: 0 .35rem 1rem rgba(0,0,0,.06);
+  box-shadow: var(--fm-shadow-sm);
 }
 .component-crea-partita .fm-role-badge {
   background: #f1f4ff;
@@ -299,78 +339,72 @@
   font-size: .9rem;
 }
 
-/* Counter + bottoni +/- */
+/* COUNTER & BOTTONI +/- (QTY) ------------------------------------------ */
 .component-crea-partita .fm-qty {
   width: 36px;
   height: 36px;
-  border-radius: .7rem !important;
+  border-radius: var(--fm-radius-md) !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
 }
-.component-crea-partita .fm-count {
+.component-crea-partita .fm-count,
+.component-crea-partita .role-count {
   min-width: 52px;
   text-align: center;
-  border-radius: .7rem;
-  background: #f7f7f9;
-  border: 1px solid #ececf1;
+  border-radius: var(--fm-radius-md);
+  background: var(--fm-bg-subtle);
+  border: 1px solid var(--fm-border-subtle);
   padding: .4rem .75rem;
   font-weight: 600;
 }
 
-/* CTA */
-.component-crea-partita .fm-header {
-  background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
-}
-
-/* override del bottone */
+/* CTA (SUBMIT) ---------------------------------------------------------- */
 .component-crea-partita .fm-submit.btn {
-  background: linear-gradient(135deg, rgba(68, 128, 187, 0.95), #567cc9) !important;
+  background: linear-gradient(135deg, var(--fm-primary-600), var(--fm-primary)) !important;
   border: none !important;
   color: #fff !important;
   font-weight: 700;
   letter-spacing: .2px;
   border-radius: 999px;
   padding: .6rem 1.35rem;
-  box-shadow: 0 .5rem 1.25rem rgba(68, 128, 187, 0.45);
-  transition: transform .06s ease, box-shadow .15s ease, filter .15s ease;
+  box-shadow: var(--fm-shadow-md);
+  transition: transform .06s ease, box-shadow var(--fm-transition-med), filter var(--fm-transition-med);
 }
-
 .component-crea-partita .fm-submit.btn:hover,
 .component-crea-partita .fm-submit.btn:focus {
   filter: brightness(1.03);
   transform: translateY(-1px);
-  box-shadow: 0 .7rem 1.5rem rgba(68, 128, 187, 0.55);
+  box-shadow: var(--fm-shadow-md-hover);
 }
-
 .component-crea-partita .fm-submit.btn:active {
   transform: translateY(0);
-  box-shadow: 0 .35rem 1rem rgba(68, 128, 187, 0.35);
+  box-shadow: var(--fm-shadow-md-active);
 }
-
 /* focus accessibile */
 .component-crea-partita .fm-submit.btn:focus-visible {
-  outline: 3px solid rgba(255,255,255,.85);
+  outline: 3px solid rgba(255, 255, 255, .85);
   outline-offset: 2px;
 }
 
-/* Role label width */
-.component-crea-partita .role-label { min-width: 160px; }
-
-/* Count width */
-.component-crea-partita .role-count {
-  min-width: 48px;
-  text-align: center;
-}
-
-/* Toast in CreaPartita */
+/* TOAST ----------------------------------------------------------------- */
 .component-crea-partita .toast-container { z-index: 11000; }
 .component-crea-partita .toast-container .toast { --bs-toast-max-width: 520px; }
 .component-crea-partita .toast .toast-body { font-size: 1.05rem; padding: 0.95rem 1.15rem; }
 .component-crea-partita .toast.fade { transition: opacity .6s ease; }
 
+/* UTILITÀ & RESPONSIVE ------------------------------------------------- */
+/* larghezza minima etichetta ruolo */
+.component-crea-partita .role-label { min-width: 160px; }
 
+/* per select casacche affiancate su schermi stretti */
+@media (max-width: 576px) {
+  .component-crea-partita .fm-count,
+  .component-crea-partita .role-count {
+    min-width: 44px;
+  }
+}
 /* ============================================================================================================================ */
 /* ======================================================= HomePage.vue ======================================================= */
 /* ============================================================================================================================ */
@@ -1154,15 +1188,4 @@ body.modal-open .card {
 /* [HomeSearchBar.vue] - Placeholder più scuro per contrasto */
 .home-search-card .fm-field .form-control::placeholder {
   color: #6c757d;
-}
-
-/* Selettore specifico per il bottone 'close' nell'header del modale 'Modifica Partita' */
-#modalModifica .modal-header .btn-close {
-  filter: invert(0) grayscale(100%) brightness(0%);
-  opacity: 0.7;
-}
-
-/* Rende la 'X' completamente opaca al passaggio del mouse */
-#modalModifica .modal-header .btn-close:hover {
-  opacity: 1;
 }

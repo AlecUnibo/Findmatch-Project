@@ -12,6 +12,10 @@
       </div>
 
       <div class="p-4 p-md-5">
+
+        <!-- ===================== Dettagli partita ===================== -->
+        <h6 class="fm-section-title">Dettagli partita</h6>
+
         <!-- SPORT -->
         <div class="mb-4">
           <label class="form-label fw-semibold">Sport</label>
@@ -28,11 +32,133 @@
           </select>
         </div>
 
+        <!-- TIPOLOGIA (solo Basket/Tennis) -->
+        <div v-if="form.sport === 'Basket' || form.sport === 'Tennis'" class="mb-4">
+          <label class="form-label fw-semibold">Tipologia</label>
+          <select v-model="form.tipologia" class="form-select form-select-lg fm-control" required>
+            <option value="">Seleziona una tipologia</option>
+            <template v-if="form.sport === 'Basket'">
+              <option>1v1 metà campo</option>
+              <option>2v2 metà campo</option>
+              <option>3v3 metà campo</option>
+              <option>5v5 metà campo</option>
+            </template>
+            <template v-else>
+              <option>Singolo</option>
+              <option>Doppio</option>
+            </template>
+          </select>
+          <div class="form-text">Campo obbligatorio per {{ form.sport }}.</div>
+        </div>
+
+        <!-- CASACCHE (Calcio/Basket: due colori) -->
+        <div
+          v-if="form.sport === 'Calcio a 11' || form.sport === 'Calcio a 5' || form.sport === 'Basket'"
+          class="mb-4"
+        >
+          <label class="form-label fw-semibold d-block">Colore casacche (Squadra A vs Squadra B)</label>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <select v-model="form.coloreDivisaA" class="form-select form-select-lg fm-control" required>
+                <option value="">Seleziona colore Squadra A</option>
+                <option>Bianco</option>
+                <option>Nero</option>
+                <option>Blu</option>
+                <option>Rosso</option>
+                <option>Verde</option>
+                <option>Giallo</option>
+                <option>Arancione</option>
+                <option>Viola</option>
+                <option>Rosa</option>
+                <option>Grigio</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <select v-model="form.coloreDivisaB" class="form-select form-select-lg fm-control" required>
+                <option value="">Seleziona colore Squadra B</option>
+                <option>Bianco</option>
+                <option>Nero</option>
+                <option>Blu</option>
+                <option>Rosso</option>
+                <option>Verde</option>
+                <option>Giallo</option>
+                <option>Arancione</option>
+                <option>Viola</option>
+                <option>Rosa</option>
+                <option>Grigio</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-text">Obbligatorio per {{ form.sport }}. I colori devono essere diversi.</div>
+        </div>
+
+        <!-- COLORE (altri sport: un colore) -->
+        <div
+          v-else-if="form.sport && !(form.sport === 'Calcio a 11' || form.sport === 'Calcio a 5' || form.sport === 'Basket')"
+          class="mb-4"
+        >
+          <label class="form-label fw-semibold">Colore divisa/casacca</label>
+          <select v-model="form.coloreDivisa" class="form-select form-select-lg fm-control" required>
+            <option value="">Seleziona un colore</option>
+            <option>Bianco</option>
+            <option>Nero</option>
+            <option>Blu</option>
+            <option>Rosso</option>
+            <option>Verde</option>
+            <option>Giallo</option>
+            <option>Arancione</option>
+            <option>Viola</option>
+            <option>Rosa</option>
+            <option>Grigio</option>
+          </select>
+          <div class="form-text">Campo obbligatorio.</div>
+        </div>
+
+        <hr class="fm-divider-brand" />
+
+        <!-- ===================== Quando & Dove ===================== -->
+        <h6 class="fm-section-title">Quando & Dove</h6>
+
+        <!-- LUOGO + DATA/ORA -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-7">
+            <label class="form-label fw-semibold">Luogo</label>
+            <div class="input-group">
+              <span class="input-group-text" aria-hidden="true">📍</span>
+              <input id="autocomplete" type="text" class="form-control fm-control" placeholder="Inserisci luogo" v-model="form.location" />
+            </div>
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Data e ora</label>
+            <div class="input-group">
+              <span class="input-group-text" aria-hidden="true">🗓️</span>
+              <input type="datetime-local" v-model="form.date_time" :min="minDateTime" class="form-control fm-control" />
+            </div>
+          </div>
+        </div>
+
+        <!-- INDICAZIONI PRECISE DEL CAMPO -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Indirizzo/indicazioni precise del campo</label>
+          <input
+            type="text"
+            v-model.trim="form.indicazioniCampo"
+            class="form-control fm-control"
+            placeholder="Es. Via dei Caduti 113, cancello lato nord — oppure 'Spiaggia23'"
+            required
+          />
+          <div class="form-text">Campo obbligatorio: aiuta i partecipanti a trovare esattamente il punto d’incontro.</div>
+        </div>
+
+        <hr class="fm-divider-brand" />
+
+        <!-- ===================== Iscrizioni ===================== -->
+        <h6 class="fm-section-title">Iscrizioni</h6>
+
         <!-- MAX PLAYERS (non calcio) -->
         <div v-if="!(form.sport === 'Calcio a 11' || form.sport === 'Calcio a 5')" class="mb-4">
-          <label class="form-label fw-semibold">
-            Numero massimo di giocatori
-          </label>
+          <label class="form-label fw-semibold">Numero massimo di giocatori</label>
           <input
             type="number"
             v-model.number="form.max_players"
@@ -41,7 +167,7 @@
             :max="maxSlots"
           />
           <div class="form-text">
-            Nota: il valore inserito rappresenta i posti liberi per altri utenti — il sistema considera l'organizzatore a parte.
+            Nota: il valore inserito rappresenta i posti liberi per altri utenti — l'organizzatore è contato a parte.
           </div>
         </div>
 
@@ -66,6 +192,7 @@
             </div>
           </div>
 
+          <!-- Lista ruoli -->
           <div class="list-group fm-roles">
             <div
               v-for="role in displayedRoleList"
@@ -83,7 +210,6 @@
               </div>
 
               <div class="d-flex align-items-center gap-2">
-                <!-- decrement -->
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-secondary fm-qty"
@@ -96,7 +222,6 @@
                   {{ roles[role.key] }}
                 </div>
 
-                <!-- increment -->
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-primary fm-qty"
@@ -113,22 +238,28 @@
           </div>
         </div>
 
-        <!-- LUOGO + DATA/ORA -->
-        <div class="row g-3 mb-4">
-          <div class="col-md-7">
-            <label class="form-label fw-semibold">Luogo</label>
-            <div class="input-group">
-              <span class="input-group-text" aria-hidden="true">📍</span>
-              <input id="autocomplete" type="text" class="form-control fm-control" placeholder="Inserisci luogo" v-model="form.location" />
-            </div>
-          </div>
+        <hr class="fm-divider-brand" />
 
-          <div class="col-md-5">
-            <label class="form-label fw-semibold">Data e ora</label>
-            <div class="input-group">
-              <span class="input-group-text" aria-hidden="true">🗓️</span>
-              <input type="datetime-local" v-model="form.date_time" :min="minDateTime" class="form-control fm-control" />
-            </div>
+        <!-- ===================== Extra ===================== -->
+        <h6 class="fm-section-title">Extra</h6>
+
+        <!-- PREZZO CAMPO -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Prezzo campo</label>
+          <div class="input-group">
+            <span class="input-group-text" aria-hidden="true">€</span>
+            <input
+              type="text"
+              v-model.trim="form.prezzoCampo"
+              class="form-control fm-control"
+              inputmode="decimal"
+              placeholder="Es. 2,50 oppure 3.50"
+              aria-describedby="help-prezzo"
+              required
+            />
+          </div>
+          <div id="help-prezzo" class="form-text">
+            Inserisci il prezzo (puoi usare virgola o punto).
           </div>
         </div>
 
@@ -136,12 +267,16 @@
         <div class="mb-4">
           <label class="form-label fw-semibold">Altro</label>
           <textarea v-model="form.description" class="form-control fm-control" rows="3" placeholder="Info extra, specifiche luogo..."></textarea>
+          <div class="form-text">Le info selezionate sopra (tipologia, prezzo, casacche, indicazioni) verranno inserite automaticamente qui al salvataggio.</div>
         </div>
 
         <!-- CTA -->
         <div class="text-end">
           <button type="submit" class="btn btn-primary btn-lg px-4 rounded-pill fm-submit" aria-label="Crea partita">
-            <span class="me-1"><img src="/images/plus.svg" alt="Icona aggiungi partita" width="18" height="18" aria-hidden="true"/></span> Crea partita
+            <span class="me-1">
+              <img src="/images/plus.svg" alt="Icona aggiungi partita" width="18" height="18" aria-hidden="true"/>
+            </span>
+            Crea partita
           </button>
         </div>
       </div>
@@ -165,25 +300,38 @@
 </template>
 
 
+
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
 
-
+// ---------------------------
+// Stato form
+// ---------------------------
 const form = ref({
   sport: '',
   location: '',
   date_time: '',
   max_players: '',
-  description: ''
+  description: '',
+  // nuovi/aggiornati
+  tipologia: '',          // obbligatoria per Basket/Tennis (dove previsto)
+  prezzoCampo: '',        // obbligatoria sempre
+  // colori: per Calcio/Basket servono due casacche, per gli altri uno
+  coloreDivisa: '',       // usato per sport non a squadre
+  coloreDivisaA: '',      // squadra A (Calcio/Basket)
+  coloreDivisaB: '',      // squadra B (Calcio/Basket)
+  indicazioniCampo: ''    // indirizzo/indicazioni precise (obbligatorio)
 })
 
 const messaggio = ref('')
 const now = new Date()
 const pad = (n) => n.toString().padStart(2, '0')
 
- // Ruoli: includiamo tutte le possibili chiavi (calcio a 11 e calcio a 5)
+// ---------------------------
+// Ruoli calcio
+// ---------------------------
 const roles = ref({
   portiere: 0,
   difensore: 0,
@@ -192,7 +340,6 @@ const roles = ref({
   all_around: 0
 })
 
-// liste etichette (usate per visualizzare solo i ruoli pertinenti)
 const calcio11RoleList = [
   { key: 'portiere', label: 'Portiere' },
   { key: 'difensore', label: 'Difensore' },
@@ -204,19 +351,16 @@ const calcio5RoleList = [
   { key: 'all_around', label: 'All-Around' }
 ]
 
-// lista dinamica mostrata in template (a seconda dello sport)
 const displayedRoleList = computed(() => {
   if (form.value.sport === 'Calcio a 11') return calcio11RoleList
   if (form.value.sport === 'Calcio a 5') return calcio5RoleList
   return []
 })
 
-// somma dei ruoli selezionati
 const sumRoles = computed(() => {
   return Object.values(roles.value).reduce((s, v) => s + Number(v || 0), 0)
 })
 
-// Limiti massimi per ruolo in base allo sport
 const roleCaps = computed(() => {
   if (form.value.sport === 'Calcio a 11') {
     return { portiere: 4, difensore: 10, centrocampista: 8, attaccante: 8, all_around: 0 }
@@ -224,55 +368,48 @@ const roleCaps = computed(() => {
   if (form.value.sport === 'Calcio a 5') {
     return { portiere: 4, difensore: 0, centrocampista: 0, attaccante: 0, all_around: 10 }
   }
-  // default (nessun limite applicato perché non si mostrano i ruoli)
   return { portiere: 0, difensore: 0, centrocampista: 0, attaccante: 0, all_around: 0 }
 })
 
-// Utility: il ruolo è al cap?
 function isAtCap(roleKey) {
   const cap = roleCaps.value[roleKey] || 0
   if (!cap) return false
   return Number(roles.value[roleKey] || 0) >= cap
 }
 
-// maxSlots dinamico (TOTALE giocatori, escluso l'organizzatore -> si mette un posto in meno perchè 1 è quello dell'organizzatore)
+// ---------------------------
+// Slot e limiti
+// ---------------------------
+const TEAM_SPORTS = ['Calcio a 11', 'Calcio a 5', 'Basket']
+const isTeamSport = computed(() => TEAM_SPORTS.includes(form.value.sport))
+
 const maxSlots = computed(() => {
   switch (form.value.sport) {
-    // Calcio a 11 -> 11 giocatori x squadra = 22 + 
-    //               4 riserve x squadra = 8
-    //               Totale = 30 giocatori - 1 che è l'organizzatore = 29 giocatori
     case 'Calcio a 11':   return 30
-    // Calcio a 5 -> 5 giocatori x squadra = 10 + 
-    //               2 riserve x squadra = 4
-    //               Totale = 14 giocatori - 1 che è l'organizzatore = 13 giocatori
     case 'Calcio a 5':    return 14
-    // Basket ->     5 giocatori x squadra = 10 + 
-    //               1 riserve x squadra = 2
-    //               Totale = 12 giocatori - 1 che è l'organizzatore = 11 giocatori
-    case 'Basket':        return 11
-    // Pallavolo ->  6 giocatori x squadra = 12 + 
-    //               1 riserve x squadra = 2
-    //               Totale = 14 giocatori - 1 che è l'organizzatore = 13 giocatori
+    case 'Basket': {
+      // vincolo 1v1 → max 1 posto libero (organizzatore escluso)
+      const tip = (form.value.tipologia || '').toLowerCase()
+      if (tip.includes('1v1')) return 1
+      return 11
+    }
     case 'Pallavolo':     return 13
     case 'Padel':         return 3
     case 'Tennis':        return 3
     case 'Beach Volley':  return 3
-    case 'Racchettoni':  return 3
+    case 'Racchettoni':   return 3
     default:              return 0
   }
 })
 
-
-// freeMaxSlots: il numero di posti liberi che l'organizzatore può chiedere per ALTRI UTENTI
-// esclude l'organizzatore stesso (-1). Usato per la validazione e la UI.
+// calcio usa freeMaxSlots/roles, non il campo numerico
 const freeMaxSlots = computed(() => {
   if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
-    return Math.max(0, maxSlots.value - 1)
+    return Math.max(0, maxSlots.value - 1) // esclude l'organizzatore
   }
   return 0
 })
 
-// remainingSlots: quanti posti liberi restano per i ruoli (calcio). È basato su freeMaxSlots.
 const remainingSlots = computed(() => {
   if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
     return Math.max(0, freeMaxSlots.value - sumRoles.value)
@@ -280,7 +417,6 @@ const remainingSlots = computed(() => {
   return 0
 })
 
-// incrementa / decrementa (rispettando i limiti)
 function incrementRole(roleKey) {
   if (freeMaxSlots.value === 0) return
   if (remainingSlots.value <= 0) return
@@ -288,46 +424,140 @@ function incrementRole(roleKey) {
   if (Number(roles.value[roleKey] || 0) >= cap) return
   roles.value[roleKey] = Number(roles.value[roleKey] || 0) + 1
 }
-
 function decrementRole(roleKey) {
   roles.value[roleKey] = Math.max(0, Number(roles.value[roleKey] || 0) - 1)
 }
 
-
-// RESET: azzera TUTTI i ruoli ogni volta che cambio sport (richiesta)
-watch(() => form.value.sport, (nv, ov) => {
-  // Azzeriamo sempre tutti i contatori dei ruoli quando cambia lo sport
-  Object.keys(roles.value).forEach(k => roles.value[k] = 0)
+// reset quando cambia sport
+watch(() => form.value.sport, () => {
+  Object.keys(roles.value).forEach(k => (roles.value[k] = 0))
+  form.value.tipologia = ''
+  form.value.coloreDivisa = ''
+  form.value.coloreDivisaA = ''
+  form.value.coloreDivisaB = ''
 })
 
+// clamp per Basket 1v1
+watch(
+  () => [form.value.sport, form.value.tipologia],
+  () => {
+    if (form.value.sport === 'Basket' && (form.value.tipologia || '').toLowerCase().includes('1v1')) {
+      form.value.max_players = 1
+    }
+  },
+  { immediate: true }
+)
+
+// ---------------------------
+// Helper nuovi campi
+// ---------------------------
+function normalizeAndFormatEuro(value) {
+  if (!value) return null
+  const n = Number(String(value).replace(',', '.'))
+  if (Number.isNaN(n)) return null
+  return n.toFixed(2).replace('.', ',') // formato "X,YY"
+}
+
+function buildExtraDescription() {
+  const pezzi = []
+
+  // Tipologia (se applicabile)
+  if (form.value.sport === 'Basket' || form.value.sport === 'Tennis') {
+    pezzi.push(`Tipologia: ${form.value.tipologia}`)
+  }
+
+  // Prezzo
+  const prezzoFmt = normalizeAndFormatEuro(form.value.prezzoCampo)
+  pezzi.push(`Prezzo campo: € ${prezzoFmt}`)
+
+  // Casacche / Colori
+  if (isTeamSport.value) {
+    pezzi.push(`Casacche: ${form.value.coloreDivisaA} vs ${form.value.coloreDivisaB}`)
+  } else {
+    pezzi.push(`Colore divisa: ${form.value.coloreDivisa}`)
+  }
+
+  // Indicazioni precise del campo
+  pezzi.push(`Indicazioni campo: ${form.value.indicazioniCampo}`)
+
+  return pezzi.join('\n')
+}
+
+// ---------------------------
+// Submit
+// ---------------------------
 const creaPartita = async () => {
-  // --- VALIDAZIONE UNIFICATA ---
+  // Validazioni base
   if (!form.value.sport) {
-    showToast('Devi selezionare uno sport.', 'warning');
-    return;
+    showToast('Devi selezionare uno sport.', 'warning')
+    return
   }
-  const isCalcio = form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5';
-  if (!isCalcio && (!form.value.max_players || form.value.max_players <= 0)) {
-    showToast('Specifica il numero di giocatori.', 'warning');
-    return;
+
+  const isCalcio = form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5'
+
+  // Tipologia obbligatoria per Basket/Tennis
+  if ((form.value.sport === 'Basket' || form.value.sport === 'Tennis') && !form.value.tipologia) {
+    showToast('Seleziona la tipologia.', 'warning')
+    return
   }
-  if (isCalcio && sumRoles.value === 0) {
-    showToast('Seleziona almeno un ruolo per il calcio.', 'warning');
-    return;
+
+  // Prezzo campo obbligatorio + formato
+  const prezzoFmt = normalizeAndFormatEuro(form.value.prezzoCampo)
+  if (!prezzoFmt) {
+    showToast('Inserisci un prezzo valido (es. 2,50 o 2.50).', 'warning')
+    return
   }
+
+  // Colori obbligatori
+  if (isTeamSport.value) {
+    if (!form.value.coloreDivisaA || !form.value.coloreDivisaB) {
+      showToast('Seleziona i colori di entrambe le casacche.', 'warning')
+      return
+    }
+    if (form.value.coloreDivisaA === form.value.coloreDivisaB) {
+      showToast('Le due casacche devono avere colori diversi.', 'warning')
+      return
+    }
+  } else {
+    if (!form.value.coloreDivisa) {
+      showToast('Seleziona il colore della divisa/casacca.', 'warning')
+      return
+    }
+  }
+
+  // Indicazioni campo obbligatorie
+  if (!form.value.indicazioniCampo || !form.value.indicazioniCampo.trim()) {
+    showToast('Inserisci l’indirizzo o indicazioni precise del campo.', 'warning')
+    return
+  }
+
+  // max_players/ruoli
+  if (!isCalcio) {
+    if (!form.value.max_players || form.value.max_players <= 0) {
+      showToast('Specifica il numero di giocatori.', 'warning')
+      return
+    }
+    // Basket 1v1 → deve essere 1
+    if (form.value.sport === 'Basket' && (form.value.tipologia || '').toLowerCase().includes('1v1') && Number(form.value.max_players) !== 1) {
+      showToast('Per 1v1 il numero deve essere 1.', 'warning')
+      form.value.max_players = 1
+      return
+    }
+  } else {
+    if (sumRoles.value === 0) {
+      showToast('Seleziona almeno un ruolo per il calcio.', 'warning')
+      return
+    }
+  }
+
   if (!form.value.location.trim()) {
-    showToast('Inserisci un luogo per la partita.', 'warning');
-    return;
+    showToast('Inserisci un luogo per la partita.', 'warning')
+    return
   }
   if (!form.value.date_time) {
-    showToast('Specifica data e ora della partita.', 'warning');
-    return;
+    showToast('Specifica data e ora della partita.', 'warning')
+    return
   }
-  if (!form.value.description.trim()) {
-    showToast('Inserisci qualche informazione extra.', 'warning');
-    return;
-  }
-  // --- FINE VALIDAZIONE ---
 
   try {
     const organizer_id = localStorage.getItem('userId')
@@ -336,37 +566,12 @@ const creaPartita = async () => {
       return
     }
 
-    // Validazione per calcio: la somma dei ruoli (posti per altri utenti) non può superare freeMaxSlots
-    if ((form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') && sumRoles.value > freeMaxSlots.value) {
+    // vincoli calcio
+    if (isCalcio && sumRoles.value > freeMaxSlots.value) {
       showToast(`La somma dei ruoli non può superare ${freeMaxSlots.value} (escludendo il creatore).`, 'warning', 6000)
       return
     }
-
-    let nuovaPartita = { ...form.value, organizer_id }
-
-    if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
-      const rolesNeededObj = {}
-      Object.keys(roles.value).forEach(k => {
-        const v = Number(roles.value[k] || 0)
-        if (v > 0) rolesNeededObj[k] = v
-      })
-      nuovaPartita = { ...nuovaPartita, max_players: null, roles_needed: rolesNeededObj }
-    } else {
-      // backend si aspetta il numero TOTALE di posti (incluso l'organizzatore).
-      // L'input dell'UI invece chiede "posti liberi per altri", quindi inviamo +1.
-      const uiFree = Number(form.value.max_players) || 0
-      nuovaPartita.max_players = uiFree > 0 ? (uiFree + 1) : null
-    }
-
-
-    // Check somma totale come già fai
-    if ((form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') && sumRoles.value > freeMaxSlots.value) {
-      showToast(`La somma dei ruoli non può superare ${freeMaxSlots.value} (escludendo il creatore).`, 'warning', 6000)
-      return
-    }
-
-    // Check per-ruolo (difensivo; il + è già bloccato in UI)
-    if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
+    if (isCalcio) {
       for (const [k, v] of Object.entries(roles.value)) {
         const cap = roleCaps.value[k] || Infinity
         if (v > 0 && v > cap) {
@@ -376,13 +581,52 @@ const creaPartita = async () => {
       }
     }
 
+    // Componi descrizione finale
+    const extraBlock = buildExtraDescription()
+    const userText = form.value.description?.trim()
+    const finalDescription = extraBlock + (userText ? `\n\n${userText}` : '')
+
+    // payload
+    let nuovaPartita = {
+      sport: form.value.sport,
+      location: form.value.location,
+      date_time: form.value.date_time,
+      description: finalDescription,
+      organizer_id
+    }
+
+    if (isCalcio) {
+      const rolesNeededObj = {}
+      Object.keys(roles.value).forEach(k => {
+        const v = Number(roles.value[k] || 0)
+        if (v > 0) rolesNeededObj[k] = v
+      })
+      nuovaPartita.max_players = null
+      nuovaPartita.roles_needed = rolesNeededObj
+    } else {
+      const uiFree = Number(form.value.max_players) || 0
+      nuovaPartita.max_players = uiFree > 0 ? uiFree + 1 : null // include l'organizzatore
+    }
+
     await axios.post('http://localhost:3000/api/partite', nuovaPartita)
 
     showToast('Partita creata con successo!', 'success', 5000)
 
-    // reset form
-    form.value = { sport: '', location: '', date_time: '', max_players: '', description: '' }
-    Object.keys(roles.value).forEach(k => roles.value[k] = 0)
+    // reset form e ruoli
+    form.value = {
+      sport: '',
+      location: '',
+      date_time: '',
+      max_players: '',
+      description: '',
+      tipologia: '',
+      prezzoCampo: '',
+      coloreDivisa: '',
+      coloreDivisaA: '',
+      coloreDivisaB: '',
+      indicazioniCampo: ''
+    }
+    Object.keys(roles.value).forEach(k => (roles.value[k] = 0))
   } catch (err) {
     console.error('Errore nella creazione della partita:', err)
     const msg = err.response?.data?.error || 'Errore durante la creazione della partita.'
@@ -390,6 +634,9 @@ const creaPartita = async () => {
   }
 }
 
+// ---------------------------
+// Min datetime per il picker
+// ---------------------------
 const minDateTime = computed(() => {
   const year = now.getFullYear()
   const month = pad(now.getMonth() + 1)
@@ -399,16 +646,24 @@ const minDateTime = computed(() => {
   return `${year}-${month}-${day}T${hours}:${minutes}`
 })
 
+// ---------------------------
+// Toast
+// ---------------------------
 const toastEl = ref(null)
 const toastMessage = ref('')
 const toastVariant = ref('success')
 
-const toastIcon = computed(() => ({ success:'✅', danger:'🛑', warning:'⚠️' }[toastVariant.value] || 'ℹ️'))
+const toastIcon = computed(() => ({
+  success: '✅',
+  danger: '🛑',
+  warning: '⚠️'
+}[toastVariant.value] || 'ℹ️'))
+
 const toastVariantClass = computed(() => ({
   success: 'bg-success text-white',
-  danger:  'bg-danger text-white',
+  danger: 'bg-danger text-white',
   warning: 'bg-warning text-dark'
-}[toastVariant.value] || 'bg-info text-white')) 
+}[toastVariant.value] || 'bg-info text-white'))
 
 function showToast(message, variant = 'success', delayMs = 5000) {
   toastMessage.value = message
@@ -417,7 +672,9 @@ function showToast(message, variant = 'success', delayMs = 5000) {
   t.show()
 }
 
-
+// ---------------------------
+// Google Places Autocomplete
+// ---------------------------
 onMounted(() => {
   const input = document.getElementById('autocomplete')
 
