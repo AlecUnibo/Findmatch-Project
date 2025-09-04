@@ -251,9 +251,9 @@
     <div class="modal fade fm-modal" id="modalModifica" tabindex="-1" aria-labelledby="modalModificaLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-info text-white">
-            <h5 class="modal-title" id="modalModificaLabel">Modifica partita</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          <div class="modal-header text-dark">
+              <h5 class="modal-title" id="modalModificaLabel">Modifica partita</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
           </div>
 
           <form @submit.prevent="salvaModifiche">

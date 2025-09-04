@@ -1155,3 +1155,14 @@ body.modal-open .card {
 .home-search-card .fm-field .form-control::placeholder {
   color: #6c757d;
 }
+
+/* Selettore specifico per il bottone 'close' nell'header del modale 'Modifica Partita' */
+#modalModifica .modal-header .btn-close {
+  filter: invert(0) grayscale(100%) brightness(0%);
+  opacity: 0.7;
+}
+
+/* Rende la 'X' completamente opaca al passaggio del mouse */
+#modalModifica .modal-header .btn-close:hover {
+  opacity: 1;
+}

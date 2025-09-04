@@ -13,7 +13,7 @@
         <!-- Profilo -->
         <section class="setting-section mb-4">
           <div class="section-title mb-3">
-            <h5 class="mb-0">Profilo</h5>
+            <h3 class="mb-0">Profilo</h3>
           </div>
 
           <div class="row g-3">
@@ -37,7 +37,7 @@
         <!-- Cambio password -->
         <section class="setting-section mb-4">
           <div class="section-title mb-3">
-            <h5 class="mb-0">Cambia password</h5>
+            <h3 class="mb-0">Cambia password</h3>
           </div>
 
           <form @submit.prevent="cambiaPassword" class="row g-3" aria-label="Cambia password">
@@ -78,7 +78,7 @@
         <!-- Notifiche -->
         <section class="setting-section mb-4">
           <div class="section-title mb-3">
-            <h5 class="mb-0">Notifiche</h5>
+            <h3 class="mb-0">Notifiche</h3>
           </div>
 
           <div class="card border-0 shadow-sm rounded-3 p-3">
@@ -100,7 +100,7 @@
         <section class="setting-section">
           <div class="section-title mb-3">
             <span class="section-icon" aria-hidden="true">⚠️</span>
-            <h5 class="mb-0 text-danger">Elimina account</h5>
+            <h3 class="mb-0 text-danger">Elimina account</h3>
           </div>
 
           <div class="alert alert-danger-soft d-flex align-items-start gap-2 mb-3" role="alert">

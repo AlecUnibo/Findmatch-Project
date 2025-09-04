@@ -13,7 +13,7 @@
         </div>
         <div>
           <!-- Nome utente + badge + barra -->
-          <h3 class="mb-0 d-flex align-items-center gap-3">
+          <h2 class="mb-0 d-flex align-items-center gap-3">
             {{ user.username }}
 
             <div
@@ -29,10 +29,11 @@
                   :aria-valuenow="leagueProgress.percent"
                   aria-valuemin="0"
                   aria-valuemax="100"
+                  :aria-label="`Progresso per la lega successiva: ${Math.round(leagueProgress.percent)}%`"
                 ></div>
               </div>
             </div>
-          </h3>
+          </h2>
 
           <button
             class="btn text-white border-0 bg-details btn-pill mt-2"
@@ -81,7 +82,7 @@
 
       <!-- Biografia -->
       <div class="mb-4">
-        <h5>📝 Biografia</h5>
+      <h3>📝 Biografia</h3>
         <p v-if="user.bio && user.bio.trim().length" class="mb-0 bio-text">
           {{ user.bio }}
         </p>

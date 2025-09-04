@@ -4,7 +4,7 @@
       <img src="/images/logo.png" alt="Logo di FindMatch" class="navbar-logo" />
     </router-link>
 
-    <ul class="navbar-nav ms-auto d-flex flex-row gap-3" role="menubar" aria-label="Menu principale">
+<ul class="navbar-nav ms-auto d-flex flex-row gap-3" aria-label="Menu principale">
       <li class="nav-item" role="none">
         <router-link
           to="/partite"

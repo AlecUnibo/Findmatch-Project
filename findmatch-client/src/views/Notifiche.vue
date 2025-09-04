@@ -1,5 +1,6 @@
 <template>
   <div class="container mt-5 component-notifiche">
+        <h1 class="visually-hidden">Centro Notifiche</h1>
     <div class="card p-4 shadow-sm mb-5">
 
       <!-- Header -->
