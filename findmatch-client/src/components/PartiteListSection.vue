@@ -1,6 +1,6 @@
 <template>
   <div class="mb-5 component-partite-list">
-    <h4 class="mb-3">{{ titolo }}</h4>
+<h3 class="mb-3">{{ titolo }}</h3>
 
     <div v-if="partite && partite.length">
       <PartitaCard

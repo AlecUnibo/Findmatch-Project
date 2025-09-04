@@ -71,51 +71,54 @@
         <!-- Join buttons (solo se showJoin === true, es. 'Disponibili') -->
         <template v-if="showJoin">
           <div v-if="isCalcio(partita)" class="dropdown join-dropdown">
-              <button
-                class="btn btn-sm btn-join dropdown-toggle"
-                type="button"
-                data-bs-toggle="dropdown"
-                data-bs-display="static"
-                data-bs-auto-close="outside"
-                aria-expanded="false"
-                aria-label="Scegli ruolo e unisciti"
-              >
-                Unisciti
-              </button>
+    <button
+      class="btn btn-sm btn-join dropdown-toggle"
+      type="button"
+      data-bs-toggle="dropdown"
+      data-bs-display="static"
+      aria-expanded="false"
+      aria-haspopup="true"
+      :aria-controls="`join-menu-${partita.id}`"
+      aria-label="Scegli ruolo e unisciti"
+    >
+      Unisciti
+    </button>
 
-              <ul class="dropdown-menu dropdown-menu-end join-menu">
-                <li>
-                  <button
-                    class="dropdown-item"
-                    @click="$emit('unisciti-calcio', { partita, roleKey: 'random' })"
-                    type="button"
-                    aria-label="Unisciti casualmente"
-                  >
-                    Unisciti (casuale)
-                  </button>
-                </li>
+    <ul class="dropdown-menu dropdown-menu-end join-menu" :id="`join-menu-${partita.id}`" role="menu">
+      <li>
+        <button
+          class="dropdown-item"
+          @click="$emit('unisciti-calcio', { partita, roleKey: 'random' })"
+          type="button"
+          role="menuitem"
+          aria-label="Unisciti casualmente"
+        >
+          Unisciti (casuale)
+        </button>
+      </li>
 
-                <li><hr class="dropdown-divider" /></li>
+      <li role="separator" class="dropdown-divider"></li>
 
-                <li v-for="(r, idx) in roleEntries(partita)" :key="`${partita.id}-${r.key}-${idx}`">
-                  <button
-                    class="dropdown-item"
-                    :disabled="r.count <= 0"
-                    @click="$emit('unisciti-calcio', { partita, roleKey: r.key })"
-                    type="button"
-                    :aria-disabled="r.count <= 0 ? 'true' : 'false'"
-                    :aria-label="`Unisciti come ${ruoloLabel(r.key)} (${r.count} posti disponibili)`"
-                  >
-                    <span class="item-label">{{ ruoloLabel(r.key) }}</span>
-                    <span class="badge role-badge" aria-hidden="true">{{ r.count }}</span>
-                  </button>
-                </li>
+      <li v-for="(r, idx) in roleEntries(partita)" :key="`${partita.id}-${r.key}-${idx}`">
+        <button
+          class="dropdown-item"
+          :disabled="r.count <= 0"
+          @click="$emit('unisciti-calcio', { partita, roleKey: r.key })"
+          type="button"
+          role="menuitem"
+          :aria-disabled="r.count <= 0 ? 'true' : 'false'"
+          :aria-label="`Unisciti come ${ruoloLabel(r.key)} (${r.count} posti disponibili)`"
+        >
+          <span class="item-label">{{ ruoloLabel(r.key) }}</span>
+          <span class="badge role-badge" aria-hidden="true">{{ r.count }}</span>
+        </button>
+      </li>
 
-                <li v-if="roleEntries(partita).length === 0">
-                  <span class="dropdown-item disabled" aria-hidden="true">Nessun ruolo disponibile</span>
-                </li>
-              </ul>
-            </div>
+      <li v-if="roleEntries(partita).length === 0">
+        <span class="dropdown-item disabled" aria-hidden="true">Nessun ruolo disponibile</span>
+      </li>
+    </ul>
+  </div>
 
           <button
             v-else

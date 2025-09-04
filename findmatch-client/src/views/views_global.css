@@ -1128,3 +1128,30 @@ body.modal-open .card {
   perspective: none !important;
   isolation: auto !important;
 }
+
+/* ========================================================================== */
+/* FIX ACCESSIBILITÀ WCAG 2.1 AA                         */
+/* ========================================================================== */
+
+/* [Profilo.vue] - Badge Leghe: grassetto per aumentare leggibilità e superare test 3:1 */
+.component-profilo .badge-flames,
+.component-profilo .badge-flames-strong,
+.component-profilo .badge-flames-ultimate {
+  font-weight: 700;
+}
+
+/* [PartiteCard.vue] - Bottone "Modifica": testo scuro su sfondo giallo */
+.component-partita-card .btn-edit {
+  color: #212529 !important;
+}
+
+/* [Navbar.vue] - Modale profilo utente: testo .text-muted più chiaro su sfondo blu */
+.component-navbar .user-modal-card .text-muted,
+.user-modal-card .text-muted {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* [HomeSearchBar.vue] - Placeholder più scuro per contrasto */
+.home-search-card .fm-field .form-control::placeholder {
+  color: #6c757d;
+}

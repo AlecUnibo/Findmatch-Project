@@ -1550,3 +1550,23 @@
   white-space: nowrap !important;
   border: 0 !important;
 }
+
+/* ========================================================================== */
+/* FIX ACCESSIBILITÀ WCAG 2.1 AA                        */
+/* ========================================================================== */
+
+/* [PartiteCard.vue] - Bottone "Modifica": testo scuro su sfondo giallo */
+.component-partita-card .btn-edit {
+  color: #212529 !important;
+}
+
+/* [Navbar.vue] - Modale profilo utente: testo .text-muted più chiaro su sfondo blu */
+.component-navbar .user-modal-card .text-muted,
+.user-modal-card .text-muted {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* [HomeSearchBar.vue] - Placeholder più scuro per contrasto */
+.home-search-card .fm-field .form-control::placeholder {
+  color: #6c757d;
+}
