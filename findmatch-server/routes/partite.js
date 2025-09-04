@@ -357,7 +357,7 @@ router.put('/:id', async (req, res) => {
 // ---------------------------------------------------------------------------
 // DELETE /api/partite/:id  - elimina e notifica i partecipanti
 // ---------------------------------------------------------------------------
-// DELETE /api/partite/:id  - elimina e notifica i partecipanti
+
 router.delete('/:id', async (req, res) => {
   const { id } = req.params
 
@@ -463,7 +463,7 @@ router.post('/:id/invite', async (req, res) => {
     console.error('Errore durante l\'invio dell\'invito:', err);
     res.status(500).json({ error: 'Errore del server.' });
   }
-});
+})
 
 // ---------------------------------------------------------------------------
 // GET /api/partite/:id  - dettaglio singolo evento
@@ -488,6 +488,20 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error(`Errore nel recupero della partita ${id}:`, error);
     res.status(500).json({ error: 'Errore nel recupero della partita' });
+  }
+});
+
+router.get('/created/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params
+    const result = await pool.query(
+      'SELECT COUNT(*) FROM partite WHERE creatore_id = $1',
+      [userId]
+    )
+    res.json({ count: parseInt(result.rows[0].count, 10) })
+  } catch (err) {
+    console.error('Errore conteggio partite create:', err)
+    res.status(500).json({ error: 'Errore server' })
   }
 });
 

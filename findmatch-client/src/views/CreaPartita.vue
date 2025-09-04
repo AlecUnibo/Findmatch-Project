@@ -235,17 +235,29 @@ function isAtCap(roleKey) {
   return Number(roles.value[roleKey] || 0) >= cap
 }
 
-// maxSlots dinamico (TOTALE giocatori, incluso l'organizzatore)
+// maxSlots dinamico (TOTALE giocatori, escluso l'organizzatore -> si mette un posto in meno perchè 1 è quello dell'organizzatore)
 const maxSlots = computed(() => {
   switch (form.value.sport) {
-    case 'Calcio a 11':   return 31
-    case 'Calcio a 5':    return 15
-    case 'Basket':        return 12
-    case 'Pallavolo':     return 14
-    case 'Padel':         return 4
-    case 'Tennis':        return 4
-    case 'Beach Volley':  return 4
-    case 'Beach Tennis':  return 4
+    // Calcio a 11 -> 11 giocatori x squadra = 22 + 
+    //               4 riserve x squadra = 8
+    //               Totale = 30 giocatori - 1 che è l'organizzatore = 29 giocatori
+    case 'Calcio a 11':   return 30
+    // Calcio a 5 -> 5 giocatori x squadra = 10 + 
+    //               2 riserve x squadra = 4
+    //               Totale = 14 giocatori - 1 che è l'organizzatore = 13 giocatori
+    case 'Calcio a 5':    return 14
+    // Basket ->     5 giocatori x squadra = 10 + 
+    //               1 riserve x squadra = 2
+    //               Totale = 12 giocatori - 1 che è l'organizzatore = 11 giocatori
+    case 'Basket':        return 11
+    // Pallavolo ->  6 giocatori x squadra = 12 + 
+    //               1 riserve x squadra = 2
+    //               Totale = 14 giocatori - 1 che è l'organizzatore = 13 giocatori
+    case 'Pallavolo':     return 13
+    case 'Padel':         return 3
+    case 'Tennis':        return 3
+    case 'Beach Volley':  return 3
+    case 'Racchettoni':  return 3
     default:              return 0
   }
 })

@@ -285,7 +285,7 @@
               <small class="text-muted">Dovrai effettuare di nuovo l’accesso per continuare.</small>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Annulla</button>
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annulla</button>
               <button type="button" class="btn btn-danger" @click="confirmLogout" data-bs-dismiss="modal">
                 <span v-if="logoutBusy" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 Sì, esci

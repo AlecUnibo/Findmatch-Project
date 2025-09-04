@@ -12,7 +12,28 @@
           />
         </div>
         <div>
-          <h3 class="mb-0">{{ user.username }}</h3>
+          <!-- Nome utente + badge + barra -->
+          <h3 class="mb-0 d-flex align-items-center gap-3">
+            {{ user.username }}
+
+            <div
+              v-if="userLeague"
+              class="d-flex align-items-center gap-2 league-badge-container"
+            >
+              <span class="badge" :class="leagueClass">{{ userLeague }}</span>
+              <div class="progress league-progress">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  :style="{ width: leagueProgress.percent + '%' }"
+                  :aria-valuenow="leagueProgress.percent"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+            </div>
+          </h3>
+
           <button
             class="btn text-white border-0 bg-details btn-pill mt-2"
             @click="apriModaleModifica"
@@ -24,7 +45,6 @@
       </div>
 
       <hr />
-
       <!-- Partite - Follower - Seguiti -->
       <div class="row text-center mb-3 g-3">
         <div class="col-12 col-md-4">
@@ -240,8 +260,7 @@
 </template>
 
 <script setup>
-/* (script unchanged) */
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import axios from 'axios'
 import * as bootstrap from 'bootstrap'
 import PartiteSection from '@/components/PartiteSection.vue'
@@ -255,8 +274,9 @@ const user = ref({
 })
 
 const followersCount = ref(0)
-const followingCount = ref(0)      // <-- nuovo contatore "Seguiti"
-const matchesPlayed = ref(0)
+const followingCount = ref(0)     
+const matchesPlayed = ref(0)       // partite giocate
+const matchesCreated = ref(0)      // partite create
 const playedMatches = ref([])
 
 const modalBio = ref('')
@@ -278,25 +298,65 @@ const followersList = ref([])
 const loadingFollowers = ref(false)
 const followersError = ref('')
 
+// Computed per badge LEGA
+const leagueThresholds = [0, 5, 10, 15, 20, 9999]
+
+const userLeague = computed(() => {
+  const total = Number(matchesPlayed.value) + Number(matchesCreated.value)
+  if (total >= 1 && total <= 5) return 'Lega 5'
+  if (total >= 6 && total <= 10) return 'Lega 4'
+  if (total >= 11 && total <= 15) return 'Lega 3'
+  if (total >= 16 && total <= 20) return 'Lega 2'
+  if (total >= 21) return 'Lega 1'
+  return null
+})
+
+const leagueProgress = computed(() => {
+  const total = Number(matchesPlayed.value) + Number(matchesCreated.value)
+  for (let i = 0; i < leagueThresholds.length - 1; i++) {
+    if (total > leagueThresholds[i] && total <= leagueThresholds[i + 1]) {
+      const min = leagueThresholds[i] + 1
+      const max = leagueThresholds[i + 1]
+      const progress = ((total - min) / (max - min)) * 100
+      return { level: i + 1, percent: progress }
+    }
+  }
+  return { level: 0, percent: 0 }
+})
+
+// Classe dinamica del badge
+const leagueClass = computed(() => {
+  if (!userLeague.value) return 'badge-normal'
+  if (userLeague.value === 'Lega 3') return 'badge-flames'
+  if (userLeague.value === 'Lega 2') return 'badge-flames-strong'
+  if (userLeague.value === 'Lega 1') return 'badge-flames-ultimate'
+  return 'badge-normal'
+})
+
+
 onMounted(async () => {
   try {
     const { data } = await axios.get(`http://localhost:3000/api/users/${userId}`)
     user.value.username = data.username || ''
     user.value.bio = data.bio || ''
-    followersCount.value = data.followers_count ?? 0
-    matchesPlayed.value = data.matches_played ?? 0
+    followersCount.value = Number(data.followers_count) || 0
 
-    // Se il backend restituisce già following_count:
-    if (typeof data.following_count !== 'undefined') {
-      followingCount.value = data.following_count
+    // matches_played potrebbe arrivare come numero o come array
+    if (Array.isArray(data.matches_played)) {
+      matchesPlayed.value = data.matches_played.length
     } else {
-      // In alternativa, proviamo a calcolarlo chiedendo la lista (se endpoint presente):
+      matchesPlayed.value = Number(data.matches_played) || 0
+    }
+
+    // Seguiti
+    if (typeof data.following_count !== 'undefined') {
+      followingCount.value = Number(data.following_count) || 0
+    } else {
       try {
         const res = await axios.get(`http://localhost:3000/api/users/${userId}/following`)
         followingList.value = res.data || []
         followingCount.value = followingList.value.length
       } catch (e) {
-        // Se l'endpoint non esiste ancora, lascia 0 senza errori visivi
         followingList.value = []
         followingCount.value = 0
       }
@@ -304,7 +364,12 @@ onMounted(async () => {
 
     // Storico partite
     const storicoRes = await axios.get(`http://localhost:3000/api/partecipazioni/storico/${userId}`)
-    playedMatches.value = storicoRes.data
+    playedMatches.value = Array.isArray(storicoRes.data) ? storicoRes.data : []
+
+    // Partite create
+    const createRes = await axios.get(`http://localhost:3000/api/partite/created/${userId}`)
+    matchesCreated.value = parseInt(createRes.data.count ?? 0, 10)
+
   } catch (err) {
     console.error('Errore nel recupero utente o partite:', err)
   }
@@ -328,7 +393,7 @@ async function salvaModifiche() {
   }
 }
 
-// Apri modale "Seguiti" e carica lista
+// Apri modale "Seguiti"
 async function apriModaleSeguiti() {
   followingError.value = ''
   loadingFollowing.value = true
@@ -351,6 +416,7 @@ async function apriModaleSeguiti() {
   }
 }
 
+// Apri modale "Follower"
 async function apriModaleFollower() {
   followersError.value = ''
   loadingFollowers.value = true
@@ -372,6 +438,8 @@ async function apriModaleFollower() {
   }
 }
 </script>
+
+
 
 <style scoped>
 img.rounded-circle {

@@ -3,18 +3,17 @@
 /* ======================================================= WelcomePage.vue ======================================================= */
 /* ============================================================================================================================ */
 
+/* ===== HERO (landing) ===== */
 .fm-landing-hero {
   position: relative;
   background: linear-gradient(135deg, rgba(68, 128, 187, 0.8), #567cc9);
   color: #fff;
   overflow: hidden;
 }
-
 .fm-landing-hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  /* leggero pattern di luce */
   background:
     radial-gradient(800px 400px at 10% 20%, rgba(255,255,255,0.15), transparent 60%),
     radial-gradient(600px 300px at 90% 0%, rgba(255,255,255,0.12), transparent 60%),
@@ -22,20 +21,20 @@
   pointer-events: none;
 }
 
+/* ===== LOGO (no crop) ===== */
 .fm-landing-logo {
-  height: 64px;         /* controlla l'altezza, la larghezza si adatta */
-  width: auto;          /* evita distorsioni */
-  object-fit: contain;  /* mai ritagliato */
+  height: 64px;
+  width: auto;
+  object-fit: contain;
   display: inline-block;
-  border-radius: 0;     /* niente angoli arrotondati che “mangiano” il logo */
+  border-radius: 0;
   filter: drop-shadow(0 4px 14px rgba(0,0,0,0.18));
 }
-
 @media (max-width: 576px) {
-  .fm-landing-logo { height: 52px; }
+  .fm-landing-logo { height: 52px; } /* unificato: niente width fissa */
 }
 
-/* Utility accessibilità (nasconde visivamente ma resta leggibile dallo screen reader) */
+/* ===== Utility accessibilità ===== */
 .visually-hidden {
   position: absolute !important;
   width: 1px; height: 1px;
@@ -44,12 +43,12 @@
   white-space: nowrap; border: 0;
 }
 
+/* ===== CTA buttons ===== */
 .fm-cta-group {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
-
 .fm-cta-group .btn {
   padding-inline: 1.25rem;
   padding-block: 0.7rem;
@@ -57,17 +56,22 @@
   transition: transform 120ms ease, box-shadow 120ms ease;
   box-shadow: 0 6px 14px rgba(0,0,0,0.30);
 }
-
 .fm-cta-group .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.16);
 }
-
-.fm-feature-card {
-  border: none;
+@media (max-width: 576px) {
+  .fm-cta-group .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-.fm-feature-card .card-body {
+/* ===== Feature cards (solo in landing) ===== */
+.fm-landing .fm-feature-card {  /* scope per evitare effetti collaterali */
+  border: none;
+}
+.fm-landing .fm-feature-card .card-body {
   padding: 1.25rem 1.25rem 1.35rem;
   box-shadow: 0 6px 18px rgba(0,0,0,0.30);
   border-radius: 1rem;
@@ -75,18 +79,7 @@
   color: #495057;
 }
 
-@media (max-width: 576px) {
-  .fm-landing-logo {
-    width: 48px;
-    height: 48px;
-  }
-  .fm-cta-group .btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-/* ----- Paragrafo descrizione sotto le card (Landing) ----- */
+/* ===== Paragrafo descrizione sotto le card ===== */
 .fm-landing-desc {
   --fm-primary: #5a67d8;
   --fm-primary-2: #7f9cf5;
@@ -95,14 +88,13 @@
   margin: 0 auto;
   padding: 1.25rem 1.5rem;
   border-radius: 1rem;
-  background: #f8f9fa;               /* box chiaro, leggibile */
+  background: #f8f9fa;
   color: #495057;
   line-height: 1.75;
   font-size: 1.05rem;
   box-shadow: 0 6px 18px rgba(0,0,0,0.30);
   position: relative;
 }
-
 .fm-landing-desc::before {
   content: "";
   display: block;
@@ -112,13 +104,25 @@
   background: linear-gradient(90deg, var(--fm-primary), var(--fm-primary-2));
   border-radius: 999px;
 }
-
 @media (max-width: 576px) {
   .fm-landing-desc {
     padding: 1rem 1rem;
     font-size: 1rem;
     line-height: 1.7;
   }
+}
+
+/* Accent per la card "Sali di lega" */
+.fm-landing .fm-feature-card--rank .card-body {
+  /* bordo gradiente di evidenza */
+  background:
+    linear-gradient(#f8f9fa, #f8f9fa) padding-box,
+    linear-gradient(90deg, #ffd43b, #ff922b) border-box;
+  border: 2px solid transparent;
+}
+
+.fm-landing .fm-feature-card--rank .card-title {
+  color: #b4690e;
 }
 
 
@@ -938,6 +942,86 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
+/* -------------------------------
+   BADGE LEGA + PROGRESS BAR
+--------------------------------*/
+
+/* Contenitore badge + barra */
+.league-badge-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Badge base */
+.component-profilo .badge {
+  font-size: 1rem;
+  padding: 0.50em 0.85em;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  color: #fff;
+  background: linear-gradient(135deg, #ff9800, #ff5722);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Badge normale (Lega 1-2) */
+.badge-normal {
+  background: linear-gradient(135deg, #607d8b, #455a64);
+}
+
+/* Badge fiamme Lega 3 */
+.badge-flames {
+  background: linear-gradient(135deg, #ff9800, #ff5722);
+  animation: flames 1s infinite alternate;
+}
+
+/* Badge fiamme più intense Lega 4 */
+.badge-flames-strong {
+  background: linear-gradient(135deg, #ff5722, #e91e63);
+  animation: flamesStrong 0.8s infinite alternate;
+}
+
+/* Badge fiamme estreme Lega 5 */
+.badge-flames-ultimate {
+  background: linear-gradient(135deg, #ff1744, #ff9100);
+  animation: flamesUltimate 0.6s infinite alternate;
+  text-shadow: 0 0 6px #fff, 0 0 12px #ff5722;
+}
+
+/* Animazioni "fiammeggianti" */
+@keyframes flames {
+  from { box-shadow: 0 0 6px #ff9800; }
+  to   { box-shadow: 0 0 14px #ff5722; }
+}
+
+@keyframes flamesStrong {
+  from { box-shadow: 0 0 10px #ff5722; }
+  to   { box-shadow: 0 0 20px #e91e63; }
+}
+
+@keyframes flamesUltimate {
+  from { box-shadow: 0 0 12px #ff1744; }
+  to   { box-shadow: 0 0 24px #ff9100; }
+}
+
+/* Progress bar accanto al badge */
+.league-progress {
+  width: 100px;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.league-progress .progress-bar {
+  background: linear-gradient(90deg, #ff9800, #ff5722);
+  transition: width 0.4s ease;
+}
+
+
 
 /* ======================================================================================================================= */
 /* ===================================================== RegisterPage.vue ================================================== */

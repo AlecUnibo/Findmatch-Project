@@ -28,27 +28,41 @@
     <!-- Sezione feature -->
     <section class="container py-5">
       <div class="row g-4">
-        <div class="col-12 col-md-4">
-          <div class="card h-100 shadow-sm fm-feature-card">
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card h-100 shadow-sm fm-feature-card fm-feature-card--calendars">
             <div class="card-body">
               <h5 class="card-title">📅 Calendario eventi</h5>
               <p class="card-text">Trova partite vicine per data, ora e sport.</p>
             </div>
           </div>
         </div>
-        <div class="col-12 col-md-4">
-          <div class="card h-100 shadow-sm fm-feature-card">
+
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card h-100 shadow-sm fm-feature-card fm-feature-card--sub">
             <div class="card-body">
               <h5 class="card-title">👥 Iscrizioni semplici</h5>
               <p class="card-text">Unisciti con un clic e ricevi promemoria automatici.</p>
             </div>
           </div>
         </div>
-        <div class="col-12 col-md-4">
-          <div class="card h-100 shadow-sm fm-feature-card">
+
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card h-100 shadow-sm fm-feature-card fm-feature-card--connections">
             <div class="card-body">
               <h5 class="card-title">🔗 Segui e trova nuovi amici</h5>
-              <p class="card-text">Segui i tuoi amici e trovane di nuovi</p>
+              <p class="card-text">Segui i tuoi amici e trovane di nuovi.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-3">
+          <div class="card h-100 shadow-sm fm-feature-card fm-feature-card--rank">
+            <div class="card-body">
+              <h5 class="card-title">🏅 Sali di lega</h5>
+              <p class="card-text">
+                Gioca e crea partite per guadagnare punti e scalare le leghe
+                <strong>(Lega 4 → Lega 3 → Lega 2 → Lega 1)</strong>. Mostra il tuo livello nel profilo!
+              </p>
             </div>
           </div>
         </div>
@@ -57,7 +71,7 @@
     <section class="container pb-5">
       <div class="row">
         <div class="col-lg-10 mx-auto">
-          <div class="fm-landing-desc">
+          <div class="fm-landing-desc fm-feature-card--desc">
             <p>
               Fare sport ha assunto un ruolo sempre più centrale nella vita delle persone, ma organizzare partite è spesso complicato: 
               mancano i numeri, gli orari non coincidono e le chat si perdono. 
