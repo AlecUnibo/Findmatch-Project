@@ -183,20 +183,25 @@
                 />
               </div>
 
-              <!-- Calcio: ruoli -->
+              <!-- Calcio: ruoli (uniti in singola voce) + indicazione ruolo utente -->
               <div class="col-12" v-else>
                 <label class="form-label">Posti liberi</label>
-                <div class="row g-2">
-                  <div class="col-md-3" v-for="(v, k) in extractRolesNeeded(partitaSelezionata)" :key="k" v-if="Number(v) > 0">
-                    <div class="input-group">
-                      <span class="input-group-text">{{ ruoloLabel(k) }}</span>
-                      <input type="text" class="form-control" :value="v" disabled />
-                    </div>
-                  </div>
+
+                <!-- Mostro in un unico campo la stringa dei ruoli mancanti, se disponibile.
+                     Esempio: "1 Portiere, 2 All-around" -->
+                <input
+                  type="text"
+                  class="form-control"
+                  :value="formatRolesMissing(partitaSelezionata) ? formatRolesMissing(partitaSelezionata) : (sumRolesNeeded(partitaSelezionata) ? `${sumRolesNeeded(partitaSelezionata)} posti liberi` : '—')"
+                  disabled
+                />
+
+                <!-- Badge che mostra il ruolo dell'utente (se è iscritto e ruolo rilevabile) -->
+                <div v-if="getUserRoleLabel(partitaSelezionata)" class="mt-2">
+                  <span class="badge bg-info text-dark">
+                    Iscritto come {{ getUserRoleLabel(partitaSelezionata) }}
+                  </span>
                 </div>
-                <small class="text-muted d-block mt-1">
-                  Totale posti liberi: {{ sumRolesNeeded(partitaSelezionata) }}
-                </small>
               </div>
 
               <div class="col-12">
@@ -376,29 +381,57 @@ function extractRolesNeeded(p) {
 }
 const sumRolesNeeded = (p) => Object.values(extractRolesNeeded(p)).reduce((a, b) => a + Number(b || 0), 0)
 
-/* helper: normalizza i partecipanti sottraendo 1 (organizzatore) */
-const normalizedParticipants = (p) => {
+/* helper: somma i ruoli già occupati se disponibili, fallback a partecipanti-1 */
+function sumFilledRoles(p) {
   if (!p) return 0
-  const raw = Number(p.partecipanti ?? 0)
-  return Math.max(0, raw - 1) // assume backend include l'organizzatore
+  if (p.roles && p.roles.filled && typeof p.roles.filled === 'object') {
+    return Object.values(p.roles.filled).reduce((a, b) => a + Number(b || 0), 0)
+  }
+  const keys = ['portiere','difensore','centrocampista','attaccante','all_around']
+  const s = keys.reduce((acc, k) => acc + Number(p[`role_filled_${k}`] || 0), 0)
+  if (s > 0) return s
+  return null
 }
 
-/* postiLiberi: ora coerente con HomePage (usa normalizedParticipants) */
+/* helper: normalizza i partecipanti */
+const normalizedParticipants = (p) => {
+  if (!p) return 0
+  if (isCalcio(p)) {
+    const filled = sumFilledRoles(p)
+    if (filled !== null) return Math.max(0, filled)
+    // fallback: use general counter -1
+    const raw = Number(p.partecipanti ?? 0)
+    return Math.max(0, raw - 1)
+  }
+  const raw = Number(p.partecipanti ?? 0)
+  return Math.max(0, raw - 1)
+}
+
+
+/* postiLiberi: ruoli rimanenti (coerente con dettagli) */
 const postiLiberi = (p) => {
   if (isCalcio(p)) return sumRolesNeeded(p)
-   // mp è il totale (incluso organizzatore), p.partecipanti è raw (incluso organizzatore)
-  // posti liberi per altri = mp - raw
   return Math.max(0, (Number(p.max_players) || 0) - (Number(p.partecipanti) || 0))
 }
 
-/* progressMax: per non-calcio è max_players; per calcio -> totale ruoli richiesti */
+/* progressMax: per calcio -> totale ruoli iniziali = remaining + filled */
 const progressMax = (p) => {
-  if (isCalcio(p)) return sumRolesNeeded(p)
-  // il max mostrato nella barra deve essere i posti disponibili per altri => mp - 1
+  if (isCalcio(p)) {
+    const remaining = sumRolesNeeded(p)         // ruoli ancora liberi
+    const filled = normalizedParticipants(p)   // ruoli occupati (se disponibili)
+    if (Number.isFinite(remaining) && Number.isFinite(filled)) {
+      return Math.max(0, remaining + filled)
+    }
+    // fallback: se non abbiamo entrambe le info, usa remaining se >0, altrimenti filled o 0
+    if (Number.isFinite(remaining) && remaining > 0) return remaining
+    if (Number.isFinite(filled) && filled > 0) return filled
+    return 0
+  }
+  // non-calcio: max mostrato nella barra deve essere i posti disponibili per altri => mp - 1
   return Math.max(0, (Number(p.max_players) || 0) - 1)
 }
 
-/* progressPercent: usa normalizedParticipants per il numeratore */
+/* progressPercent: usa normalizedParticipants per il numeratore rispetto a progressMax */
 const progressPercent = (p) => {
   const max = progressMax(p)
   const cur = normalizedParticipants(p)
@@ -415,7 +448,63 @@ const progressBarClass = (p) => {
 }
 
 
-/* ======================= Ruoli UI ======================= */
+/* ======================= Rilevamento ruolo utente nella partita ======================= */
+/**
+ * Cerca di capire se l'utente corrente è iscritto a questa partita e restituisce il ruolo (chiave)
+ * Prova più formati possibili che il backend potrebbe restituire.
+ */
+function userRoleInPartita(p) {
+  if (!p) return null
+  // 1) campo esplicito
+  if (p.current_user_role) return String(p.current_user_role)
+  if (p.my_role) return String(p.my_role)
+  if (p.user_role) return String(p.user_role)
+  if (p.role_of_current_user) return String(p.role_of_current_user)
+
+  // 2) array di partecipanti / players
+  const tryFindInArray = (arr) => {
+    if (!Array.isArray(arr)) return null
+    const found = arr.find(item => String(item.user_id || item.id || item.user) === String(userId) || String(item.id) === String(userId))
+    if (found) {
+      // common shapes: { user_id, role } oppure { id, role } oppure { user: id, role }
+      return found.role || found.ruolo || found.role_key || found.roleName || null
+    }
+    return null
+  }
+
+  let role = null
+  role = role || tryFindInArray(p.participants) || tryFindInArray(p.players) || tryFindInArray(p.users)
+  if (role) return String(role)
+
+  // 3) se p has maplike roles_assignments: { roleKey: [userId,...] }
+  if (p.roles_assignments && typeof p.roles_assignments === 'object') {
+    for (const [roleKey, arr] of Object.entries(p.roles_assignments)) {
+      if (Array.isArray(arr) && arr.map(String).includes(String(userId))) return roleKey
+    }
+  }
+
+  return null
+}
+
+/* helper che restituisce l'etichetta leggibile del ruolo (o null) */
+function getUserRoleLabel(p) {
+  const role = userRoleInPartita(p)
+  if (!role) return null
+  return ruoloLabel(role) || role
+}
+
+/* helper: restituisce stringa leggibile dei ruoli mancanti, es "1 Portiere, 2 All-around" */
+function formatRolesMissing(p) {
+  const missing = extractRolesNeeded(p)
+  if (!missing) return null
+  const parts = []
+  for (const [k, v] of Object.entries(missing)) {
+    if (Number(v) > 0) parts.push(`${Number(v)} ${ruoloLabel(k)}`)
+  }
+  return parts.length ? parts.join(', ') : null
+}
+
+/* ======================= Ruoli UI helpers ======================= */
 const ruoloLabel = (key) => ({
   portiere: 'Portiere',
   difensore: 'Difensore',
@@ -478,8 +567,18 @@ const minDateTime = computed(() => {
 })
 const partitaSelezionata = ref(null)
 
-function mostraDettagli(partita) {
+// Otteniamo sempre i dettagli più aggiornati quando apro il modal: questo permette di
+// leggere ruoli assegnati / participants array e mostrare il ruolo dell'utente corrente.
+async function mostraDettagli(partita) {
   partitaSelezionata.value = partita
+  if (typeof props.fetchEventoById === 'function') {
+    try {
+      const fresh = await props.fetchEventoById(partita.id)
+      if (fresh) partitaSelezionata.value = fresh
+    } catch (e) {
+      console.warn('Impossibile fetchare dettagli aggiornati per la partita', e)
+    }
+  }
   const modal = new bootstrap.Modal(document.getElementById('modalDettagli'))
   modal.show()
 }

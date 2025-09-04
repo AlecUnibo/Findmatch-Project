@@ -251,9 +251,9 @@
     <div class="modal fade fm-modal" id="modalModifica" tabindex="-1" aria-labelledby="modalModificaLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header text-dark">
-              <h5 class="modal-title" id="modalModificaLabel">Modifica partita</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+          <div class="modal-header bg-info text-white">
+            <h5 class="modal-title" id="modalModificaLabel">Modifica partita</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
           </div>
 
           <form @submit.prevent="salvaModifiche">
@@ -502,48 +502,72 @@ const sportMaxSlotsFor = (sport) => {
 /**
  * initialSlots:
  * - per NON-calcio: preferisce p.max_players (valore impostato alla creazione)
- * - per calcio: usa la somma dei ruoli richiesti (sumRolesNeeded), fallback a sportMaxSlotsFor
+ * - per calcio: DEV'ESSERE il totale dei posti (ruoli rimanenti + ruoli già occupati)
+ *   così che progressPercent = filled / total e postiLiberi = total - filled -> remaining
  */
 const initialSlots = (p) => {
   if (!p) return 0
 
   if (isCalcio(p)) {
-    const totalRoles = sumRolesNeeded(p)
-    if (totalRoles > 0) return totalRoles
+    const remaining = sumRolesNeeded(p) // ruoli mancanti attuali (es. 3 dopo un'iscrizione)
+    // usa participantsForProgress per ottenere i ruoli già occupati (se disponibili)
+    const filled = participantsForProgress(p) // questa funzione legge roles.filled o partec - 1
+    // se remaining è finito e filled è finito -> totale = remaining + filled
+    if (Number.isFinite(remaining) && Number.isFinite(filled)) {
+      return Math.max(0, remaining + filled)
+    }
+    // fallback: se non abbiamo dati by-role, prova a ricavare da sportMaxSlotsFor
     const fallback = sportMaxSlotsFor(p.sport)
     return fallback > 0 ? fallback : 0
   }
 
-    // Ora p.max_players è il TOTALE (organizzatore + altri). Per l'UI vogliamo i posti
-    // effettivamente disponibili per gli altri utenti => mp - 1
-    const mp = (p.max_players !== undefined && p.max_players !== null) ? Number(p.max_players) : NaN
-    if (Number.isFinite(mp) && mp > 0) {
-      return Math.max(0, mp - 1)
-    }
+  // NON-calcio: p.max_players è il TOTALE (organizzatore + altri). Per l'UI vogliamo i posti
+  // effettivamente disponibili per gli altri utenti => mp - 1
+  const mp = (p.max_players !== undefined && p.max_players !== null) ? Number(p.max_players) : NaN
+  if (Number.isFinite(mp) && mp > 0) {
+    return Math.max(0, mp - 1)
+  }
 
   const fallback = sportMaxSlotsFor(p.sport)
   return fallback > 0 ? fallback : 0
 }
 
+
 /**
  * participantsForProgress:
  * - restituisce i partecipanti effettivi da usare per progressi e calcoli UI
- * - sottrae 1 (organizzatore) per tutti gli sport quando il backend lo include nel conteggio
- *   (comportamento coerente con ciò che vuoi mostrare nella Home)
- * - protegge da valori negativi con Math.max(0,...)
+ * - per il calcio preferisce il conteggio dei ruoli già occupati (roles.filled o role_filled_*)
+ * - fallback: usa partecipanti - 1 (assumendo che backend includa l'organizzatore)
+ * - protegge da valori negativi
  */
 const participantsForProgress = (p) => {
   if (!p) return 0
-  const raw = Number(p.partecipanti ?? 0)
 
-  // Se il backend ha un conteggio plausibile, trattiamo raw come "inclusivo" dell'organizzatore
-  // e sottraiamo 1: questo risolve il problema "creator già iscritto" per calcio e non-calcio.
-  //
-  // Nota: se il backend dovesse già restituire partecipanti che ESCLUDONO l'organizzatore,
-  // questa sottrazione porterebbe a un sotto-conteggio. Se in futuro vedi casi del genere
-  // possiamo aggiungere un controllo/flag lato API o una euristica più complessa.
+  // helper: somma i ruoli "filled" se disponibili
+  const sumFilledRoles = (part) => {
+    if (!part) return 0
+    // roles.filled (struttura preferita)
+    if (part.roles && part.roles.filled && typeof part.roles.filled === 'object') {
+      return Object.values(part.roles.filled).reduce((acc, v) => acc + Number(v || 0), 0)
+    }
+    // campi flat role_filled_*
+    const keys = ['portiere','difensore','centrocampista','attaccante','all_around']
+    const sum = keys.reduce((acc, k) => acc + Number(part[`role_filled_${k}`] || 0), 0)
+    if (sum > 0) return sum
+
+    return null
+  }
+
+  if (isCalcio(p)) {
+    const filled = sumFilledRoles(p)
+    if (filled !== null) return Math.max(0, filled)
+  }
+
+  const raw = Number(p.partecipanti ?? 0)
+  // tratta raw come "inclusivo" dell'organizzatore e sottrai 1
   return Math.max(0, raw - 1)
 }
+
 
 
 /**
@@ -577,6 +601,7 @@ const progressPercent = (p) => {
   const pct = Math.round((Math.max(0, participants) / total) * 100)
   return Math.min(100, pct)
 }
+
 
 /**
  * progressBarClass:
