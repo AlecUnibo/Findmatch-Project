@@ -23,7 +23,7 @@ router.get('/search', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const viewerId = req.query.viewerId; // opzionale, per is_following
+  const viewerId = req.query.viewerId; 
 
   try {
     const result = await pool.query(
@@ -145,8 +145,8 @@ router.put('/:id', async (req, res) => {
   
   // Segui un utente
   router.post('/:id/follow', async (req, res) => {
-    const { id } = req.params;       // user da seguire
-    const { followerId } = req.body;  // chi sta seguendo (dal client)
+    const { id } = req.params;
+    const { followerId } = req.body;  
   
     if (!followerId) return res.status(400).json({ error: 'followerId obbligatorio' });
     if (parseInt(id) === parseInt(followerId)) {

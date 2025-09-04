@@ -48,7 +48,7 @@
         </button>
 
 
-        <!-- Pulsanti gestione (solo per Create da te) -->
+        <!-- Pulsanti gestione -->
         <template v-if="showManage">
           <button
             class="btn btn-sm btn-primary btn-edit"
@@ -139,7 +139,7 @@
 defineProps({
   partita: { type: Object, required: true },
   showJoin: { type: Boolean, default: true },
-  showManage: { type: Boolean, default: false }, // 👈 nuovo
+  showManage: { type: Boolean, default: false }, 
 
   // helper functions passate dal parent
   getCardClass: { type: Function, required: true },
@@ -154,5 +154,5 @@ defineProps({
   roleEntries: { type: Function, required: true },
   ruoloLabel: { type: Function, required: true },
 })
-defineEmits(['dettagli', 'unisciti', 'unisciti-calcio', 'modifica', 'elimina']) // 👈 nuovo
+defineEmits(['dettagli', 'unisciti', 'unisciti-calcio', 'modifica', 'elimina']) 
 </script>

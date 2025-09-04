@@ -491,7 +491,6 @@
 }
 .fm-modal .modal-header {
   border-bottom: 0;
-  /* niente background qui, lo mettiamo per-ID sotto */
   color: #fff;
   padding-block: 0.9rem;
 }
@@ -859,7 +858,7 @@
   margin-left: auto;
 }
 
-/* piccole regole per il pulsante circolare di azione (estratto dall'inline style) */
+/* piccole regole per il pulsante circolare di azione */
 .component-notifiche .notif-action-circle {
   width: 32px;
   height: 32px;
@@ -977,9 +976,7 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-/* -------------------------------
-   BADGE LEGA + PROGRESS BAR
---------------------------------*/
+/* ------------------------------- BADGE LEGA + PROGRESS BAR --------------------------------*/
 
 /* Contenitore badge + barra */
 .league-badge-container {
@@ -1163,9 +1160,9 @@ body.modal-open .card {
   isolation: auto !important;
 }
 
-/* ========================================================================== */
-/* FIX ACCESSIBILITÀ WCAG 2.1 AA                         */
-/* ========================================================================== */
+/* ======================================================================================================================= */
+/* ============================================== FIX ACCESSIBILITÀ WCAG 2.1 AA ========================================== */
+/* ======================================================================================================================= */
 
 /* [Profilo.vue] - Badge Leghe: grassetto per aumentare leggibilità e superare test 3:1 */
 .component-profilo .badge-flames,

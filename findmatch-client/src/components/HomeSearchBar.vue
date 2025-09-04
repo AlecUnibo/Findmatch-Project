@@ -212,7 +212,6 @@ const timeRef = ref(null)
 const openPicker = (el) => {
   if (!el) return;
 
-  // se l'input è readonly, rimuovilo temporaneamente
   const wasAttrReadonly = el.hasAttribute('readonly');
   const wasPropReadonly = el.readOnly;
   if (wasAttrReadonly || wasPropReadonly) {
@@ -221,7 +220,6 @@ const openPicker = (el) => {
   }
 
   const restoreReadonly = () => {
-    // ripristina allo stato precedente nel microtask successivo
     Promise.resolve().then(() => {
       if (wasAttrReadonly) el.setAttribute('readonly', '');
       el.readOnly = wasPropReadonly;
@@ -258,7 +256,7 @@ const openTime = (ev) => {
   openPicker(timeRef.value)
 }
 
-/* --- Select Sport (come avevi) --- */
+/* --- Select Sport --- */
 const sports = ['Calcio a 11','Calcio a 5','Basket','Beach Volley','Pallavolo','Racchettoni','Tennis','Padel']
 const sportOpen = ref(false)
 const activeSportIndex = ref(-1)

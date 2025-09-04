@@ -48,7 +48,6 @@
       <!-- TAB: NOTIFICHE -->
       <Transition name="fade-blur" mode="out-in">
         <div :key="currentTab">
-          <!-- TAB: NOTIFICHE -->
           <div v-if="currentTab === 'notifiche'">
             <div v-if="loading" class="text-center text-muted mt-5">
               <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
@@ -59,7 +58,6 @@
               <p>Non ci sono nuove notifiche.</p>
             </div>
 
-            <!-- vedi patch 2 sotto per animare la lista -->
             <div v-else class="list-group" role="list">
               <div
                 v-for="notifica in notifiche"

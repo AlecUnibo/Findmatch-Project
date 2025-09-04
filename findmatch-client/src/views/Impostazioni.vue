@@ -187,7 +187,6 @@ const confermaEliminazione = ref(false)
 const eliminaAccount = async () => {
   try {
     await axios.delete(`http://localhost:3000/api/users/${userId}`)
-    // Non mostriamo il toast qui perché la pagina verrà ricaricata
     localStorage.clear()
     window.location.href = '/'
   } catch (err) {

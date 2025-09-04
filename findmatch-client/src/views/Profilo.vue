@@ -195,7 +195,6 @@
                     <div class="fw-semibold">{{ u.username }}</div>
                     <small class="text-muted">{{ u.email }}</small>
                   </div>
-                  <!-- Se vuoi, in futuro: bottone 'Apri profilo' -->
                 </li>
               </ul>
               <p v-else class="text-muted mb-0">Non stai seguendo nessuno.</p>
@@ -439,8 +438,6 @@ async function apriModaleFollower() {
   }
 }
 </script>
-
-
 
 <style scoped>
 img.rounded-circle {

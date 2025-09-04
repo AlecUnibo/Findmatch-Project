@@ -2,9 +2,6 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// ---- Config in base allo schema DB ----
-// true  = hai reso max_players NULLabile (consigliato)
-// false = tieni max_players NOT NULL e metti 22/10 per calcio
 const USE_NULL_MAX_PLAYERS = true;
 
 // Helper per formattare data/ora (solo per messaggi)
@@ -15,9 +12,7 @@ const formatDateTime = (dateTime) => {
   return `${date} alle ${time}`;
 };
 
-// ---------------------------------------------------------------------------
 // GET /api/partite  - lista con filtri (sport/luogo/data/ora) + count partecipanti
-// ---------------------------------------------------------------------------
 router.get('/', async (req, res) => {
   try {
     const { sport, luogo, data, ora, exclude_user_id } = req.query;
@@ -68,12 +63,7 @@ router.get('/', async (req, res) => {
         AND e.date_time < (${p2}::timestamp + INTERVAL '1 hour')
       `;
 
-      // Se e.date_time è TIMESTAMPTZ in UTC e vuoi filtrare in Europe/Rome, usa questa variante al posto di quella sopra:
-      // query += `
-      //   AND (e.date_time AT TIME ZONE 'Europe/Rome') >= ${p1}
-      //   AND (e.date_time AT TIME ZONE 'Europe/Rome') < (${p2}::timestamp + INTERVAL '1 hour')
-      // `;
-
+      
     } else {
       if (data) {
         query += ` AND e.date_time::date = ${push(data)}`;
@@ -87,15 +77,10 @@ router.get('/', async (req, res) => {
           AND (e.date_time::time < (${t2}::time + INTERVAL '1 hour'))
         `;
 
-        // Variante per TIMESTAMPTZ (UTC) con filtro in Europe/Rome:
-        // query += `
-        //   AND ((e.date_time AT TIME ZONE 'Europe/Rome')::time >= ${t1}::time)
-        //   AND ((e.date_time AT TIME ZONE 'Europe/Rome')::time < (${t2}::time + INTERVAL '1 hour'))
-        // `;
       }
     }
 
-    // Escludi eventi a cui l'utente è già iscritto (fix: usa 'i' corretto)
+    // Esclude eventi a cui l'utente è già iscritto (fix: usa 'i' corretto)
     if (exclude_user_id) {
       const pid = push(exclude_user_id);
       query += ` AND NOT EXISTS (
@@ -118,9 +103,7 @@ router.get('/', async (req, res) => {
 });
 
 
-// ---------------------------------------------------------------------------
 // POST /api/partite  - crea evento (con ruoli per Calcio 11/5)
-// ---------------------------------------------------------------------------
 router.post('/', async (req, res) => {
   try {
     const {
@@ -247,9 +230,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------------------
 // PUT /api/partite/:id  - aggiorna evento (supporta ruoli e max_players/null)
-// ---------------------------------------------------------------------------
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -354,10 +335,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------------------------
 // DELETE /api/partite/:id  - elimina e notifica i partecipanti
-// ---------------------------------------------------------------------------
-
 router.delete('/:id', async (req, res) => {
   const { id } = req.params
 
@@ -416,9 +394,7 @@ router.delete('/:id', async (req, res) => {
   }
 })
 
-// ---------------------------------------------------------------------------
 // POST /api/partite/:id/invite  - invito a un utente
-// ---------------------------------------------------------------------------
 router.post('/:id/invite', async (req, res) => {
   const { id: eventId } = req.params;
   const { inviterId, inviteeId } = req.body;
@@ -465,9 +441,7 @@ router.post('/:id/invite', async (req, res) => {
   }
 })
 
-// ---------------------------------------------------------------------------
 // GET /api/partite/:id  - dettaglio singolo evento
-// ---------------------------------------------------------------------------
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {

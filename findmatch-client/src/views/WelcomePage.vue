@@ -4,9 +4,7 @@
     <header class="fm-landing-hero text-white">
       <div class="container py-5">
         <div class="text-center mb-4">
-          <!-- SOLO LOGO, niente testo accanto -->
           <img src="/images/logo.png" alt="FindMatch" class="fm-landing-logo" />
-          <!-- Titolo solo per accessibilità/SEO -->
           <h1 class="visually-hidden">FindMatch</h1>
         </div>
 

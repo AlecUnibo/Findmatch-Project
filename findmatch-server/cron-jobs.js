@@ -9,7 +9,6 @@ const formatDateTime = (dateTime) => {
   return `${date} alle ${time}`;
 };
 
-// --- Compito #1: Promemoria a 24 ore ---
 // Eseguito ogni ora, al minuto 0 (es. 13:00, 14:00)
 cron.schedule('0 * * * *', async () => {
   console.log(`[${new Date().toLocaleString()}] Esecuzione cron job per promemoria a 24 ORE...`);
@@ -41,8 +40,6 @@ cron.schedule('0 * * * *', async () => {
   }
 });
 
-
-// --- Compito #2: Promemoria a 1 ora ---
 // Eseguito ogni 5 minuti, per non mancare la finestra esatta
 cron.schedule('*/5 * * * *', async () => {
     console.log(`[${new Date().toLocaleString()}] Esecuzione cron job per promemoria a 1 ORA...`);

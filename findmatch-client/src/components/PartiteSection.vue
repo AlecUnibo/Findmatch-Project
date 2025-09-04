@@ -184,12 +184,10 @@
                 />
               </div>
 
-              <!-- Calcio: ruoli (uniti in singola voce) + indicazione ruolo utente -->
+              <!-- Calcio: ruoli  + indicazione ruolo utente -->
               <div class="col-12" v-else>
                 <label class="form-label">Posti liberi</label>
 
-                <!-- Mostro in un unico campo la stringa dei ruoli mancanti, se disponibile.
-                     Esempio: "1 Portiere, 2 All-around" -->
                 <input
                   type="text"
                   class="form-control"
@@ -382,7 +380,7 @@ function extractRolesNeeded(p) {
 }
 const sumRolesNeeded = (p) => Object.values(extractRolesNeeded(p)).reduce((a, b) => a + Number(b || 0), 0)
 
-/* helper: somma i ruoli già occupati se disponibili, fallback a partecipanti-1 */
+/* somma i ruoli già occupati se disponibili, fallback a partecipanti-1 */
 function sumFilledRoles(p) {
   if (!p) return 0
   if (p.roles && p.roles.filled && typeof p.roles.filled === 'object') {
@@ -394,13 +392,13 @@ function sumFilledRoles(p) {
   return null
 }
 
-/* helper: normalizza i partecipanti */
+/* normalizza i partecipanti */
 const normalizedParticipants = (p) => {
   if (!p) return 0
   if (isCalcio(p)) {
     const filled = sumFilledRoles(p)
     if (filled !== null) return Math.max(0, filled)
-    // fallback: use general counter -1
+    // use general counter -1
     const raw = Number(p.partecipanti ?? 0)
     return Math.max(0, raw - 1)
   }
@@ -450,10 +448,7 @@ const progressBarClass = (p) => {
 
 
 /* ======================= Rilevamento ruolo utente nella partita ======================= */
-/**
- * Cerca di capire se l'utente corrente è iscritto a questa partita e restituisce il ruolo (chiave)
- * Prova più formati possibili che il backend potrebbe restituire.
- */
+
 function userRoleInPartita(p) {
   if (!p) return null
   // 1) campo esplicito
@@ -568,8 +563,6 @@ const minDateTime = computed(() => {
 })
 const partitaSelezionata = ref(null)
 
-// Otteniamo sempre i dettagli più aggiornati quando apro il modal: questo permette di
-// leggere ruoli assegnati / participants array e mostrare il ruolo dell'utente corrente.
 async function mostraDettagli(partita) {
   partitaSelezionata.value = partita
   if (typeof props.fetchEventoById === 'function') {

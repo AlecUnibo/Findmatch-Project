@@ -126,14 +126,14 @@
 .home-search-card .fm-field {
   position: relative;
   display: grid;
-  grid-template-columns: 18px 1fr;     /* icona + input */
+  grid-template-columns: 18px 1fr;     
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  min-height: 54px;                    /* altezza uniforme per TUTTI i campi */
+  min-height: 54px;                 
   border-radius: 12px;
-  border: 1px solid #e5e7eb;           /* bordo chiaro */
-  background: #fff;                    /* <-- BIANCO per tutti i campi */
+  border: 1px solid #e5e7eb;           
+  background: #fff;                   
   box-shadow: 0 6px 14px rgba(0,0,0,.10);
 }
 
@@ -144,7 +144,7 @@
 /* icona a sinistra dentro al box campo */
 .home-search-card .fm-field > img {
   opacity: .85;
-  pointer-events: none;  /* non intercetta i click dell’input */
+  pointer-events: none;  
 }
 
 /* Focus ring coerente su tutti i box */
@@ -1320,8 +1320,6 @@
   transition: width .25s ease;
 }
 
-/* allinea i contenuti della colonna sinistra in cima
-   così la barra non “galleggia” a metà altezza quando i bottoni a destra sono al centro */
 .component-partite .card .card-body {
   align-items: flex-start;
 }
@@ -1534,9 +1532,7 @@
   cursor: not-allowed;
 }
 
-/* ==========================================================================
-   Accessibilità - Visually Hidden
-   ========================================================================== */
+/* ================================ Accessibilità - Visually Hidden ================================ */
 
 /* Nasconde un elemento visivamente ma lo lascia accessibile agli screen reader */
 .visually-hidden {
@@ -1551,9 +1547,10 @@
   border: 0 !important;
 }
 
-/* ========================================================================== */
-/* FIX ACCESSIBILITÀ WCAG 2.1 AA                        */
-/* ========================================================================== */
+
+/* ============================================================================================================================ */
+/* =============================================== FIX ACCESSIBILITÀ WCAG 2.1 AA ============================================== */
+/* ============================================================================================================================ */
 
 /* [PartiteCard.vue] - Bottone "Modifica": testo scuro su sfondo giallo */
 .component-partita-card .btn-edit {

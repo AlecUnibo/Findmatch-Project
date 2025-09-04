@@ -56,7 +56,6 @@ const tabs = [
   { label: '📖 Storico partecipazioni', value: 'storico' }
 ]
 
-// Opzionale: usato da PartiteSection per sincronizzare un evento specifico
 const fetchEventoById = async (id) => {
   try {
     const { data } = await axios.get(`http://localhost:3000/api/partite/${id}`)

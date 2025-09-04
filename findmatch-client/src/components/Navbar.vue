@@ -46,7 +46,7 @@
         </router-link>
       </li>
 
-      <!-- Cerca utenti — popover moderno -->
+      <!-- Cerca utenti -->
       <li class="nav-item position-relative" ref="searchBox">
         <button
           type="button"
@@ -117,7 +117,7 @@
         </router-link>
       </li>
 
-      <!-- Menu profilo — popover moderno -->
+      <!-- Menu profilo -->
       <li class="nav-item position-relative" ref="profileMenu">
         <button
           class="nav-link d-flex align-items-center btn-icon"
@@ -350,7 +350,7 @@ const confirmLogout = async () => {
   }
 }
 
-/** Helpers (ricerca, profilo, ecc.) — invariati **/
+/** Helpers (ricerca, profilo, ecc.) **/
 const fetchUnreadCount = async () => {
   if (!currentUserId) return
   try {
@@ -484,7 +484,7 @@ const openLogoutConfirm = () => {
   })
 }
 const cancelLogout = () => { showLogoutConfirm.value = false }
-/** Logout reale (invariato + aggiorna displayName) */
+/** Logout reale */
 const logout = () => {
   ls?.removeItem('token')
   ls?.removeItem('userName')
@@ -512,7 +512,7 @@ onMounted(() => {
     if (e.key === 'Escape') {
       if (showSearch.value) closeSearch()
       if (showProfile.value) closeProfileMenu()
-      if (showLogoutConfirm.value) cancelLogout() // NEW: ESC chiude dialog
+      if (showLogoutConfirm.value) cancelLogout() // ESC chiude dialog
     }
   }
   document.addEventListener('keydown', onKey, { passive: true })

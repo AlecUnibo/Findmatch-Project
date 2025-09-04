@@ -316,14 +316,12 @@ const form = ref({
   date_time: '',
   max_players: '',
   description: '',
-  // nuovi/aggiornati
-  tipologia: '',          // obbligatoria per Basket/Tennis (dove previsto)
-  prezzoCampo: '',        // obbligatoria sempre
-  // colori: per Calcio/Basket servono due casacche, per gli altri uno
-  coloreDivisa: '',       // usato per sport non a squadre
-  coloreDivisaA: '',      // squadra A (Calcio/Basket)
-  coloreDivisaB: '',      // squadra B (Calcio/Basket)
-  indicazioniCampo: ''    // indirizzo/indicazioni precise (obbligatorio)
+  tipologia: '',          
+  prezzoCampo: '',        
+  coloreDivisa: '',       
+  coloreDivisaA: '',      
+  coloreDivisaB: '',      
+  indicazioniCampo: ''    
 })
 
 const messaggio = ref('')
@@ -406,7 +404,7 @@ const maxSlots = computed(() => {
 // calcio usa freeMaxSlots/roles, non il campo numerico
 const freeMaxSlots = computed(() => {
   if (form.value.sport === 'Calcio a 11' || form.value.sport === 'Calcio a 5') {
-    return Math.max(0, maxSlots.value - 1) // esclude l'organizzatore
+    return Math.max(0, maxSlots.value - 1)
   }
   return 0
 })

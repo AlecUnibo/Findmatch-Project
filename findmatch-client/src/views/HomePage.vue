@@ -390,7 +390,6 @@
 </template>
 
 <script setup>
-/* (script unchanged) */
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import * as bootstrap from 'bootstrap'
@@ -484,7 +483,7 @@ const sportEmojis = {
   'tennis': '🎾', 'padel': '🥎'
 }
 
-// --- Helpers posti/progress (SOSTITUISCI QUI IL BLOCCO VECCHIO)
+// --- Helpers posti/progress 
 const sportMaxSlotsFor = (sport) => {
   switch ((sport || '').toLowerCase()) {
     case 'calcio a 11':   return 31
@@ -499,19 +498,13 @@ const sportMaxSlotsFor = (sport) => {
   }
 }
 
-/**
- * initialSlots:
- * - per NON-calcio: preferisce p.max_players (valore impostato alla creazione)
- * - per calcio: DEV'ESSERE il totale dei posti (ruoli rimanenti + ruoli già occupati)
- *   così che progressPercent = filled / total e postiLiberi = total - filled -> remaining
- */
 const initialSlots = (p) => {
   if (!p) return 0
 
   if (isCalcio(p)) {
     const remaining = sumRolesNeeded(p) // ruoli mancanti attuali (es. 3 dopo un'iscrizione)
     // usa participantsForProgress per ottenere i ruoli già occupati (se disponibili)
-    const filled = participantsForProgress(p) // questa funzione legge roles.filled o partec - 1
+    const filled = participantsForProgress(p) // legge roles.filled o partec - 1
     // se remaining è finito e filled è finito -> totale = remaining + filled
     if (Number.isFinite(remaining) && Number.isFinite(filled)) {
       return Math.max(0, remaining + filled)
@@ -521,8 +514,6 @@ const initialSlots = (p) => {
     return fallback > 0 ? fallback : 0
   }
 
-  // NON-calcio: p.max_players è il TOTALE (organizzatore + altri). Per l'UI vogliamo i posti
-  // effettivamente disponibili per gli altri utenti => mp - 1
   const mp = (p.max_players !== undefined && p.max_players !== null) ? Number(p.max_players) : NaN
   if (Number.isFinite(mp) && mp > 0) {
     return Math.max(0, mp - 1)
@@ -532,14 +523,6 @@ const initialSlots = (p) => {
   return fallback > 0 ? fallback : 0
 }
 
-
-/**
- * participantsForProgress:
- * - restituisce i partecipanti effettivi da usare per progressi e calcoli UI
- * - per il calcio preferisce il conteggio dei ruoli già occupati (roles.filled o role_filled_*)
- * - fallback: usa partecipanti - 1 (assumendo che backend includa l'organizzatore)
- * - protegge da valori negativi
- */
 const participantsForProgress = (p) => {
   if (!p) return 0
 
@@ -568,12 +551,6 @@ const participantsForProgress = (p) => {
   return Math.max(0, raw - 1)
 }
 
-
-
-/**
- * postiLiberi: quanti posti rimangono *adesso* per gli ALTRI utenti
- * = max(0, initialSlots - participantsForProgress)
- */
 const postiLiberi = (p) => {
   if (!p) return 0
   const total = initialSlots(p)
@@ -582,17 +559,11 @@ const postiLiberi = (p) => {
   return Math.max(0, total - participants)
 }
 
-/**
- * progressMax: valore massimo per la progress bar -> initialSlots
- */
+
 const progressMax = (p) => {
   return initialSlots(p)
 }
 
-/**
- * progressPercent: percentuale occupata (participantsForProgress / initialSlots)
- * se initialSlots = 0 restituisce 0
- */
 const progressPercent = (p) => {
   if (!p) return 0
   const total = initialSlots(p)
@@ -602,12 +573,6 @@ const progressPercent = (p) => {
   return Math.min(100, pct)
 }
 
-
-/**
- * progressBarClass:
- * - se non ci sono iscritti (participantsForProgress === 0) => ritorna stringa vuota (non colorata)
- * - altrimenti usa lo stesso criterio di warning/danger/success basato su posti rimanenti
- */
 const progressBarClass = (p) => {
   if (!p) return ''
   const participants = participantsForProgress(p)
@@ -778,9 +743,6 @@ async function eliminaPartita(eventId) {
   }
 }
 
-/**
- * Può ricevere l'oggetto partita o solo l'id (emesso dal child).
- */
 function chiediElimina(partitaOrId) {
   const id = typeof partitaOrId === 'object' ? partitaOrId.id : partitaOrId
   const p  = typeof partitaOrId === 'object'
@@ -973,7 +935,7 @@ async function salvaModifiche() {
     const sportLower = (editForm.value.sport || '').toLowerCase()
 
     const basePayload = {
-      sport: editForm.value.sport, // <-- importante per il validator del backend
+      sport: editForm.value.sport, 
       location: editForm.value.location.trim(),
       date_time: combineDateTime(editForm.value.date, editForm.value.time),
       description: editForm.value.description ?? ''

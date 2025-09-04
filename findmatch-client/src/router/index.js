@@ -9,7 +9,7 @@ const routes = [
   // Landing (pagina iniziale)
   {
     path: '/',
-    alias: ['/welcome', '/Welcome'], // così /welcome e /Welcome funzionano
+    alias: ['/welcome', '/Welcome'], 
     name: 'Welcome',
     component: () => import('../views/WelcomePage.vue'),
     meta: { transition: 'page-fade', hideNav: true, allowAuthed: true }
@@ -103,8 +103,6 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  // Se sei autenticato, impedisci l’accesso SOLO a login/register.
-  // La landing è visitabile anche da utenti loggati (allowAuthed: true).
   if (authed && (to.name === 'Login' || to.name === 'Register')) {
     next({ name: 'Home' })
     return

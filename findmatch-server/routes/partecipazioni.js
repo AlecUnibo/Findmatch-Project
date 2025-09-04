@@ -147,7 +147,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Rimuovi partecipazione
 // Rimuovi partecipazione (rimette a disposizione il ruolo se calcio)
 router.delete('/', async (req, res) => {
     const { user_id, event_id } = req.body;

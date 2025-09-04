@@ -61,7 +61,7 @@ const props = defineProps({
   partite: { type: Array, default: () => [] },
   perPage: { type: Number, default: 8 },
   showJoin: { type: Boolean, default: true },
-  showManage: { type: Boolean, default: false }, // 👈 nuovo
+  showManage: { type: Boolean, default: false }, 
 
   // helper functions passate dal parent (stesse di PartitaCard)
   getCardClass: { type: Function, required: true },
@@ -77,7 +77,7 @@ const props = defineProps({
   ruoloLabel: { type: Function, required: true },
 })
 
-const emit = defineEmits(['dettagli', 'unisciti', 'uniscitiCalcio', 'modifica', 'elimina']) // 👈 nuovo
+const emit = defineEmits(['dettagli', 'unisciti', 'uniscitiCalcio', 'modifica', 'elimina']) 
 
 const page = ref(1)
 const totalPages = computed(() => Math.max(1, Math.ceil(props.partite.length / props.perPage)))
