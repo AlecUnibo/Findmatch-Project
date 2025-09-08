@@ -59,7 +59,7 @@
               <h5 class="card-title">🏅 Sali di lega</h5>
               <p class="card-text">
                 Gioca e crea partite per guadagnare punti e scalare le leghe
-                <strong>(Lega 4 → Lega 3 → Lega 2 → Lega 1)</strong>. Mostra il tuo livello nel profilo!
+                <strong> - da Lega 5 a Lega 1 -</strong> Mostra il livello nel tuo profilo!
               </p>
             </div>
           </div>
