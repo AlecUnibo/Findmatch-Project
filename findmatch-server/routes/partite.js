@@ -367,20 +367,20 @@ router.delete('/:id', async (req, res) => {
     // 4) Elimina evento
     await client.query('DELETE FROM events WHERE id = $1', [id])
 
-    // 5) Notifiche (best effort)
+    // 5) Notifiche senza event_id
     try {
       const message = `La partita di ${ev.sport} del ${formatDateTime(ev.date_time)} a ${ev.location} è stata annullata dall'organizzatore.`
       for (const { user_id } of participants) {
         await client.query(
           `INSERT INTO notifications (user_id, actor_id, event_id, type, message)
-           VALUES ($1, $2, $3, 'partita_annullata', $4)`,
-          [user_id, ev.organizer_id, ev.id, message]
+          VALUES ($1, $2, NULL, 'partita_annullata', $3)`,
+          [user_id, ev.organizer_id, message]
         )
       }
     } catch (notifErr) {
       console.error('Notifiche annullamento (non bloccante):', notifErr)
-      // non facciamo ROLLBACK per le notifiche
     }
+
 
     await client.query('COMMIT')
     // 204 = no content
