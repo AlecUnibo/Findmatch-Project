@@ -407,6 +407,17 @@ const remainingSlots = computed(() => {
   return 0
 })
 
+function incrementRole(roleKey) {
+  if (freeMaxSlots.value === 0) return
+  if (remainingSlots.value <= 0) return
+  const cap = roleCaps.value[roleKey] || Infinity
+  if (Number(roles.value[roleKey] || 0) >= cap) return
+  roles.value[roleKey] = Number(roles.value[roleKey] || 0) + 1
+}
+function decrementRole(roleKey) {
+  roles.value[roleKey] = Math.max(0, Number(roles.value[roleKey] || 0) - 1)
+}
+
 // clamp automatico dell'input max_players quando cambia tipologia/sport
 watch(
   () => [form.value.sport, form.value.tipologia, maxSlots.value],
