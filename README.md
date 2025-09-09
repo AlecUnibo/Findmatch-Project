@@ -35,6 +35,11 @@ Vai nella cartella del progetto relativa al backend -> findmatch_server, e lanci
 ```bash
 & "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/001_init_schema.sql
 & "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/002_seed_data.sql
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/003_add_bio_and_followers.sql
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/004_followers.sql
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/005_create_notifications.sql
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/006_events_roles_needed.sql
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/007_participants_add_role.sql
 ```
 
 > Inserisci la password dell’utente postgres quando richiesto.
@@ -66,7 +71,7 @@ CREATE TABLE eventi (
 3. Si potranno applicare le modifiche con:
 
 ```bash
-& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/003_add_tabella_eventi
+& "C:\Program Files\PostgreSQL\17\bin\psql.exe" -U postgres -d findmatch_db -f migrations/008_add_tabella_eventi
 ```
 
 # 3. Avviare la web app:
